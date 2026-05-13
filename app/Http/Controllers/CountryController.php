@@ -1,76 +1,65 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Domain\Country\Actions\CreateCountryAction;
 use App\Domain\Country\Actions\DeleteCountryAction;
+use App\Domain\Country\Actions\GetCountryAction;
 use App\Domain\Country\Actions\UpdateCountryAction;
 use App\Domain\Country\Data\CountryData;
-use App\Domain\Country\Rules\CreateCountryRules;
-use App\Domain\Country\Rules\UpdateCountryRules;
-use App\Http\Controllers\Controller;
+use App\Http\Requests\Country\StoreCountryRequest;
+use App\Http\Requests\Country\UpdateCountryRequest;
+use App\Http\Resources\CountryResource;
 use App\Models\Country;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class CountryController extends Controller
 {
     /**
-     * Menampilkan daftar semua negara.
+     * Display a paginated listing of countries.
      */
-    public function index(): JsonResponse
+    public function index(GetCountryAction $getCountryAction): JsonResponse
     {
-        $countries = Country::all();
+        $countries = $getCountryAction->execute();
 
-        return response()->json(CountryData::collection($countries));
+        return CountryResource::collection($countries)->response();
     }
 
     /**
-     * Menyimpan negara baru.
+     * Store a newly created country.
      */
-    public function store(Request $request, CreateCountryAction $createCountryAction): JsonResponse
+    public function store(StoreCountryRequest $request, CreateCountryAction $createCountryAction): JsonResponse
     {
-        // Validasi request menggunakan aturan yang telah didefinisikan
-        $validatedData = $request->validate((new CreateCountryRules)->execute());
-
-        // Buat DTO dari data yang divalidasi
-        $countryData = CountryData::fromRequest($validatedData);
-
-        // Jalankan Action untuk membuat negara
+        $countryData = CountryData::fromArray($request->validated());
         $country = $createCountryAction->execute($countryData);
 
-        return response()->json(CountryData::fromModel($country), Response::HTTP_CREATED);
+        return CountryResource::make($country)
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
-     * Menampilkan detail negara tertentu.
+     * Display the specified country.
      */
     public function show(Country $country): JsonResponse
     {
-        // Laravel secara otomatis melakukan Route Model Binding
-        return response()->json(CountryData::fromModel($country));
+        return CountryResource::make($country)->response();
     }
 
     /**
-     * Memperbarui negara tertentu.
+     * Update the specified country.
      */
-    public function update(Request $request, Country $country, UpdateCountryAction $updateCountryAction): JsonResponse
+    public function update(UpdateCountryRequest $request, Country $country, UpdateCountryAction $updateCountryAction): JsonResponse
     {
-        // Validasi request menggunakan aturan pembaruan, mengabaikan ID negara saat ini
-        $validatedData = $request->validate((new UpdateCountryRules)->execute($country->id));
-
-        // Buat DTO dari data yang divalidasi
-        $countryData = CountryData::fromRequest($validatedData);
-
-        // Jalankan Action untuk memperbarui negara
+        $countryData = CountryData::fromArray($request->validated());
         $updatedCountry = $updateCountryAction->execute($country, $countryData);
 
-        return response()->json(CountryData::fromModel($updatedCountry));
+        return CountryResource::make($updatedCountry)->response();
     }
 
     /**
-     * Menghapus negara tertentu.
+     * Remove the specified country.
      */
     public function destroy(Country $country, DeleteCountryAction $deleteCountryAction): Response
     {

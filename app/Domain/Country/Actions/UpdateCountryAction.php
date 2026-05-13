@@ -12,8 +12,9 @@ class UpdateCountryAction
      */
     public function execute(Country $country, CountryData $data): Country
     {
-        $country->update($data->toArray());
+        $country->fill($data->toArray());
+        $country->save();
 
-        return $country;
+        return $country->refresh();
     }
 }

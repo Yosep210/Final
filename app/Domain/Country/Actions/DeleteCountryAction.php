@@ -9,7 +9,7 @@ class DeleteCountryAction
     /**
      * Execute the action to delete a country.
      */
-    public function execute(Country $country): bool
+    public function execute(Country $country): ?bool
     {
         return $country->delete();
     }

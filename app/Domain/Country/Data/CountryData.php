@@ -4,38 +4,36 @@ namespace App\Domain\Country\Data;
 
 use App\Models\Country;
 
-class CountryData
+final class CountryData
 {
     public function __construct(
         public readonly string $iso,
         public readonly string $name,
         public readonly string $niceName,
-        public readonly ?string $iso3, // Bisa null
-        public readonly ?string $numcode, // Bisa null
-        public readonly int $phonecode, // Mengubah ke int
+        public readonly ?string $iso3,
+        public readonly ?int $numcode,
+        public readonly int $phonecode,
         public readonly bool $status
     ) {}
 
     /**
-     * Membuat DTO dari array request.
-     *
      * @param  array<string, mixed>  $data
      */
-    public static function fromRequest(array $data): self
+    public static function fromArray(array $data): self
     {
         return new self(
             iso: $data['iso'],
             name: $data['name'],
             niceName: $data['nice_name'],
-            iso3: $data['iso3'],
-            numcode: $data['numcode'],
+            iso3: $data['iso3'] ?? null,
+            numcode: isset($data['numcode']) ? (int) $data['numcode'] : null,
             phonecode: $data['phonecode'],
             status: $data['status']
         );
     }
 
     /**
-     * Membuat DTO dari instance model Country.
+     * Create a DTO from the Country model.
      */
     public static function fromModel(Country $country): self
     {
@@ -44,12 +42,15 @@ class CountryData
             name: $country->name,
             niceName: $country->nice_name,
             iso3: $country->iso3,
-            numcode: (string) $country->numcode, // Konversi int ke string untuk DTO
+            numcode: $country->numcode,
             phonecode: $country->phonecode,
-            status: (bool) $country->status
+            status: $country->status
         );
     }
 
+    /**
+     * @return array<string, string|int|bool|null>
+     */
     public function toArray(): array
     {
         return [

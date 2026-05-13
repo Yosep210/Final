@@ -24,5 +24,12 @@ class Country extends Model
         'status',
     ];
 
-    protected $casts = ['status' => 'boolean'];
+    /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'numcode' => 'integer',
+        'phonecode' => 'integer',
+        'status' => 'boolean',
+    ];
 }
