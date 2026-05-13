@@ -37,8 +37,8 @@ final class CountryData
             niceName: $niceName,
             iso3: $iso3,
             numcode: $numcode,
-            phonecode: $data['phonecode'],
-            status: $data['status']
+            phonecode: (int) $data['phonecode'],
+            status: (bool) $data['status']
         );
     }
 
@@ -53,8 +53,8 @@ final class CountryData
             niceName: $country->nice_name,
             iso3: $country->iso3,
             numcode: $country->numcode,
-            phonecode: $country->phonecode,
-            status: $country->status
+            phonecode: (int) $country->phonecode,
+            status: (bool) $country->status
         );
     }
 

@@ -19,4 +19,12 @@ class StoreCountryRequest extends FormRequest
     {
         return CountryValidation::rules();
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return CountryValidation::attributes();
+    }
 }

@@ -23,4 +23,12 @@ class UpdateCountryRequest extends FormRequest
 
         return CountryValidation::rules($country);
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return CountryValidation::attributes();
+    }
 }

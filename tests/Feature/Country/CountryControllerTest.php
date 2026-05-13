@@ -64,6 +64,21 @@ it('stores a country', function () {
     ]);
 });
 
+it('shows a country', function () {
+    $user = User::factory()->create();
+    $country = Country::query()->create(countryPayload());
+
+    $response = $this
+        ->actingAs($user)
+        ->getJson(route('countries.show', $country));
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('data.id', $country->id)
+        ->assertJsonPath('data.iso', 'ID')
+        ->assertJsonPath('data.name', 'Indonesia');
+});
+
 it('updates a country', function () {
     $user = User::factory()->create();
     $country = Country::query()->create(countryPayload());
