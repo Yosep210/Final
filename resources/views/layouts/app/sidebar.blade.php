@@ -13,7 +13,7 @@
         </flux:sidebar.header>
 
         @php
-        $menus = \App\Services\MenuServices::get('Menu')
+        $menus = \App\Services\MenuService::get('Menu')
         @endphp
 
         <flux:sidebar.nav class="flex-1 overflow-y-auto">

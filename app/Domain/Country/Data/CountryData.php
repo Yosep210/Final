@@ -21,12 +21,22 @@ final class CountryData
      */
     public static function fromArray(array $data): self
     {
+        $iso = strtoupper(trim((string) $data['iso']));
+        $name = trim((string) $data['name']);
+        $niceName = trim((string) $data['nice_name']);
+        $iso3 = isset($data['iso3']) && $data['iso3'] !== null && $data['iso3'] !== ''
+            ? strtoupper(trim((string) $data['iso3']))
+            : null;
+        $numcode = isset($data['numcode']) && $data['numcode'] !== null && $data['numcode'] !== ''
+            ? (int) $data['numcode']
+            : null;
+
         return new self(
-            iso: $data['iso'],
-            name: $data['name'],
-            niceName: $data['nice_name'],
-            iso3: $data['iso3'] ?? null,
-            numcode: isset($data['numcode']) ? (int) $data['numcode'] : null,
+            iso: $iso,
+            name: $name,
+            niceName: $niceName,
+            iso3: $iso3,
+            numcode: $numcode,
             phonecode: $data['phonecode'],
             status: $data['status']
         );
