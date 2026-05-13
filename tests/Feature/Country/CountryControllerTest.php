@@ -3,6 +3,7 @@
 use App\Models\Country;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
@@ -64,6 +65,25 @@ it('stores a country', function () {
     ]);
 });
 
+it('fails to store a country with duplicate iso', function () {
+    $user = User::factory()->create();
+    Country::query()->create(countryPayload());
+
+    $response = $this
+        ->actingAs($user)
+        ->postJson(route('countries.store'), countryPayload([
+            'name' => 'Indonesia Duplicate',
+            'nice_name' => 'Indonesia Duplicate',
+            'iso3' => 'IDX',
+            'numcode' => 361,
+            'phonecode' => 620,
+        ]));
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['iso']);
+});
+
 it('shows a country', function () {
     $user = User::factory()->create();
     $country = Country::query()->create(countryPayload());
@@ -99,6 +119,34 @@ it('updates a country', function () {
     ]);
 });
 
+it('fails to update a country with duplicate iso', function () {
+    $user = User::factory()->create();
+    Country::query()->create(countryPayload());
+    $country = Country::query()->create(countryPayload([
+        'iso' => 'MY',
+        'name' => 'Malaysia',
+        'nice_name' => 'Malaysia',
+        'iso3' => 'MYS',
+        'numcode' => 458,
+        'phonecode' => 60,
+    ]));
+
+    $response = $this
+        ->actingAs($user)
+        ->putJson(route('countries.update', $country), countryPayload([
+            'iso' => 'ID',
+            'name' => 'Malaysia',
+            'nice_name' => 'Malaysia',
+            'iso3' => 'MYS',
+            'numcode' => 458,
+            'phonecode' => 60,
+        ]));
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['iso']);
+});
+
 it('deletes a country', function () {
     $user = User::factory()->create();
     $country = Country::query()->create(countryPayload());
@@ -110,6 +158,30 @@ it('deletes a country', function () {
     $response->assertNoContent();
 
     $this->assertDatabaseMissing('countries', [
+        'id' => $country->id,
+    ]);
+});
+
+it('blocks deleting a country that is already referenced by province data', function () {
+    $user = User::factory()->create();
+    $country = Country::query()->create(countryPayload());
+
+    DB::table('provincies')->insert([
+        'country_id' => $country->id,
+        'name' => 'Jawa Barat',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->deleteJson(route('countries.destroy', $country));
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['country']);
+
+    $this->assertDatabaseHas('countries', [
         'id' => $country->id,
     ]);
 });
