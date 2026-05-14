@@ -1,14 +1,129 @@
+Urutan paling aman untuk meniru modul lain dari pola country ini adalah seperti ini:
+
+Buat migration dulu
+
+Pastikan schema tabel, unique key, foreign key, dan delete policy sudah jelas dari awal.
+
+Buat model
+
+Isi fillable, casts, dan relasi dasar yang memang dipakai modul itu.
+
+Buat DTO/data object
+
+Contoh seperti CountryData.php (line 1).
+
+DTO dipakai untuk normalisasi input dan jadi boundary data antar layer.
+
+Buat validation support
+
+Kalau mau pola yang konsisten, buat helper seperti CountryValidation agar rules bisa dipakai ulang oleh FormRequest dan Livewire.
+
+Buat FormRequest
+
+Pisahkan Store...Request dan Update...Request.
+
+Kalau perlu label error custom, sambungkan attributes() ke validation helper.
+
+Buat actions
+
+Minimal:
+
+Create...Action
+
+Get/List...Action
+
+Update...Action
+
+Delete...Action
+
+Action harus punya tanggung jawab jelas, bukan hanya copy-paste query tanpa arah.
+
+Tambahkan business guard
+
+Contoh:
+
+boleh dihapus atau tidak
+
+kalau dipakai relasi lain, blok delete
+
+kalau butuh soft delete, putuskan di sini
+
+Buat resource API
+
+Gunakan JsonResource agar response stabil dan konsisten untuk FE/API consumer.
+Buat controller
+
+Controller tipis saja:
+
+validasi dari FormRequest
+
+mapping ke DTO
+
+panggil action
+
+return resource
+
+Buat halaman web admin
+
+Kalau mengikuti pola project ini:
+
+Livewire page Index
+
+PowerGrid table
+
+modal/form sederhana untuk create/edit
+
+Daftarkan route
+
+Pisahkan dengan jelas:
+
+route web admin, misalnya country.index
+
+route API resource, misalnya countries.\*
+
+Sinkronkan menu/sidebar
+
+Masukkan route name yang benar ke config/menu.php (line 1) dan pastikan sidebar membaca key yang sama.
+Tulis feature test
+
+Minimal:
+
+create success
+
+duplicate create gagal
+
+show success
+
+index success
+
+update success
+
+duplicate update gagal
+
+delete success / blocked
+
+Tulis unit test
+
+Minimal:
+
+DTO normalisasi
+
+validation rules create/update
+
+Dokumentasikan contract
+
+Buat file singkat seperti country-api.md (line 1) supaya modul mudah dipakai ulang.
 app/
-  Domain/
-    Member/
-      Actions/
-        CreateMemberAction.php
-        UpdateMemberAction.php
-        DeleteMemberAction.php
-        ActivateMemberAction.php
-        DeactivateMemberAction.php
-        AssignSponsorAction.php
-        ChangePackageAction.php
+Domain/
+Member/
+Actions/
+CreateMemberAction.php
+UpdateMemberAction.php
+DeleteMemberAction.php
+ActivateMemberAction.php
+DeactivateMemberAction.php
+AssignSponsorAction.php
+ChangePackageAction.php
 
       Data/
         MemberData.php
@@ -96,71 +211,72 @@ app/
         MemberTransformer.php
         MemberListTransformer.php
         MemberDetailTransformer.php
-  Livewire/
-    Member/
-      Pages/
-        Index.php
-        Create.php
-        Edit.php
-        Show.php
-      Components/
-        MemberForm.php
-        MemberTable.php
-        MemberFilters.php
-        MemberStatusBadge.php
-        MemberNetworkTree.php
-  Http/
-    Controllers/
-      Admin/
-        MemberController.php
-    Requests/
-      Member/
-        StoreMemberRequest.php
-        UpdateMemberRequest.php
-        AssignSponsorRequest.php
-        ChangePackageRequest.php
-    Resources/
-      Member/
-        MemberResource.php
-        MemberCollection.php
+
+Livewire/
+Member/
+Pages/
+Index.php
+Create.php
+Edit.php
+Show.php
+Components/
+MemberForm.php
+MemberTable.php
+MemberFilters.php
+MemberStatusBadge.php
+MemberNetworkTree.php
+Http/
+Controllers/
+Admin/
+MemberController.php
+Requests/
+Member/
+StoreMemberRequest.php
+UpdateMemberRequest.php
+AssignSponsorRequest.php
+ChangePackageRequest.php
+Resources/
+Member/
+MemberResource.php
+MemberCollection.php
 routes/
-  admin/
-    member.php
+admin/
+member.php
 database/
-  factories/
-    MemberFactory.php
-    MemberProfileFactory.php
-    MembershipFactory.php
-    MemberNetworkFactory.php
-    BankAccountFactory.php
+factories/
+MemberFactory.php
+MemberProfileFactory.php
+MembershipFactory.php
+MemberNetworkFactory.php
+BankAccountFactory.php
 
-  seeders/
-    MemberSeeder.php
-    MemberStatusSeeder.php
-    MemberPackageSeeder.php
+seeders/
+MemberSeeder.php
+MemberStatusSeeder.php
+MemberPackageSeeder.php
 tests/
-  Unit/
-    Domain/
-      Member/
-        Actions/
-        Services/
-        Queries/
-        Repositories/
-        ValueObjects/
-        Rules/
+Unit/
+Domain/
+Member/
+Actions/
+Services/
+Queries/
+Repositories/
+ValueObjects/
+Rules/
 
-  Feature/
-    Livewire/
-      Member/
-    Http/
-      Member/
+Feature/
+Livewire/
+Member/
+Http/
+Member/
 
-  Integration/
-    Domain/
-      Member/
+Integration/
+Domain/
+Member/
 resources/
-  views/
-    livewire/
-      member/
-        pages/
-        components/
+views/
+livewire/
+member/
+pages/
+components/
