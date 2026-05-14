@@ -13,6 +13,7 @@ class MemberData
         public readonly string $name,
         public readonly string $username,
         public readonly string $email,
+        public readonly string $password,
         public readonly string $status,
         public readonly ?string $referralCode,
         public readonly ?\DateTimeInterface $emailVerifiedAt,
@@ -28,6 +29,7 @@ class MemberData
             name: $member->name,
             username: $member->username,
             email: $member->email,
+            password: $member->password,
             status: $member->status,
             referralCode: $member->referral_code,
             emailVerifiedAt: $member->email_verified_at,
@@ -44,6 +46,7 @@ class MemberData
             name: trim((string) $data['name']),
             username: trim((string) $data['username']),
             email: trim((string) $data['email']),
+            password: trim((string) $data['password']),
             status: trim((string) $data['status']),
             referralCode: isset($data['referral_code']) && $data['referral_code'] !== null && $data['referral_code'] !== ''
                 ? trim((string) $data['referral_code'])
@@ -62,6 +65,7 @@ class MemberData
         return [
             'name' => $this->name,
             'username' => $this->username,
+            'password' => $this->password,
             'email' => $this->email,
             'status' => $this->status,
             'referral_code' => $this->referralCode,

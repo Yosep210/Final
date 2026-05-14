@@ -3,6 +3,7 @@
 namespace App\Domain\Member\Actions;
 
 use App\Domain\Member\Data\MemberData;
+use App\Events\MemberCreated;
 use App\Models\Member;
 
 class CreateMemberAction
@@ -12,6 +13,10 @@ class CreateMemberAction
      */
     public function execute(MemberData $memberData): Member
     {
-        return Member::query()->create($memberData->toArray());
+        $member = Member::query()->create($memberData->toArray());
+
+        MemberCreated::dispatch($member);
+
+        return $member;
     }
 }

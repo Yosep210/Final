@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'passwords' => 'users',
+    'passwords' => 'members',
 
     /*
     |--------------------------------------------------------------------------
@@ -45,7 +45,7 @@ return [
     |
     */
 
-    'username' => 'email',
+    'username' => 'username',
 
     'email' => 'email',
 
