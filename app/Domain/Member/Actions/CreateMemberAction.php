@@ -36,6 +36,8 @@ class CreateMemberAction implements CreatesNewUsers
 
         MemberCreated::dispatch($member);
 
+        $member->assignRole('member');
+
         return $member;
     }
 }

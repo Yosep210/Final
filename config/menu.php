@@ -15,7 +15,7 @@ return [
                 [
                     'title' => 'Country',
                     'href' => 'country.index',
-                    // 'role' => 'admin',
+                    'role' => 'admin',
                 ],
             ],
         ],
