@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Member\Actionns;
+namespace App\Domain\Member\Actions;
 
 use App\Domain\Member\Data\MemberData;
 use App\Models\Member;
