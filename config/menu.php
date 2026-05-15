@@ -35,23 +35,23 @@ return [
         //         ],
         //     ],
         // ],
-        // [
-        //     'heading' => 'Admin',
-        //     'icon' => 'lock-closed',
-        //     'route' => ['role.*', 'permission.*'],
-        //     'sub' => [
-        //         [
-        //             'title' => 'Role',
-        //             'href' => 'role.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Permission',
-        //             'href' => 'permission.index',
-        //             'role' => 'admin',
-        //         ],
-        //     ],
-        // ],
+        [
+            'heading' => 'Admin',
+            'icon' => 'lock-closed',
+            'route' => ['role.*', 'permission.*'],
+            'sub' => [
+                [
+                    'title' => 'Role',
+                    'href' => 'admin.role.index',
+                    'role' => 'admin',
+                ],
+                [
+                    'title' => 'Permission',
+                    'href' => 'permission.index',
+                    'role' => 'admin',
+                ],
+            ],
+        ],
         // [
         //     'heading' => 'Master Data',
         //     'icon' => 'circle-stack',

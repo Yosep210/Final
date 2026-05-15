@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Province;
+namespace App\Http\Requests\Role;
 
-use App\Domain\Province\Support\ProvinceValidation;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Domain\Role\Support\RoleValidation;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProvinceRequest extends FormRequest
+class StoreRoleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +22,7 @@ class StoreProvinceRequest extends FormRequest
      */
     public function rules(): array
     {
-        return ProvinceValidation::rules();
+        return RoleValidation::rules();
     }
 
     /**
@@ -33,6 +32,6 @@ class StoreProvinceRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return ProvinceValidation::attributes();
+        return RoleValidation::attributes();
     }
 }

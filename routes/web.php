@@ -14,4 +14,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::apiResource('members', MemberController::class);
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/admin.php';
