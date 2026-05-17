@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Province;
 
-use App\Domain\Province\Support\ProvinceValidation;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Province;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProvinceRequest extends FormRequest
 {
@@ -19,11 +19,11 @@ class StoreProvinceRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, array<mixed>>
      */
     public function rules(): array
     {
-        return ProvinceValidation::rules();
+        return static::provinceRules();
     }
 
     /**
@@ -33,6 +33,34 @@ class StoreProvinceRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return ProvinceValidation::attributes();
+        return static::attributeLabels();
+    }
+
+    /**
+     * Get the validation rules for creating or updating a province.
+     *
+     * @return array<string, array<mixed>>
+     */
+    public static function provinceRules(?Province $province = null): array
+    {
+        $ignoreName = $province?->id ? Rule::unique('provincies', 'name')->ignore($province) : Rule::unique('provincies', 'name');
+
+        return [
+            'country_id' => ['required', 'integer', 'exists:countries,id'],
+            'name' => ['required', 'string', 'max:255', $ignoreName],
+        ];
+    }
+
+    /**
+     * Get custom attribute labels for provinces.
+     *
+     * @return array<string, string>
+     */
+    public static function attributeLabels(): array
+    {
+        return [
+            'country_id' => 'country',
+            'name' => 'name',
+        ];
     }
 }

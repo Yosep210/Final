@@ -21,18 +21,18 @@ return [
         [
             'heading' => 'Data Address',
             'icon' => 'users',
-            'route' => ['country.*'],
+            'route' => ['country.*', 'province.*'],
             'sub' => [
                 [
                     'title' => 'Country',
                     'href' => 'country.index',
                     // 'role' => 'admin',
                 ],
-                //         [
-                //             'title' => 'Province',
-                //             'href' => 'province.index',
-                //             'role' => 'admin',
-                //         ],
+                [
+                    'title' => 'Province',
+                    'href' => 'province.index',
+                    //             'role' => 'admin',
+                ],
                 //         [
                 //             'title' => 'City',
                 //             'href' => 'city.index',
@@ -75,7 +75,7 @@ return [
                 [
                     'title' => 'Transaction List',
                     'href' => 'dashboard',
-                    'role' => 'admin',
+                    // 'role' => 'admin',
                 ],
             ],
             // 'sub' => [
@@ -134,7 +134,7 @@ return [
                 [
                     'title' => 'Transaction List',
                     'href' => 'dashboard',
-                    'role' => 'admin',
+                    // 'role' => 'admin',
                 ],
             ],
         ],

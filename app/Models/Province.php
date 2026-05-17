@@ -4,10 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
-class Province extends Model
+class Province extends Model implements Auditable
 {
+    use AuditableTrait;
     use HasFactory;
+    use LogsActivity;
+
+    protected $table = 'provincies';
 
     /**
      * The attributes that are mass assignable.
@@ -26,4 +34,16 @@ class Province extends Model
     protected $casts = [
         'country_id' => 'integer',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'country_id',
+                'name',
+                'code',
+            ])
+            ->logOnlyDirty()
+            ->useLogName('province');
+    }
 }

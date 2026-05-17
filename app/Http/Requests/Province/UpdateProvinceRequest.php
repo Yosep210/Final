@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Province;
 
-use App\Domain\Province\Support\ProvinceValidation;
 use App\Models\Province;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,7 +25,7 @@ class UpdateProvinceRequest extends FormRequest
         /** @var Province $province */
         $province = $this->route('province');
 
-        return ProvinceValidation::rules($province);
+        return StoreProvinceRequest::provinceRules($province);
     }
 
     /**
@@ -36,6 +35,6 @@ class UpdateProvinceRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return ProvinceValidation::attributes();
+        return StoreProvinceRequest::attributeLabels();
     }
 }
