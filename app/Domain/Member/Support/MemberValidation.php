@@ -19,7 +19,7 @@ final class MemberValidation
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', $ignoreUsername],
             'email' => ['required', 'string', 'email', 'max:255', $ignoreEmail],
-            'status' => ['required', 'string', 'in:active,inactive,banned'],
+            'status' => ['required', 'string', 'in:active,suspended,inactive'],
             'referral_code' => ['nullable', 'string', 'max:255'],
             'email_verified_at' => ['nullable', 'date'],
             'last_login_at' => ['nullable', 'date'],

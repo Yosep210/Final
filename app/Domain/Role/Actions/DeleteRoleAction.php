@@ -10,9 +10,9 @@ class DeleteRoleAction
 {
     public function execute(Role $role): ?bool
     {
-        if (DB::table('users')->where('role_id', $role->id)->exists()) {
+        if (DB::table('model_has_roles')->where('role_id', $role->id)->exists()) {
             throw ValidationException::withMessages([
-                'role' => 'Role cannot be deleted because it is already used by user data.',
+                'role' => 'Role cannot be deleted because it is already assigned to a model.',
             ]);
         }
 

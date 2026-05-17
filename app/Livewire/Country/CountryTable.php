@@ -81,11 +81,11 @@ final class CountryTable extends PowerGridComponent
     }
 
     #[On('country:delete')]
-    public function delete(DeleteCountryAction $deleteCountryAction, int $rowId): void
+    public function delete(int $rowId): void
     {
         $country = Country::query()->findOrFail($rowId);
 
-        $deleteCountryAction->execute($country);
+        DeleteCountryAction::run($country);
 
         Flux::toast(variant: 'success', text: 'Country deleted successfully.');
 

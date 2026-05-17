@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Role;
-use App\Models\Member;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

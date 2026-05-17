@@ -16,64 +16,39 @@ use Illuminate\Http\Response;
 
 class MemberController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): JsonResponse
+    public function index(GetMemberAction $getMemberAction): JsonResponse
     {
-        $members = Member::all();
+        $members = $getMemberAction->execute();
 
-        return response()->json([
-            'data' => MemberResource::collection($members),
-        ]);
+        return MemberResource::collection($members)->response();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreMemberRequest $request): JsonResponse
+    public function store(StoreMemberRequest $request, CreateMemberAction $createMemberAction): JsonResponse
     {
         $memberData = MemberData::fromArray($request->validated());
-        $member = (new CreateMemberAction)->execute($memberData);
+        $member = $createMemberAction->execute($memberData);
 
-        return response()->json([
-            'data' => MemberResource::make($member),
-            'message' => 'Member created successfully',
-        ], 201);
+        return MemberResource::make($member)
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Member $member): JsonResponse
     {
-        $member = (new GetMemberAction)->execute($member->id);
-
-        return response()->json([
-            'data' => MemberResource::make($member),
-        ]);
+        return MemberResource::make($member)->response();
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMemberRequest $request, Member $member): JsonResponse
+    public function update(UpdateMemberRequest $request, Member $member, UpdateMemberAction $updateMemberAction): JsonResponse
     {
         $memberData = MemberData::fromArray($request->validated());
-        $updated = (new UpdateMemberAction)->execute($member->id, $memberData);
+        $updatedMember = $updateMemberAction->execute($member, $memberData);
 
-        return response()->json([
-            'data' => MemberResource::make($updated),
-            'message' => 'Member updated successfully',
-        ]);
+        return MemberResource::make($updatedMember)->response();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Member $member): Response
+    public function destroy(Member $member, DeleteMemberAction $deleteMemberAction): Response
     {
-        (new DeleteMemberAction)->execute($member->id);
+        $deleteMemberAction->execute($member);
 
         return response()->noContent();
     }

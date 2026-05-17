@@ -8,6 +8,17 @@ return [
             'href' => 'dashboard',
         ],
         [
+            'heading' => 'Data Member',
+            'icon' => 'users',
+            'route' => ['member.*'],
+            'sub' => [
+                [
+                    'title' => 'Member List',
+                    'href' => 'member.index',
+                ],
+            ],
+        ],
+        [
             'heading' => 'Data Address',
             'icon' => 'users',
             'route' => ['country.*'],
@@ -15,26 +26,30 @@ return [
                 [
                     'title' => 'Country',
                     'href' => 'country.index',
-                    'role' => 'admin',
+                    // 'role' => 'admin',
                 ],
+                //         [
+                //             'title' => 'Province',
+                //             'href' => 'province.index',
+                //             'role' => 'admin',
+                //         ],
+                //         [
+                //             'title' => 'City',
+                //             'href' => 'city.index',
+                //             'role' => 'admin',
+                //         ],
+                //         [
+                //             'title' => 'Regency',
+                //             'href' => 'regency.index',
+                //             'role' => 'admin',
+                //         ],
+                //         [
+                //             'title' => 'Village',
+                //             'href' => 'village.index',
+                //             'role' => 'admin',
+                //         ],
             ],
         ],
-        // [
-        //     'heading' => 'Data Member',
-        //     'icon' => 'users',
-        //     'route' => ['member.*'],
-        //     'sub' => [
-        //         [
-        //             'title' => 'Create Member',
-        //             'href' => 'member.create',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Member List',
-        //             'href' => 'member.index',
-        //         ],
-        //     ],
-        // ],
         [
             'heading' => 'Admin',
             'icon' => 'lock-closed',
@@ -42,14 +57,14 @@ return [
             'sub' => [
                 [
                     'title' => 'Role',
-                    'href' => 'admin.role.index',
-                    'role' => 'admin',
+                    'href' => 'role.index',
+                    // 'role' => 'admin',
                 ],
-                [
-                    'title' => 'Permission',
-                    'href' => 'permission.index',
-                    'role' => 'admin',
-                ],
+                // [
+                //     'title' => 'Permission',
+                //     'href' => 'permission.index',
+                //     // 'role' => 'admin',
+                // ],
             ],
         ],
         // [
@@ -68,21 +83,6 @@ return [
         //             'role' => 'admin',
         //         ],
         //         [
-        //             'title' => 'City',
-        //             'href' => 'city.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Country',
-        //             'href' => 'country.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Regency',
-        //             'href' => 'regency.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
         //             'title' => 'Membership',
         //             'href' => 'membership.index',
         //             'role' => 'admin',
@@ -90,11 +90,6 @@ return [
         //         [
         //             'title' => 'Package',
         //             'href' => 'package.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Province',
-        //             'href' => 'province.index',
         //             'role' => 'admin',
         //         ],
         //         [
@@ -120,11 +115,6 @@ return [
         //         [
         //             'title' => 'Supplier',
         //             'href' => 'supplier.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Village',
-        //             'href' => 'village.index',
         //             'role' => 'admin',
         //         ],
         //     ],

@@ -48,7 +48,7 @@ final class RoleTable extends PowerGridComponent
             ->add('name')
             ->add('guard_name')
             ->add('created_at')
-            ->add('created_at_formatted', fn(Role $model) => $model->created_at->format('d/m/Y H:i'));
+            ->add('created_at_formatted', fn (Role $model) => $model->created_at->format('d/m/Y H:i'));
     }
 
     public function columns(): array

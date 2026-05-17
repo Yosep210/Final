@@ -3,8 +3,12 @@
 namespace App\Domain\Country\Data;
 
 use App\Models\Country;
+use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
-final class CountryData
+#[MapName(SnakeCaseMapper::class)]
+final class CountryData extends Data
 {
     public function __construct(
         public readonly string $iso,
@@ -21,24 +25,16 @@ final class CountryData
      */
     public static function fromArray(array $data): self
     {
-        $iso = strtoupper(trim((string) $data['iso']));
-        $name = trim((string) $data['name']);
-        $niceName = trim((string) $data['nice_name']);
-        $iso3 = isset($data['iso3']) && $data['iso3'] !== null && $data['iso3'] !== ''
-            ? strtoupper(trim((string) $data['iso3']))
-            : null;
-        $numcode = isset($data['numcode']) && $data['numcode'] !== null && $data['numcode'] !== ''
-            ? (int) $data['numcode']
-            : null;
+        $normalized = self::normalize($data);
 
         return new self(
-            iso: $iso,
-            name: $name,
-            niceName: $niceName,
-            iso3: $iso3,
-            numcode: $numcode,
-            phonecode: (int) $data['phonecode'],
-            status: (bool) $data['status']
+            iso: (string) $normalized['iso'],
+            name: (string) $normalized['name'],
+            niceName: (string) $normalized['niceName'],
+            iso3: $normalized['iso3'] !== null ? (string) $normalized['iso3'] : null,
+            numcode: $normalized['numcode'] !== null ? (int) $normalized['numcode'] : null,
+            phonecode: (int) $normalized['phonecode'],
+            status: (bool) $normalized['status'],
         );
     }
 
@@ -47,30 +43,27 @@ final class CountryData
      */
     public static function fromModel(Country $country): self
     {
-        return new self(
-            iso: $country->iso,
-            name: $country->name,
-            niceName: $country->nice_name,
-            iso3: $country->iso3,
-            numcode: $country->numcode,
-            phonecode: (int) $country->phonecode,
-            status: (bool) $country->status
-        );
+        return self::from($country);
     }
 
     /**
+     * @param  array<string, mixed>  $data
      * @return array<string, string|int|bool|null>
      */
-    public function toArray(): array
+    protected static function normalize(array $data): array
     {
         return [
-            'iso' => $this->iso,
-            'name' => $this->name,
-            'nice_name' => $this->niceName,
-            'iso3' => $this->iso3,
-            'numcode' => $this->numcode,
-            'phonecode' => $this->phonecode,
-            'status' => $this->status,
+            'iso' => strtoupper(trim((string) ($data['iso'] ?? ''))),
+            'name' => trim((string) ($data['name'] ?? '')),
+            'niceName' => trim((string) ($data['nice_name'] ?? $data['niceName'] ?? '')),
+            'iso3' => isset($data['iso3']) && $data['iso3'] !== null && $data['iso3'] !== ''
+                ? strtoupper(trim((string) $data['iso3']))
+                : null,
+            'numcode' => isset($data['numcode']) && $data['numcode'] !== null && $data['numcode'] !== ''
+                ? (int) $data['numcode']
+                : null,
+            'phonecode' => (int) ($data['phonecode'] ?? 0),
+            'status' => (bool) ($data['status'] ?? false),
         ];
     }
 }

@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\Member;
 
+use App\Concerns\PasswordValidationRules;
 use App\Domain\Member\Support\MemberValidation;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMemberRequest extends FormRequest
 {
+    use PasswordValidationRules;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -23,7 +26,10 @@ class StoreMemberRequest extends FormRequest
      */
     public function rules(): array
     {
-        return MemberValidation::rules();
+        return [
+            ...MemberValidation::rules(),
+            'password' => $this->passwordRules(),
+        ];
     }
 
     /**

@@ -19,9 +19,9 @@ class CountryController extends Controller
     /**
      * Display a paginated listing of countries.
      */
-    public function index(GetCountryAction $getCountryAction): JsonResponse
+    public function index(): JsonResponse
     {
-        $countries = $getCountryAction->execute();
+        $countries = GetCountryAction::run();
 
         return CountryResource::collection($countries)->response();
     }
@@ -29,10 +29,10 @@ class CountryController extends Controller
     /**
      * Store a newly created country.
      */
-    public function store(StoreCountryRequest $request, CreateCountryAction $createCountryAction): JsonResponse
+    public function store(StoreCountryRequest $request): JsonResponse
     {
         $countryData = CountryData::fromArray($request->validated());
-        $country = $createCountryAction->execute($countryData);
+        $country = CreateCountryAction::run($countryData);
 
         return CountryResource::make($country)
             ->response()
@@ -50,10 +50,10 @@ class CountryController extends Controller
     /**
      * Update the specified country.
      */
-    public function update(UpdateCountryRequest $request, Country $country, UpdateCountryAction $updateCountryAction): JsonResponse
+    public function update(UpdateCountryRequest $request, Country $country): JsonResponse
     {
         $countryData = CountryData::fromArray($request->validated());
-        $updatedCountry = $updateCountryAction->execute($country, $countryData);
+        $updatedCountry = UpdateCountryAction::run($country, $countryData);
 
         return CountryResource::make($updatedCountry)->response();
     }
@@ -61,9 +61,9 @@ class CountryController extends Controller
     /**
      * Remove the specified country.
      */
-    public function destroy(Country $country, DeleteCountryAction $deleteCountryAction): Response
+    public function destroy(Country $country): Response
     {
-        $deleteCountryAction->execute($country);
+        DeleteCountryAction::run($country);
 
         return response()->noContent();
     }

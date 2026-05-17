@@ -57,7 +57,7 @@ class Index extends Component
         $this->showModal = true;
     }
 
-    public function save(CreateCountryAction $createCountryAction, UpdateCountryAction $updateCountryAction): void
+    public function save(): void
     {
         $country = $this->editingCountryId
             ? Country::query()->findOrFail($this->editingCountryId)
@@ -72,11 +72,11 @@ class Index extends Component
         $countryData = CountryData::fromArray($validated['form']);
 
         if ($country) {
-            $updateCountryAction->execute($country, $countryData);
+            UpdateCountryAction::run($country, $countryData);
 
             Flux::toast(variant: 'success', text: 'Country updated successfully.');
         } else {
-            $createCountryAction->execute($countryData);
+            CreateCountryAction::run($countryData);
 
             Flux::toast(variant: 'success', text: 'Country created successfully.');
         }

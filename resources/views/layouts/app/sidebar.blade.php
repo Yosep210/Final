@@ -9,43 +9,31 @@
     <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.header>
             <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-            <flux:sidebar.collapse class="lg:hidden" />
+            <flux:sidebar.collapse class="hidden lg:flex" />
         </flux:sidebar.header>
 
         @php
-            $menus = \App\Services\MenuService::get('Menu');
+        $menus = \App\Services\MenuService::get('Menu');
         @endphp
 
-        <flux:sidebar.nav class="flex-1 overflow-y-auto">
+        <flux:sidebar.nav>
             @foreach ($menus as $menu)
-                @if (! empty($menu['sub']))
-                    <flux:sidebar.group
-                        :heading="__($menu['heading'])"
-                        icon="{{ $menu['icon'] }}"
-                        class="grid"
-                        expandable
-                        :expanded="request()->routeIs(...($menu['route'] ?? []))"
-                    >
-                        @foreach ($menu['sub'] as $sub)
-                            <flux:sidebar.item
-                                :href="route($sub['href'])"
-                                :current="request()->routeIs($sub['href'])"
-                                wire:navigate
-                            >
-                                {{ __($sub['title']) }}
-                            </flux:sidebar.item>
-                        @endforeach
-                    </flux:sidebar.group>
-                @else
-                    <flux:sidebar.item
-                        icon="{{ $menu['icon'] }}"
-                        :href="route($menu['href'])"
-                        :current="request()->routeIs($menu['href'])"
-                        wire:navigate
-                    >
-                        {{ __($menu['title']) }}
-                    </flux:sidebar.item>
-                @endif
+            @if (! empty($menu['sub']))
+            <flux:sidebar.group :heading="__($menu['heading'])" icon="{{ $menu['icon'] }}" class="grid" expandable
+                :expanded="request()->routeIs(...($menu['route'] ?? []))">
+                @foreach ($menu['sub'] as $sub)
+                <flux:sidebar.item :href="route($sub['href'])" :current="request()->routeIs($sub['href'])"
+                    wire:navigate>
+                    {{ __($sub['title']) }}
+                </flux:sidebar.item>
+                @endforeach
+            </flux:sidebar.group>
+            @else
+            <flux:sidebar.item icon="{{ $menu['icon'] }}" :href="route($menu['href'])"
+                :current="request()->routeIs($menu['href'])" wire:navigate>
+                {{ __($menu['title']) }}
+            </flux:sidebar.item>
+            @endif
             @endforeach
         </flux:sidebar.nav>
 

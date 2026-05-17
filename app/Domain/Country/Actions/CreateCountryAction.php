@@ -4,13 +4,16 @@ namespace App\Domain\Country\Actions;
 
 use App\Domain\Country\Data\CountryData;
 use App\Models\Country;
+use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateCountryAction
 {
+    use AsAction;
+
     /**
-     * Execute the action to create a country.
+     * Create a new country record from the normalized data object.
      */
-    public function execute(CountryData $data): Country
+    public function handle(CountryData $data): Country
     {
         return Country::query()->create($data->toArray());
     }

@@ -5,27 +5,16 @@ namespace App\Domain\Member\Actions;
 use App\Domain\Member\Data\MemberData;
 use App\Events\MemberUpdated;
 use App\Models\Member;
-use Illuminate\Validation\ValidationException;
 
 class UpdateMemberAction
 {
-    /**
-     * Execute the action to update a member.
-     */
-    public function execute(int $id, MemberData $memberData): Member
+    public function execute(Member $member, MemberData $memberData): Member
     {
-        $member = Member::query()->find($id);
-
-        if (! $member) {
-            throw ValidationException::withMessages([
-                'member' => 'Member not found.',
-            ]);
-        }
-
-        $member->update($memberData->toArray());
+        $member->fill($memberData->toArray());
+        $member->save();
 
         MemberUpdated::dispatch($member);
 
-        return $member;
+        return $member->refresh();
     }
 }

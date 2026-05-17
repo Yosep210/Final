@@ -14,9 +14,6 @@ class CreateMemberAction implements CreatesNewUsers
 {
     use PasswordValidationRules;
 
-    /**
-     * Create the action to create a member.
-     */
     public function create(array $input): Member
     {
         $input = array_merge([
@@ -31,13 +28,19 @@ class CreateMemberAction implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        $memberData = MemberData::fromArray($input);
+        return $this->execute(MemberData::fromArray($input));
+    }
+
+    public function execute(MemberData $memberData): Member
+    {
         $member = Member::query()->create($memberData->toArray());
 
         MemberCreated::dispatch($member);
 
-        $member->assignRole('member');
+        if (method_exists($member, 'assignRole')) {
+            $member->assignRole('member');
+        }
 
-        return $member;
+        return $member->refresh();
     }
 }

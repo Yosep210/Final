@@ -3,14 +3,14 @@
 namespace App\Domain\Member\Actions;
 
 use App\Models\Member;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetMemberAction
 {
-    /**
-     * Execute the action to get a member.
-     */
-    public function execute(int $id): ?Member
+    public function execute(int $perPage = 15): LengthAwarePaginator
     {
-        return Member::query()->find($id);
+        return Member::query()
+            ->latest('id')
+            ->paginate($perPage);
     }
 }
