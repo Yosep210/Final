@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Country\Data;
+namespace App\Data;
 
 use App\Models\Country;
 use Spatie\LaravelData\Attributes\MapName;
@@ -38,9 +38,6 @@ final class CountryData extends Data
         );
     }
 
-    /**
-     * Create a DTO from the Country model.
-     */
     public static function fromModel(Country $country): self
     {
         return self::from($country);

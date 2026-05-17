@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Domain\Country\Actions\CreateCountryAction;
-use App\Domain\Country\Actions\DeleteCountryAction;
-use App\Domain\Country\Actions\GetCountryAction;
-use App\Domain\Country\Actions\UpdateCountryAction;
-use App\Domain\Country\Data\CountryData;
+use App\Actions\Country\CreateCountryAction;
+use App\Actions\Country\DeleteCountryAction;
+use App\Actions\Country\GetCountryAction;
+use App\Actions\Country\UpdateCountryAction;
+use App\Data\CountryData;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Country\StoreCountryRequest;
 use App\Http\Requests\Country\UpdateCountryRequest;
 use App\Http\Resources\CountryResource;
@@ -16,9 +17,6 @@ use Illuminate\Http\Response;
 
 class CountryController extends Controller
 {
-    /**
-     * Display a paginated listing of countries.
-     */
     public function index(): JsonResponse
     {
         $countries = GetCountryAction::run();
@@ -26,41 +24,27 @@ class CountryController extends Controller
         return CountryResource::collection($countries)->response();
     }
 
-    /**
-     * Store a newly created country.
-     */
     public function store(StoreCountryRequest $request): JsonResponse
     {
-        $countryData = CountryData::fromArray($request->validated());
-        $country = CreateCountryAction::run($countryData);
+        $country = CreateCountryAction::run(CountryData::fromArray($request->validated()));
 
         return CountryResource::make($country)
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified country.
-     */
     public function show(Country $country): JsonResponse
     {
         return CountryResource::make($country)->response();
     }
 
-    /**
-     * Update the specified country.
-     */
     public function update(UpdateCountryRequest $request, Country $country): JsonResponse
     {
-        $countryData = CountryData::fromArray($request->validated());
-        $updatedCountry = UpdateCountryAction::run($country, $countryData);
+        $country = UpdateCountryAction::run($country, CountryData::fromArray($request->validated()));
 
-        return CountryResource::make($updatedCountry)->response();
+        return CountryResource::make($country)->response();
     }
 
-    /**
-     * Remove the specified country.
-     */
     public function destroy(Country $country): Response
     {
         DeleteCountryAction::run($country);

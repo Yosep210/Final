@@ -1,11 +1,11 @@
 <?php
 
-use App\Domain\Country\Support\CountryValidation;
+use App\Http\Requests\Country\StoreCountryRequest;
 use App\Models\Country;
 use Illuminate\Validation\Rules\Unique;
 
 it('builds create rules without ignored model', function () {
-    $rules = CountryValidation::rules();
+    $rules = StoreCountryRequest::countryRules();
     $uniqueRule = collect($rules['iso'])->first(fn (mixed $rule) => $rule instanceof Unique);
 
     expect($uniqueRule)->toBeInstanceOf(Unique::class)
@@ -16,7 +16,7 @@ it('builds update rules with ignored model', function () {
     $country = new Country;
     $country->id = 99;
 
-    $rules = CountryValidation::rules($country);
+    $rules = StoreCountryRequest::countryRules($country);
     $uniqueRule = collect($rules['iso'])->first(fn (mixed $rule) => $rule instanceof Unique);
 
     expect($uniqueRule)->toBeInstanceOf(Unique::class)

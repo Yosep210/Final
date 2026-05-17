@@ -4,6 +4,7 @@ use App\Models\Country;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
@@ -22,6 +23,7 @@ function countryPayload(array $overrides = []): array
 
 it('returns a paginated country list', function () {
     $user = User::factory()->create();
+    Sanctum::actingAs($user);
     Country::query()->create(countryPayload());
     Country::query()->create(countryPayload([
         'iso' => 'MY',
@@ -33,7 +35,6 @@ it('returns a paginated country list', function () {
     ]));
 
     $response = $this
-        ->actingAs($user)
         ->getJson(route('countries.index'));
 
     $response
@@ -49,9 +50,9 @@ it('returns a paginated country list', function () {
 
 it('stores a country', function () {
     $user = User::factory()->create();
+    Sanctum::actingAs($user);
 
     $response = $this
-        ->actingAs($user)
         ->postJson(route('countries.store'), countryPayload());
 
     $response
@@ -67,10 +68,10 @@ it('stores a country', function () {
 
 it('fails to store a country with duplicate iso', function () {
     $user = User::factory()->create();
+    Sanctum::actingAs($user);
     Country::query()->create(countryPayload());
 
     $response = $this
-        ->actingAs($user)
         ->postJson(route('countries.store'), countryPayload([
             'name' => 'Indonesia Duplicate',
             'nice_name' => 'Indonesia Duplicate',
@@ -86,10 +87,10 @@ it('fails to store a country with duplicate iso', function () {
 
 it('shows a country', function () {
     $user = User::factory()->create();
+    Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 
     $response = $this
-        ->actingAs($user)
         ->getJson(route('countries.show', $country));
 
     $response
@@ -101,10 +102,10 @@ it('shows a country', function () {
 
 it('updates a country', function () {
     $user = User::factory()->create();
+    Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 
     $response = $this
-        ->actingAs($user)
         ->putJson(route('countries.update', $country), countryPayload([
             'name' => 'Republik Indonesia',
         ]));
@@ -121,6 +122,7 @@ it('updates a country', function () {
 
 it('fails to update a country with duplicate iso', function () {
     $user = User::factory()->create();
+    Sanctum::actingAs($user);
     Country::query()->create(countryPayload());
     $country = Country::query()->create(countryPayload([
         'iso' => 'MY',
@@ -132,7 +134,6 @@ it('fails to update a country with duplicate iso', function () {
     ]));
 
     $response = $this
-        ->actingAs($user)
         ->putJson(route('countries.update', $country), countryPayload([
             'iso' => 'ID',
             'name' => 'Malaysia',
@@ -149,10 +150,10 @@ it('fails to update a country with duplicate iso', function () {
 
 it('deletes a country', function () {
     $user = User::factory()->create();
+    Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 
     $response = $this
-        ->actingAs($user)
         ->deleteJson(route('countries.destroy', $country));
 
     $response->assertNoContent();
@@ -164,6 +165,7 @@ it('deletes a country', function () {
 
 it('blocks deleting a country that is already referenced by province data', function () {
     $user = User::factory()->create();
+    Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 
     DB::table('provincies')->insert([
@@ -174,7 +176,6 @@ it('blocks deleting a country that is already referenced by province data', func
     ]);
 
     $response = $this
-        ->actingAs($user)
         ->deleteJson(route('countries.destroy', $country));
 
     $response

@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Country;
 
-use App\Domain\Country\Actions\CreateCountryAction;
-use App\Domain\Country\Actions\UpdateCountryAction;
-use App\Domain\Country\Data\CountryData;
-use App\Domain\Country\Support\CountryValidation;
+use App\Actions\Country\CreateCountryAction;
+use App\Actions\Country\UpdateCountryAction;
+use App\Data\CountryData;
+use App\Http\Requests\Country\StoreCountryRequest;
 use App\Models\Country;
 use Flux\Flux;
 use Livewire\Attributes\On;
@@ -104,7 +104,7 @@ class Index extends Component
      */
     protected function prefixedRules(?Country $country = null): array
     {
-        $rules = CountryValidation::rules($country);
+        $rules = StoreCountryRequest::countryRules($country);
 
         return collect($rules)
             ->mapWithKeys(fn (array $ruleSet, string $field) => ["form.$field" => $ruleSet])
@@ -116,7 +116,7 @@ class Index extends Component
      */
     protected function prefixedAttributes(): array
     {
-        return collect(CountryValidation::attributes())
+        return collect(StoreCountryRequest::attributeLabels())
             ->mapWithKeys(fn (string $label, string $field) => ["form.$field" => $label])
             ->all();
     }

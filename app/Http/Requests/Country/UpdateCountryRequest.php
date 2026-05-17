@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Country;
 
-use App\Domain\Country\Support\CountryValidation;
 use App\Models\Country;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -21,7 +20,7 @@ class UpdateCountryRequest extends FormRequest
         /** @var Country $country */
         $country = $this->route('country');
 
-        return CountryValidation::rules($country);
+        return StoreCountryRequest::countryRules($country);
     }
 
     /**
@@ -29,6 +28,6 @@ class UpdateCountryRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return CountryValidation::attributes();
+        return StoreCountryRequest::attributeLabels();
     }
 }

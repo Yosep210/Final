@@ -67,69 +67,76 @@ return [
                 // ],
             ],
         ],
-        // [
-        //     'heading' => 'Master Data',
-        //     'icon' => 'circle-stack',
-        //     'route' => ['area.*', 'bank.*', 'city.*', 'country.*', 'regency.*', 'membership.*', 'package.*', 'province.*', 'rank.*', 'product.*', 'product-category.*', 'product-variant.*', 'supplier.*', 'village.*'],
-        //     'sub' => [
-        //         [
-        //             'title' => 'Area',
-        //             'href' => 'area.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Bank',
-        //             'href' => 'bank.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Membership',
-        //             'href' => 'membership.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Package',
-        //             'href' => 'package.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Rank',
-        //             'href' => 'rank.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Product',
-        //             'href' => 'product.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Product Category',
-        //             'href' => 'product-category.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Product Variant',
-        //             'href' => 'product-variant.index',
-        //             'role' => 'admin',
-        //         ],
-        //         [
-        //             'title' => 'Supplier',
-        //             'href' => 'supplier.index',
-        //             'role' => 'admin',
-        //         ],
-        //     ],
-        // ],
-        // [
-        //     'heading' => 'Transactions',
-        //     'icon' => 'currency-dollar',
-        //     'route' => ['transaction.*'],
-        //     'sub' => [
-        //         [
-        //             'title' => 'Transaction List',
-        //             'href' => 'dashboard',
-        //             'role' => 'admin',
-        //         ],
-        //     ],
-        // ],
+        [
+            'heading' => 'Master Data',
+            'icon' => 'circle-stack',
+            'route' => ['area.*', 'bank.*', 'city.*', 'country.*', 'regency.*', 'membership.*', 'package.*', 'province.*', 'rank.*', 'product.*', 'product-category.*', 'product-variant.*', 'supplier.*', 'village.*'],
+            'sub' => [
+                [
+                    'title' => 'Transaction List',
+                    'href' => 'dashboard',
+                    'role' => 'admin',
+                ],
+            ],
+            // 'sub' => [
+            //         [
+            //             'title' => 'Area',
+            //             'href' => 'area.index',
+            //             'role' => 'admin',
+            //         ],
+            //         [
+            //             'title' => 'Bank',
+            //             'href' => 'bank.index',
+            //             'role' => 'admin',
+            //         ],
+            //         [
+            //             'title' => 'Membership',
+            //             'href' => 'membership.index',
+            //             'role' => 'admin',
+            //         ],
+            //         [
+            //             'title' => 'Package',
+            //             'href' => 'package.index',
+            //             'role' => 'admin',
+            //         ],
+            //         [
+            //             'title' => 'Rank',
+            //             'href' => 'rank.index',
+            //             'role' => 'admin',
+            //         ],
+            //         [
+            //             'title' => 'Product',
+            //             'href' => 'product.index',
+            //             'role' => 'admin',
+            //         ],
+            //         [
+            //             'title' => 'Product Category',
+            //             'href' => 'product-category.index',
+            //             'role' => 'admin',
+            //         ],
+            //         [
+            //             'title' => 'Product Variant',
+            //             'href' => 'product-variant.index',
+            //             'role' => 'admin',
+            //         ],
+            //         [
+            //             'title' => 'Supplier',
+            //             'href' => 'supplier.index',
+            //             'role' => 'admin',
+            //         ],
+            //     ],
+        ],
+        [
+            'heading' => 'Transactions',
+            'icon' => 'currency-dollar',
+            'route' => ['transaction.*'],
+            'sub' => [
+                [
+                    'title' => 'Transaction List',
+                    'href' => 'dashboard',
+                    'role' => 'admin',
+                ],
+            ],
+        ],
     ],
 ];

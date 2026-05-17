@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Country\Actions;
+namespace App\Actions\Country;
 
 use App\Models\Country;
 use Illuminate\Support\Facades\DB;
@@ -11,9 +11,6 @@ class DeleteCountryAction
 {
     use AsAction;
 
-    /**
-     * Delete a country if it is not referenced by province data.
-     */
     public function handle(Country $country): ?bool
     {
         if (DB::table('provincies')->where('country_id', $country->id)->exists()) {

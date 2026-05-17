@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Country;
 
-use App\Domain\Country\Actions\DeleteCountryAction;
+use App\Actions\Country\DeleteCountryAction;
 use App\Models\Country;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;

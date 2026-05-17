@@ -12,16 +12,10 @@
         </flux:button>
     </div>
 
-    <div class="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
-        <livewire:country.country-table />
-    </div>
+    <livewire:country.country-table />
 
-    <flux:modal
-        name="country-form-modal"
-        class="max-w-2xl md:min-w-2xl"
-        wire:model="showModal"
-        @close="$wire.closeModal()"
-    >
+    <flux:modal name="country-form-modal" class="max-w-2xl md:min-w-2xl" wire:model="showModal"
+        @close="$wire.closeModal()">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">

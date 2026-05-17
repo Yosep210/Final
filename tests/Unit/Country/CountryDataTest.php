@@ -1,6 +1,6 @@
 <?php
 
-use App\Domain\Country\Data\CountryData;
+use App\Data\CountryData;
 
 it('normalizes country data from array input', function () {
     $data = CountryData::fromArray([
