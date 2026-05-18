@@ -87,12 +87,12 @@ final class RoleTable extends PowerGridComponent
     {
         return [
             Button::add('edit')
-                ->slot('<i class="fas fa-edit"></i>')
+                ->slot('Edit')
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
                 ->dispatch('role:edit', ['roleId' => $role->id]),
 
             Button::add('delete')
-                ->slot('<i class="fas fa-trash"></i>')
+                ->slot('Delete')
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
                 ->dispatch('delete-role', ['roleId' => $role->id]),
         ];

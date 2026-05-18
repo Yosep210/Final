@@ -13,7 +13,7 @@ class ProvinceData extends Data
     public function __construct(
         public readonly int $countryId,
         public readonly string $name,
-        public readonly bool $status
+        public readonly ?string $code = null,
     ) {}
 
     /**
@@ -25,8 +25,7 @@ class ProvinceData extends Data
 
         return new self(
             countryId: $normalized['country_id'],
-            name: $normalized['name'],
-            status: $normalized['status']
+            name: $normalized['name']
         );
     }
 
@@ -37,14 +36,14 @@ class ProvinceData extends Data
 
     /**
      * @param  array<string, mixed>  $data
-     * @return array<string, int|string|bool>
+     * @return array<string, int|string>
      */
     protected static function normalize(array $data): array
     {
         return [
             'country_id' => (int) ($data['country_id'] ?? 0),
             'name' => trim((string) ($data['name'] ?? '')),
-            'status' => isset($data['status']) ? (bool) $data['status'] : true,
+            'code' => isset($data['code']) ? trim((string) $data['code']) : null,
         ];
     }
 }

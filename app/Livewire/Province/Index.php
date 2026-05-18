@@ -6,10 +6,11 @@ use App\Actions\Province\CreateProvinceAction;
 use App\Actions\Province\UpdateProvinceAction;
 use App\Data\ProvinceData;
 use App\Http\Requests\Province\StoreProvinceRequest;
+use App\Models\Country;
 use App\Models\Province;
 use Flux\Flux;
-use Livewire\Atributes\On;
-use Livewire\Atributes\Title;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Title('Province')]
@@ -19,6 +20,8 @@ class Index extends Component
 
     public ?int $editingProvinceId = null;
 
+    public array $countries = [];
+
     /**
      * @var array<string, mixed>
      */
@@ -26,6 +29,7 @@ class Index extends Component
 
     public function mount(): void
     {
+        $this->countries = Country::query()->orderBy('name')->pluck('name', 'id')->toArray();
         $this->resetForm();
     }
 
@@ -38,14 +42,15 @@ class Index extends Component
     }
 
     #[On('province:edit')]
-    public function edit(int $provinceId): void
+    public function edit(int $rowId): void
     {
-        $province = Province::query()->findOrFail($provinceId);
+        $province = Province::query()->findOrFail($rowId);
 
         $this->editingProvinceId = $province->id;
         $this->form = [
             'country_id' => $province->country_id,
             'name' => $province->name,
+            'code' => $province->code,
         ];
 
         $this->resetValidation();
@@ -120,6 +125,7 @@ class Index extends Component
         $this->form = [
             'country_id' => null,
             'name' => null,
+            'code' => null,
         ];
     }
 }

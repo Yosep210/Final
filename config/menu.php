@@ -21,7 +21,7 @@ return [
         [
             'heading' => 'Data Address',
             'icon' => 'users',
-            'route' => ['country.*', 'province.*'],
+            'route' => ['country.*', 'province.*', 'city.*'],
             'sub' => [
                 [
                     'title' => 'Country',
@@ -33,14 +33,14 @@ return [
                     'href' => 'province.index',
                     //             'role' => 'admin',
                 ],
+                [
+                    'title' => 'City',
+                    'href' => 'city.index',
+                    //             'role' => 'admin',
+                ],
                 //         [
-                //             'title' => 'City',
-                //             'href' => 'city.index',
-                //             'role' => 'admin',
-                //         ],
-                //         [
-                //             'title' => 'Regency',
-                //             'href' => 'regency.index',
+                //             'title' => 'District',
+                //             'href' => 'district.index',
                 //             'role' => 'admin',
                 //         ],
                 //         [
@@ -70,7 +70,7 @@ return [
         [
             'heading' => 'Master Data',
             'icon' => 'circle-stack',
-            'route' => ['area.*', 'bank.*', 'city.*', 'country.*', 'regency.*', 'membership.*', 'package.*', 'province.*', 'rank.*', 'product.*', 'product-category.*', 'product-variant.*', 'supplier.*', 'village.*'],
+            'route' => ['area.*', 'bank.*', 'membership.*', 'package.*', 'rank.*', 'product.*', 'product-category.*', 'product-variant.*', 'supplier.*'],
             'sub' => [
                 [
                     'title' => 'Transaction List',

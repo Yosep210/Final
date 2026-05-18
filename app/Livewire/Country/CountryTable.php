@@ -33,7 +33,13 @@ final class CountryTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Country::query();
+        $allowedSort = ['iso', 'name', 'nice_name', 'iso3', 'numcode', 'phonecode', 'status'];
+        $sortField = in_array($this->sortField, $allowedSort) ? $this->sortField : 'name';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        return Country::query()
+            ->select('countries.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY countries.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -44,26 +50,28 @@ final class CountryTable extends PowerGridComponent
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
-            ->add('id')
+            ->add('no')
             ->add('iso')
             ->add('name')
             ->add('nice_name')
             ->add('iso3')
             ->add('numcode')
             ->add('phonecode')
-            ->add('status_label', fn (Country $country) => $country->status ? 'Active' : 'Inactive');
+            ->add('status');
     }
 
     public function columns(): array
     {
         return [
+            Column::make('#', 'no'),
             Column::make('ISO', 'iso')->sortable()->searchable(),
             Column::make('Name', 'name')->sortable()->searchable(),
             Column::make('Nice Name', 'nice_name')->sortable()->searchable(),
             Column::make('ISO3', 'iso3')->sortable()->searchable(),
             Column::make('Numcode', 'numcode')->sortable(),
             Column::make('Phonecode', 'phonecode')->sortable(),
-            Column::make('Status', 'status_label', 'status')->sortable(),
+            Column::make('Status', 'status')
+                ->toggleable(),
             Column::action('Action'),
         ];
     }
@@ -77,6 +85,8 @@ final class CountryTable extends PowerGridComponent
             Filter::inputText('iso3')->operators(['contains']),
             Filter::inputText('numcode')->operators(['contains']),
             Filter::inputText('phonecode')->operators(['contains']),
+            Filter::boolean('status')
+                ->label('Active', 'Inactive'),
         ];
     }
 

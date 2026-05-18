@@ -1,40 +1,40 @@
 <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
     <div class="flex items-center justify-between">
         <div>
-            <flux:heading size="xl">{{ __('Province') }}</flux:heading>
+            <flux:heading size="xl">{{ __('Cities') }}</flux:heading>
             <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
-                {{ __('Manage province master data for the application.') }}
+                {{ __('Manage city master data for the application.') }}
             </flux:text>
         </div>
 
         <flux:button wire:click="create" variant="primary">
-            {{ __('Add Province') }}
+            {{ __('Add City') }}
         </flux:button>
     </div>
 
-    <livewire:province.province-table />
+    <livewire:city.city-table />
 
-    <flux:modal name="province-form-modal" class="max-w-2xl md:min-w-2xl" wire:model="showModal"
+    <flux:modal name="city-form-modal" class="max-w-2xl md:min-w-2xl" wire:model="showModal"
         @close="$wire.closeModal()">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">
-                    {{ $editingProvinceId ? __('Edit Province') : __('Add Province') }}
+                    {{ $editingCityId ? __('Edit City') : __('Add City') }}
                 </flux:heading>
                 <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
-                    {{ __('Fill in the province information below.') }}
+                    {{ __('Fill in the city information below.') }}
                 </flux:text>
             </div>
 
             <form wire:submit="save" class="space-y-6">
                 <div class="grid gap-4 md:grid-cols-2">
-                    <flux:select wire:model="form.country_id" :label="__('Country')" placeholder="Select country">
-                        @foreach ($countries as $id => $country)
-                            <flux:select.option value="{{ $id }}">{{ $country }}</flux:select.option>
+                    <flux:select wire:model="form.province_id" :label="__('Province')" placeholder="Select province">
+                        @foreach ($provinces as $id => $province)
+                            <flux:select.option value="{{ $id }}">{{ $province }}</flux:select.option>
                         @endforeach
                     </flux:select>
-                    <flux:input wire:model="form.name" :label="__('Name')" placeholder="Jawa Barat" />
-                    <flux:input wire:model="form.code" :label="__('Code')" placeholder="JBR" />
+                    <flux:input wire:model="form.name" :label="__('Name')" placeholder="Bandung" />
+                    <flux:input wire:model="form.type" :label="__('Type')" placeholder="City / Regency" />
                 </div>
 
                 <div class="flex gap-2">
@@ -43,7 +43,7 @@
                         {{ __('Cancel') }}
                     </flux:button>
                     <flux:button type="submit" variant="primary">
-                        {{ $editingProvinceId ? __('Update') : __('Save') }}
+                        {{ $editingCityId ? __('Update') : __('Save') }}
                     </flux:button>
                 </div>
             </form>

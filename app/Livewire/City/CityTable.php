@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\Province;
+namespace App\Livewire\City;
 
-use App\Actions\Province\DeleteProvinceAction;
-use App\Models\Province;
+use App\Actions\City\DeleteCityAction;
+use App\Models\City;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -14,9 +14,9 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class ProvinceTable extends PowerGridComponent
+final class CityTable extends PowerGridComponent
 {
-    public string $tableName = 'provinceTable';
+    public string $tableName = 'cityTable';
 
     public string $sortField = 'name';
 
@@ -33,13 +33,13 @@ final class ProvinceTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSort = ['country_id', 'name'];
+        $allowedSort = ['name', 'province_id', 'type', 'created_at'];
         $sortField = in_array($this->sortField, $allowedSort) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return Province::query()
-            ->select('provincies.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY provincies.' . $sortField . ' ' . $sortDirection . ') AS no');
+        return City::query()
+            ->select('cities.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY cities.' . $sortField . ' ' . $sortDirection . ') AS no');
     }
 
     public function relationSearch(): array
@@ -51,24 +51,20 @@ final class ProvinceTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('country_id')
+            ->add('province_id')
             ->add('name')
-            ->add('code');
+            ->add('type')
+            ->add('created_at_formatted', fn(City $city) => optional($city->created_at)?->format('d M Y H:i'));
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Country ID', 'country_id')
-                ->searchable()
-                ->sortable(),
-            Column::make('Name', 'name')
-                ->searchable()
-                ->sortable(),
-            Column::make('Code', 'code')
-                ->searchable()
-                ->sortable(),
+            Column::make('Province Id', 'province_id')->searchable(),
+            Column::make('Name', 'name')->searchable(),
+            Column::make('Type', 'type')->searchable(),
+            Column::make('Created at', 'created_at_formatted', 'created_at'),
             Column::action('Action'),
         ];
     }
@@ -76,35 +72,37 @@ final class ProvinceTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::inputText('country_id')->operators(['contains']),
             Filter::inputText('name')->operators(['contains']),
+            Filter::inputText('province_id')->operators(['contains']),
+            Filter::inputText('type')->operators(['contains']),
+            Filter::datepicker('created_at'),
         ];
     }
 
-    #[On('province:delete')]
+    #[On('city:delete')]
     public function delete(int $rowId): void
     {
-        $province = Province::query()->findOrFail($rowId);
+        $city = City::query()->findOrFail($rowId);
 
-        DeleteProvinceAction::run($province);
+        DeleteCityAction::run($city);
 
-        Flux::toast(variant: 'success', text: 'Province deleted successfully.');
+        Flux::toast(variant: 'success', text: 'City deleted successfully.');
 
-        $this->dispatch('pg:eventRefresh-provinceTable');
+        $this->dispatch('pg:eventRefresh-cityTable');
     }
 
-    public function actions(Province $row): array
+    public function actions(City $row): array
     {
         return [
             Button::add('edit')
                 ->slot('Edit')
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('province:edit', ['rowId' => $row->id]),
+                ->dispatch('city:edit', ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->confirm('Are you sure you want to delete this province?')
-                ->dispatch('province:delete', ['rowId' => $row->id]),
+                ->confirm('Are you sure you want to delete this city?')
+                ->dispatch('city:delete', ['rowId' => $row->id]),
         ];
     }
 }
