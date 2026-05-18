@@ -94,14 +94,14 @@ class Index extends Component
         $rules = StoreCityRequest::cityRules($city);
 
         return collect($rules)
-            ->mapWithKeys(fn(array $ruleSet, string $field) => ["form.$field" => $ruleSet])
+            ->mapWithKeys(fn (array $ruleSet, string $field) => ["form.$field" => $ruleSet])
             ->all();
     }
 
     protected function prefixedAttributes(): array
     {
         return collect(StoreCityRequest::attributeLabels())
-            ->mapWithKeys(fn(string $label, string $field) => ["form.$field" => $label])
+            ->mapWithKeys(fn (string $label, string $field) => ["form.$field" => $label])
             ->all();
     }
 

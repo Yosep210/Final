@@ -19,9 +19,26 @@ return [
             ],
         ],
         [
+            'heading' => 'Admin',
+            'icon' => 'lock-closed',
+            'route' => ['role.*', 'permission.*'],
+            'sub' => [
+                [
+                    'title' => 'Role',
+                    'href' => 'role.index',
+                    // 'role' => 'admin',
+                ],
+                // [
+                //     'title' => 'Permission',
+                //     'href' => 'permission.index',
+                //     // 'role' => 'admin',
+                // ],
+            ],
+        ],
+        [
             'heading' => 'Data Address',
             'icon' => 'users',
-            'route' => ['country.*', 'province.*', 'city.*'],
+            'route' => ['country.*', 'province.*', 'city.*', 'district.*', 'village.*'],
             'sub' => [
                 [
                     'title' => 'Country',
@@ -38,33 +55,16 @@ return [
                     'href' => 'city.index',
                     //             'role' => 'admin',
                 ],
-                //         [
-                //             'title' => 'District',
-                //             'href' => 'district.index',
-                //             'role' => 'admin',
-                //         ],
-                //         [
-                //             'title' => 'Village',
-                //             'href' => 'village.index',
-                //             'role' => 'admin',
-                //         ],
-            ],
-        ],
-        [
-            'heading' => 'Admin',
-            'icon' => 'lock-closed',
-            'route' => ['role.*', 'permission.*'],
-            'sub' => [
                 [
-                    'title' => 'Role',
-                    'href' => 'role.index',
-                    // 'role' => 'admin',
+                    'title' => 'District',
+                    'href' => 'district.index',
+                    //             'role' => 'admin',
                 ],
-                // [
-                //     'title' => 'Permission',
-                //     'href' => 'permission.index',
-                //     // 'role' => 'admin',
-                // ],
+                [
+                    'title' => 'Village',
+                    'href' => 'village.index',
+                    //             'role' => 'admin',
+                ],
             ],
         ],
         [

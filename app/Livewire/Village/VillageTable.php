@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\City;
+namespace App\Livewire\Village;
 
-use App\Actions\City\DeleteCityAction;
-use App\Models\City;
+use App\Actions\Village\DeleteVillageAction;
+use App\Models\Village;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -14,9 +14,9 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class CityTable extends PowerGridComponent
+final class VillageTable extends PowerGridComponent
 {
-    public string $tableName = 'cityTable';
+    public string $tableName = 'villageTable';
 
     public string $sortField = 'name';
 
@@ -33,38 +33,43 @@ final class CityTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSort = ['name', 'province_id', 'type', 'created_at'];
+        $allowedSort = ['name', 'district_id', 'postal_code', 'created_at'];
         $sortField = in_array($this->sortField, $allowedSort) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return City::query()
-            ->select('cities.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY cities.'.$sortField.' '.$sortDirection.') AS no');
+        return Village::query()
+            ->select('villages.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY villages.'.$sortField.' '.$sortDirection.') AS no')
+            ->with('district');
     }
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'district' => [
+                'name',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('province_id')
+            ->add('district_name', fn (Village $model) => $model->district?->name)
             ->add('name')
-            ->add('type')
-            ->add('created_at_formatted', fn (City $city) => optional($city->created_at)?->format('d M Y H:i'));
+            ->add('postal_code')
+            ->add('created_at_formatted', fn (Village $model) => $model->created_at->format('d M Y H:i'));
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Province Id', 'province_id')->searchable(),
-            Column::make('Name', 'name')->searchable(),
-            Column::make('Type', 'type')->searchable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at'),
+            Column::make('Name', 'name')->sortable(),
+            Column::make('District', 'district_name')->sortable(),
+            Column::make('Postal code', 'postal_code')->sortable(),
+            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
             Column::action('Action'),
         ];
     }
@@ -73,36 +78,35 @@ final class CityTable extends PowerGridComponent
     {
         return [
             Filter::inputText('name')->operators(['contains']),
-            Filter::inputText('province_id')->operators(['contains']),
-            Filter::inputText('type')->operators(['contains']),
-            Filter::datepicker('created_at'),
+            Filter::inputText('district.name')->operators(['contains']),
+            Filter::inputText('postal_code')->operators(['contains']),
         ];
     }
 
-    #[On('city:delete')]
+    #[On('village:delete')]
     public function delete(int $rowId): void
     {
-        $city = City::query()->findOrFail($rowId);
+        $village = Village::query()->findOrFail($rowId);
 
-        DeleteCityAction::run($city);
+        DeleteVillageAction::run($village);
 
-        Flux::toast(variant: 'success', text: 'City deleted successfully.');
+        Flux::toast(variant: 'success', text: 'Village deleted successfully.');
 
-        $this->dispatch('pg:eventRefresh-cityTable');
+        $this->dispatch('pg:eventRefresh-villageTable');
     }
 
-    public function actions(City $row): array
+    public function actions(Village $row): array
     {
         return [
             Button::add('edit')
                 ->slot('Edit')
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('city:edit', ['rowId' => $row->id]),
+                ->dispatch('village:edit', ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->confirm('Are you sure you want to delete this city?')
-                ->dispatch('city:delete', ['rowId' => $row->id]),
+                ->confirm('Are you sure you want to delete this village?')
+                ->dispatch('village:delete', ['rowId' => $row->id]),
         ];
     }
 }
