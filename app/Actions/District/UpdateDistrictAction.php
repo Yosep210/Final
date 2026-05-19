@@ -10,7 +10,7 @@ class UpdateDistrictAction
 {
     use AsAction;
 
-    public function handle(DistrictData $data, District $district): District
+    public function handle(District $district, DistrictData $data): District
     {
         $district->fill($data->toArray());
         $district->save();

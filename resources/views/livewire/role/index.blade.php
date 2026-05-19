@@ -48,4 +48,46 @@
             </form>
         </div>
     </flux:modal>
+
+    <flux:modal name="role-permission-modal" class="max-w-3xl md:min-w-3xl" wire:model="showPermissionModal"
+        @close="$wire.closePermissionModal()">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">
+                    {{ __('Manage Permissions for') }} {{ $permissionRoleName }}
+                </flux:heading>
+                <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
+                    {{ __('Toggle permissions to grant or revoke access for this role.') }}
+                </flux:text>
+            </div>
+
+            <form wire:submit="saveRolePermissions" class="space-y-6">
+                <div class="grid gap-3">
+                    @forelse($permissionOptions as $permissionId => $permissionName)
+                    <div
+                        class="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
+                        <flux:checkbox wire:model="permissionAccess.{{ $permissionId }}" />
+                        <flux:label>{{ $permissionName }}</flux:label>
+                    </div>
+                    @empty
+                    <flux:text class="text-zinc-600 dark:text-zinc-400">
+                        {{ __('No permissions found. Please add permissions before assigning them to a role.') }}
+                    </flux:text>
+                    @endforelse
+                </div>
+
+                <div class="flex gap-2">
+                    <flux:spacer />
+
+                    <flux:button type="button" variant="ghost" wire:click="closePermissionModal">
+                        {{ __('Cancel') }}
+                    </flux:button>
+
+                    <flux:button type="submit" variant="primary">
+                        {{ __('Save Permissions') }}
+                    </flux:button>
+                </div>
+            </form>
+        </div>
+    </flux:modal>
 </div>

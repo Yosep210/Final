@@ -6,7 +6,9 @@ use App\Domain\Role\Actions\CreateRoleAction;
 use App\Domain\Role\Actions\UpdateRoleAction;
 use App\Domain\Role\Data\RoleData;
 use App\Domain\Role\Support\RoleValidation;
+use App\Models\Permission;
 use App\Models\Role;
+use App\Models\RolePermission;
 use Flux\Flux;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -24,9 +26,26 @@ class Index extends Component
      */
     public array $form = [];
 
+    public bool $showPermissionModal = false;
+
+    public ?int $permissionRoleId = null;
+
+    public string $permissionRoleName = '';
+
+    /**
+     * @var array<int, bool>
+     */
+    public array $permissionAccess = [];
+
+    /**
+     * @var array<int, string>
+     */
+    public array $permissionOptions = [];
+
     public function mount(): void
     {
         $this->resetForm();
+        $this->resetPermissionForm();
     }
 
     public function create(): void
@@ -86,6 +105,86 @@ class Index extends Component
         $this->editingRoleId = null;
         $this->resetForm();
         $this->resetValidation();
+    }
+
+    #[On('role:access')]
+    public function access(int $roleId): void
+    {
+        $role = Role::query()->findOrFail($roleId);
+
+        $this->permissionRoleId = $role->id;
+        $this->permissionRoleName = $role->name;
+        $this->permissionOptions = Permission::query()->orderBy('name')->pluck('name', 'id')->toArray();
+
+        $assignedPermissions = RolePermission::query()
+            ->where('role_id', $role->id)
+            ->pluck('permission_id')
+            ->toArray();
+
+        $this->permissionAccess = array_fill_keys(array_keys($this->permissionOptions), false);
+
+        foreach ($assignedPermissions as $permissionId) {
+            if (array_key_exists($permissionId, $this->permissionAccess)) {
+                $this->permissionAccess[$permissionId] = true;
+            }
+        }
+
+        $this->resetValidation();
+        $this->showPermissionModal = true;
+    }
+
+    public function saveRolePermissions(): void
+    {
+        $this->validate([
+            'permissionAccess' => ['array'],
+            'permissionAccess.*' => ['boolean'],
+        ]);
+
+        if ($this->permissionRoleId === null) {
+            return;
+        }
+
+        $selectedPermissionIds = array_keys(array_filter($this->permissionAccess));
+        $existingPermissionIds = RolePermission::query()
+            ->where('role_id', $this->permissionRoleId)
+            ->pluck('permission_id')
+            ->toArray();
+
+        $toAttach = array_diff($selectedPermissionIds, $existingPermissionIds);
+        $toDetach = array_diff($existingPermissionIds, $selectedPermissionIds);
+
+        foreach ($toAttach as $permissionId) {
+            RolePermission::query()->create([
+                'role_id' => $this->permissionRoleId,
+                'permission_id' => $permissionId,
+            ]);
+        }
+
+        if (! empty($toDetach)) {
+            RolePermission::query()
+                ->where('role_id', $this->permissionRoleId)
+                ->whereIn('permission_id', $toDetach)
+                ->delete();
+        }
+
+        Flux::toast(variant: 'success', text: 'Role permissions updated successfully.');
+        $this->closePermissionModal();
+        $this->dispatch('pg:eventRefresh-roleTable');
+    }
+
+    public function closePermissionModal(): void
+    {
+        $this->showPermissionModal = false;
+        $this->resetPermissionForm();
+        $this->resetValidation();
+    }
+
+    private function resetPermissionForm(): void
+    {
+        $this->permissionRoleId = null;
+        $this->permissionRoleName = '';
+        $this->permissionAccess = [];
+        $this->permissionOptions = [];
     }
 
     private function resetForm(): void

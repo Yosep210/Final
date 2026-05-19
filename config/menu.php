@@ -28,11 +28,11 @@ return [
                     'href' => 'role.index',
                     // 'role' => 'admin',
                 ],
-                // [
-                //     'title' => 'Permission',
-                //     'href' => 'permission.index',
-                //     // 'role' => 'admin',
-                // ],
+                [
+                    'title' => 'Permission',
+                    'href' => 'permission.index',
+                    //     // 'role' => 'admin',
+                ],
             ],
         ],
         [

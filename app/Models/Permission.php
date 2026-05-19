@@ -4,17 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Auditable as AuditableTrait;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-class Village extends Model implements Auditable
+class Permission extends Model implements Auditable
 {
     use AuditableTrait;
     use HasFactory;
     use LogsActivity;
+
+    protected $table = 'permissions';
 
     /**
      * The attributes that are mass assignable.
@@ -23,29 +24,22 @@ class Village extends Model implements Auditable
      */
     protected $fillable = [
         'name',
-        'district_id',
-        'postal_code',
+        'guard_name',
     ];
 
     protected $casts = [
-        'district_id' => 'integer',
-        'postal_code' => 'integer',
+        'name' => 'string',
+        'guard_name' => 'string',
     ];
-
-    public function district(): BelongsTo
-    {
-        return $this->belongsTo(District::class);
-    }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly([
                 'name',
-                'district_id',
-                'postal_code',
+                'guard_name',
             ])
             ->logOnlyDirty()
-            ->useLogName('village');
+            ->useLogName('permission');
     }
 }
