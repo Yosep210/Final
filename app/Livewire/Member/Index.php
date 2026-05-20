@@ -8,6 +8,7 @@ use App\Data\MemberData;
 use App\Http\Requests\Member\StoreMemberRequest;
 use App\Models\Member;
 use Flux\Flux;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -16,6 +17,8 @@ use Livewire\Component;
 #[Title('Member')]
 class Index extends Component
 {
+    use AuthorizesRequests;
+
     public bool $showModal = false;
 
     public ?int $editingMemberId = null;
@@ -32,6 +35,8 @@ class Index extends Component
 
     public function create(): void
     {
+        $this->authorize('create', Member::class);
+
         $this->editingMemberId = null;
         $this->resetForm();
         $this->resetValidation();
@@ -42,6 +47,7 @@ class Index extends Component
     public function edit(int $memberId): void
     {
         $member = Member::query()->findOrFail($memberId);
+        $this->authorize('update', $member);
 
         $this->editingMemberId = $member->id;
         $this->form = [
@@ -65,6 +71,12 @@ class Index extends Component
         $member = $this->editingMemberId
             ? Member::query()->findOrFail($this->editingMemberId)
             : null;
+
+        if ($member) {
+            $this->authorize('update', $member);
+        } else {
+            $this->authorize('create', Member::class);
+        }
 
         $validated = $this->validate($this->rules($member), [], $this->attributes());
         $memberData = MemberData::fromArray($validated['form']);

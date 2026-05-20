@@ -6,6 +6,7 @@ use App\Actions\Member\DeleteMemberAction;
 use App\Models\Member;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -16,6 +17,8 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class MemberTable extends PowerGridComponent
 {
+    use AuthorizesRequests;
+
     private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
 
     public string $tableName = 'memberTable';
@@ -120,6 +123,7 @@ final class MemberTable extends PowerGridComponent
     public function delete(int $memberId): void
     {
         $member = Member::query()->findOrFail($memberId);
+        $this->authorize('delete', $member);
 
         try {
             DeleteMemberAction::run($member);

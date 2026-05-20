@@ -16,7 +16,7 @@ class StoreMemberRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('Create', Member::class) ?? false;
     }
 
     /**

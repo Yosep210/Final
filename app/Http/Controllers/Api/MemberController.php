@@ -19,6 +19,8 @@ class MemberController extends Controller
 {
     public function index(): JsonResponse
     {
+        $this->authorize('viewAny', Member::class);
+
         $members = GetMemberAction::run();
 
         return MemberResource::collection($members)->response();
@@ -35,6 +37,8 @@ class MemberController extends Controller
 
     public function show(Member $member): JsonResponse
     {
+        $this->authorize('view', $member);
+
         return MemberResource::make($member)->response();
     }
 
@@ -47,6 +51,8 @@ class MemberController extends Controller
 
     public function destroy(Member $member): Response
     {
+        $this->authorize('delete', $member);
+
         DeleteMemberAction::run($member);
 
         return response()->noContent();

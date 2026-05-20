@@ -22,7 +22,7 @@ function memberPayload(array $overrides = []): array
 }
 
 it('returns a paginated member list', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    Sanctum::actingAs(Member::factory()->active()->create());
 
     Member::factory()->create(['username' => 'member1', 'email' => 'member1@example.com']);
     Member::factory()->create(['username' => 'member2', 'email' => 'member2@example.com']);
@@ -39,7 +39,7 @@ it('returns a paginated member list', function () {
 });
 
 it('stores a member', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    Sanctum::actingAs(Member::factory()->active()->create());
 
     $this->postJson(route('members.store'), memberPayload())
         ->assertCreated()
@@ -52,7 +52,7 @@ it('stores a member', function () {
 });
 
 it('fails to store a duplicate member username', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    Sanctum::actingAs(Member::factory()->active()->create());
     Member::factory()->create(['username' => 'johndoe', 'email' => 'other@example.com']);
 
     $this->postJson(route('members.store'), memberPayload())
@@ -61,7 +61,7 @@ it('fails to store a duplicate member username', function () {
 });
 
 it('shows a member', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    Sanctum::actingAs(Member::factory()->active()->create());
     $member = Member::factory()->create();
 
     $this->getJson(route('members.show', $member))
@@ -70,7 +70,7 @@ it('shows a member', function () {
 });
 
 it('updates a member', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    Sanctum::actingAs(Member::factory()->active()->create());
     $member = Member::factory()->create();
 
     $this->putJson(route('members.update', $member), memberPayload([
@@ -91,7 +91,7 @@ it('updates a member', function () {
 });
 
 it('deletes a member', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    Sanctum::actingAs(Member::factory()->active()->create());
     $member = Member::factory()->create();
 
     $this->deleteJson(route('members.destroy', $member))
