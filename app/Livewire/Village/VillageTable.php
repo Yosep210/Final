@@ -16,6 +16,8 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class VillageTable extends PowerGridComponent
 {
+    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
+
     public string $tableName = 'villageTable';
 
     public string $sortField = 'name';
@@ -33,14 +35,20 @@ final class VillageTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSort = ['name', 'district_id', 'postal_code', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSort) ? $this->sortField : 'name';
+        $allowedSort = [
+            'name' => 'villages.name',
+            'district_name' => 'districts.name',
+            'postal_code' => 'villages.postal_code',
+            'created_at' => 'villages.created_at',
+        ];
+
+        $sortField = $allowedSort[$this->sortField] ?? 'villages.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Village::query()
-            ->select('villages.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY villages.'.$sortField.' '.$sortDirection.') AS no')
-            ->with('district');
+            ->leftJoin('districts', 'villages.district_id', '=', 'districts.id')
+            ->select('villages.*', 'districts.name as district_name')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -56,7 +64,7 @@ final class VillageTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('district_name', fn (Village $model) => $model->district?->name)
+            ->add('district_name')
             ->add('name')
             ->add('postal_code')
             ->add('created_at_formatted', fn (Village $model) => $model->created_at->format('d M Y H:i'));
@@ -66,20 +74,40 @@ final class VillageTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Name', 'name')->sortable(),
             Column::make('District', 'district_name')->sortable(),
+            Column::make('Name', 'name')->sortable(),
             Column::make('Postal code', 'postal_code')->sortable(),
             Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
-            Column::action('Action'),
+            Column::action('Action')->fixedOnResponsive(),
         ];
     }
 
     public function filters(): array
     {
         return [
-            Filter::inputText('name')->operators(['contains']),
-            Filter::inputText('district.name')->operators(['contains']),
+            Filter::inputText('name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('villages.name', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('district_name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('districts.name', 'like', '%'.$searchTerm.'%');
+                }),
             Filter::inputText('postal_code')->operators(['contains']),
+            Filter::datepicker('created_at'),
         ];
     }
 
@@ -100,11 +128,11 @@ final class VillageTable extends PowerGridComponent
         return [
             Button::add('edit')
                 ->slot('Edit')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->dispatch('village:edit', ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->confirm('Are you sure you want to delete this village?')
                 ->dispatch('village:delete', ['rowId' => $row->id]),
         ];

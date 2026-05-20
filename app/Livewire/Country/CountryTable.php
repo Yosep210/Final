@@ -16,6 +16,8 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class CountryTable extends PowerGridComponent
 {
+    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
+
     public string $tableName = 'countryTable';
 
     public string $sortField = 'name';
@@ -33,13 +35,22 @@ final class CountryTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSort = ['iso', 'name', 'nice_name', 'iso3', 'numcode', 'phonecode', 'status'];
-        $sortField = in_array($this->sortField, $allowedSort) ? $this->sortField : 'name';
+        $allowedSort = [
+            'iso' => 'countries.iso',
+            'name' => 'countries.name',
+            'nice_name' => 'countries.nice_name',
+            'iso3' => 'countries.iso3',
+            'numcode' => 'countries.numcode',
+            'phonecode' => 'countries.phonecode',
+            'status' => 'countries.status',
+        ];
+
+        $sortField = $allowedSort[$this->sortField] ?? 'countries.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Country::query()
             ->select('countries.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY countries.'.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -64,15 +75,14 @@ final class CountryTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('ISO', 'iso')->sortable()->searchable(),
-            Column::make('Name', 'name')->sortable()->searchable(),
-            Column::make('Nice Name', 'nice_name')->sortable()->searchable(),
-            Column::make('ISO3', 'iso3')->sortable()->searchable(),
+            Column::make('ISO', 'iso')->sortable(),
+            Column::make('Name', 'name')->sortable(),
+            Column::make('Nice Name', 'nice_name')->sortable(),
+            Column::make('ISO3', 'iso3')->sortable(),
             Column::make('Numcode', 'numcode')->sortable(),
             Column::make('Phonecode', 'phonecode')->sortable(),
-            Column::make('Status', 'status')
-                ->toggleable(),
-            Column::action('Action'),
+            Column::make('Status', 'status')->toggleable(),
+            Column::action('Action')->fixedOnResponsive(),
         ];
     }
 
@@ -85,8 +95,7 @@ final class CountryTable extends PowerGridComponent
             Filter::inputText('iso3')->operators(['contains']),
             Filter::inputText('numcode')->operators(['contains']),
             Filter::inputText('phonecode')->operators(['contains']),
-            Filter::boolean('status')
-                ->label('Active', 'Inactive'),
+            Filter::boolean('status')->label('Active', 'Inactive'),
         ];
     }
 
@@ -107,11 +116,11 @@ final class CountryTable extends PowerGridComponent
         return [
             Button::add('edit')
                 ->slot('Edit')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->dispatch('country:edit', ['countryId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
+                ->class(self::BUTTON_CLASS)
                 ->confirm('Delete this country?')
                 ->dispatch('country:delete', ['rowId' => $row->id]),
         ];

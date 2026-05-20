@@ -101,7 +101,7 @@ it('shows a country', function () {
 });
 
 it('updates a country', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
     Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 
@@ -121,7 +121,7 @@ it('updates a country', function () {
 });
 
 it('fails to update a country with duplicate iso', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
     Sanctum::actingAs($user);
     Country::query()->create(countryPayload());
     $country = Country::query()->create(countryPayload([
@@ -149,7 +149,7 @@ it('fails to update a country with duplicate iso', function () {
 });
 
 it('deletes a country', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
     Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 
@@ -164,7 +164,7 @@ it('deletes a country', function () {
 });
 
 it('blocks deleting a country that is already referenced by province data', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
     Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 

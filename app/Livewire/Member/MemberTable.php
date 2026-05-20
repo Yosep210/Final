@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Member;
 
-use App\Domain\Member\Actions\DeleteMemberAction;
+use App\Actions\Member\DeleteMemberAction;
 use App\Models\Member;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,6 +16,8 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class MemberTable extends PowerGridComponent
 {
+    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
+
     public string $tableName = 'memberTable';
 
     public string $sortField = 'name';
@@ -33,7 +35,21 @@ final class MemberTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Member::query();
+        $allowedSort = [
+            'id' => 'members.id',
+            'name' => 'members.name',
+            'username' => 'members.username',
+            'email' => 'members.email',
+            'status' => 'members.status',
+            'created_at' => 'members.created_at',
+        ];
+
+        $sortField = $allowedSort[$this->sortField] ?? 'members.name';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        return Member::query()
+            ->select('members.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -44,24 +60,26 @@ final class MemberTable extends PowerGridComponent
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
+            ->add('no')
             ->add('id')
             ->add('name')
             ->add('username')
             ->add('email')
             ->add('status')
-            ->add('created_at_formatted', fn (Member $member) => optional($member->created_at)?->format('d/m/Y H:i'));
+            ->add('created_at_formatted', fn (Member $member) => optional($member->created_at)?->format('d M Y H:i'));
     }
 
     public function columns(): array
     {
         return [
+            Column::make('#', 'no'),
             Column::make('ID', 'id')->sortable(),
-            Column::make('Name', 'name')->sortable()->searchable(),
-            Column::make('Username', 'username')->sortable()->searchable(),
-            Column::make('Email', 'email')->sortable()->searchable(),
-            Column::make('Status', 'status')->sortable()->searchable(),
-            Column::make('Created At', 'created_at_formatted', 'created_at')->sortable(),
-            Column::action('Action'),
+            Column::make('Name', 'name')->sortable(),
+            Column::make('Username', 'username')->sortable(),
+            Column::make('Email', 'email')->sortable(),
+            Column::make('Status', 'status')->sortable(),
+            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
+            Column::action('Action')->fixedOnResponsive(),
         ];
     }
 
@@ -73,12 +91,13 @@ final class MemberTable extends PowerGridComponent
             Filter::inputText('email')->operators(['contains']),
             Filter::select('status', 'status')
                 ->dataSource(collect([
-                    ['id' => 'active', 'name' => 'active'],
-                    ['id' => 'suspended', 'name' => 'suspended'],
-                    ['id' => 'inactive', 'name' => 'inactive'],
+                    ['id' => 'active', 'name' => 'Active'],
+                    ['id' => 'suspended', 'name' => 'Suspended'],
+                    ['id' => 'inactive', 'name' => 'Inactive'],
                 ]))
                 ->optionValue('id')
                 ->optionLabel('name'),
+            Filter::datepicker('created_at'),
         ];
     }
 
@@ -87,23 +106,23 @@ final class MemberTable extends PowerGridComponent
         return [
             Button::add('edit')
                 ->slot('Edit')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->dispatch('member:edit', ['memberId' => $member->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
+                ->class(self::BUTTON_CLASS)
                 ->confirm('Delete this member?')
                 ->dispatch('member:delete', ['memberId' => $member->id]),
         ];
     }
 
     #[On('member:delete')]
-    public function deleteMember(int $memberId, DeleteMemberAction $deleteMemberAction): void
+    public function delete(int $memberId): void
     {
         $member = Member::query()->findOrFail($memberId);
 
         try {
-            $deleteMemberAction->execute($member);
+            DeleteMemberAction::run($member);
             Flux::toast(variant: 'success', text: 'Member deleted successfully.');
         } catch (\Throwable $throwable) {
             Flux::toast(variant: 'error', text: $throwable->getMessage());

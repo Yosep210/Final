@@ -16,9 +16,11 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class CityTable extends PowerGridComponent
 {
+    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
+
     public string $tableName = 'cityTable';
 
-    public string $sortField = 'name';
+    public string $sortField = 'province_name';
 
     public string $sortDirection = 'asc';
 
@@ -33,26 +35,37 @@ final class CityTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSort = ['name', 'province_id', 'type', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSort) ? $this->sortField : 'name';
+        $allowedSort = [
+            'name' => 'cities.name',
+            'province_name' => 'provincies.name',
+            'type' => 'cities.type',
+            'created_at' => 'cities.created_at',
+        ];
+
+        $sortField = $allowedSort[$this->sortField] ?? 'provincies.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return City::query()
-            ->select('cities.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY cities.'.$sortField.' '.$sortDirection.') AS no');
+            ->leftJoin('provincies', 'cities.province_id', '=', 'provincies.id')
+            ->select('cities.*', 'cities.name as city_name', 'provincies.name as province_name')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'province' => [
+                'name',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('province_id')
-            ->add('name')
+            ->add('province_name')
+            ->add('city_name')
             ->add('type')
             ->add('created_at_formatted', fn (City $city) => optional($city->created_at)?->format('d M Y H:i'));
     }
@@ -61,19 +74,39 @@ final class CityTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Province Id', 'province_id')->searchable(),
-            Column::make('Name', 'name')->searchable(),
-            Column::make('Type', 'type')->searchable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at'),
-            Column::action('Action'),
+            Column::make('Province', 'province_name')->sortable(),
+            Column::make('Name', 'city_name', 'name')->sortable(),
+            Column::make('Type', 'type')->sortable(),
+            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
+            Column::action('Action')->fixedOnResponsive(),
         ];
     }
 
     public function filters(): array
     {
         return [
-            Filter::inputText('name')->operators(['contains']),
-            Filter::inputText('province_id')->operators(['contains']),
+            Filter::inputText('province_name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('provincies.name', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('cities.name', 'like', '%'.$searchTerm.'%');
+                }),
             Filter::inputText('type')->operators(['contains']),
             Filter::datepicker('created_at'),
         ];
@@ -96,11 +129,11 @@ final class CityTable extends PowerGridComponent
         return [
             Button::add('edit')
                 ->slot('Edit')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->dispatch('city:edit', ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->confirm('Are you sure you want to delete this city?')
                 ->dispatch('city:delete', ['rowId' => $row->id]),
         ];

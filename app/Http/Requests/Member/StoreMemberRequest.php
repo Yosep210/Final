@@ -3,9 +3,9 @@
 namespace App\Http\Requests\Member;
 
 use App\Concerns\PasswordValidationRules;
-use App\Domain\Member\Support\MemberValidation;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Member;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreMemberRequest extends FormRequest
 {
@@ -22,12 +22,12 @@ class StoreMemberRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
-            ...MemberValidation::rules(),
+            ...static::memberRules(),
             'password' => $this->passwordRules(),
         ];
     }
@@ -39,6 +39,46 @@ class StoreMemberRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return MemberValidation::attributes();
+        return static::attributeLabels();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function memberRules(?Member $member = null): array
+    {
+        $ignoreUsername = $member?->id
+            ? Rule::unique('members', 'username')->ignore($member)
+            : Rule::unique('members', 'username');
+        $ignoreEmail = $member?->id
+            ? Rule::unique('members', 'email')->ignore($member)
+            : Rule::unique('members', 'email');
+
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', $ignoreUsername],
+            'email' => ['required', 'string', 'email', 'max:255', $ignoreEmail],
+            'status' => ['required', 'string', 'max:50'],
+            'referral_code' => ['nullable', 'string', 'max:255'],
+            'email_verified_at' => ['nullable', 'date'],
+            'last_login_at' => ['nullable', 'date'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function attributeLabels(): array
+    {
+        return [
+            'name' => 'name',
+            'username' => 'username',
+            'email' => 'email',
+            'password' => 'password',
+            'status' => 'status',
+            'referral_code' => 'referral code',
+            'email_verified_at' => 'email verified at',
+            'last_login_at' => 'last login at',
+        ];
     }
 }

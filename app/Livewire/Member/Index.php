@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Member;
 
-use App\Domain\Member\Actions\CreateMemberAction;
-use App\Domain\Member\Actions\UpdateMemberAction;
-use App\Domain\Member\Data\MemberData;
-use App\Domain\Member\Support\MemberValidation;
+use App\Actions\Member\CreateMemberAction;
+use App\Actions\Member\UpdateMemberAction;
+use App\Data\MemberData;
+use App\Http\Requests\Member\StoreMemberRequest;
 use App\Models\Member;
 use Flux\Flux;
 use Illuminate\Validation\Rules\Password;
@@ -60,7 +60,7 @@ class Index extends Component
         $this->showModal = true;
     }
 
-    public function save(CreateMemberAction $createMemberAction, UpdateMemberAction $updateMemberAction): void
+    public function save(): void
     {
         $member = $this->editingMemberId
             ? Member::query()->findOrFail($this->editingMemberId)
@@ -70,10 +70,10 @@ class Index extends Component
         $memberData = MemberData::fromArray($validated['form']);
 
         if ($member) {
-            $updateMemberAction->execute($member, $memberData);
+            UpdateMemberAction::run($member, $memberData);
             Flux::toast(variant: 'success', text: 'Member updated successfully.');
         } else {
-            $createMemberAction->execute($memberData);
+            CreateMemberAction::run($memberData);
             Flux::toast(variant: 'success', text: 'Member created successfully.');
         }
 
@@ -105,7 +105,7 @@ class Index extends Component
             'form.*' => ['nullable'],
         ];
 
-        foreach (MemberValidation::rules($member) as $key => $ruleSet) {
+        foreach (StoreMemberRequest::memberRules($member) as $key => $ruleSet) {
             $rules["form.$key"] = $ruleSet;
         }
 
@@ -126,7 +126,7 @@ class Index extends Component
     {
         $attributes = [];
 
-        foreach (MemberValidation::attributes() as $key => $value) {
+        foreach (StoreMemberRequest::attributeLabels() as $key => $value) {
             $attributes["form.$key"] = $value;
         }
 

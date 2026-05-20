@@ -44,4 +44,9 @@ class City extends Model implements Auditable
             ->logOnlyDirty()
             ->useLogName('city');
     }
+
+    public function province()
+    {
+        return $this->belongsTo(Province::class);
+    }
 }

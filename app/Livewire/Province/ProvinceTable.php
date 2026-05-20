@@ -16,6 +16,8 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class ProvinceTable extends PowerGridComponent
 {
+    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
+
     public string $tableName = 'provinceTable';
 
     public string $sortField = 'name';
@@ -33,51 +35,70 @@ final class ProvinceTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSort = ['country_id', 'name'];
-        $sortField = in_array($this->sortField, $allowedSort) ? $this->sortField : 'name';
+        $allowedSort = [
+            'country_name' => 'countries.name',
+            'name' => 'provincies.name',
+        ];
+
+        $sortField = $allowedSort[$this->sortField] ?? 'provincies.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Province::query()
-            ->select('provincies.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY provincies.'.$sortField.' '.$sortDirection.') AS no');
+            ->leftJoin('countries', 'provincies.country_id', '=', 'countries.id')
+            ->select('provincies.*', 'countries.name as country_name')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'country' => [
+                'name',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('country_id')
-            ->add('name')
-            ->add('code');
+            ->add('country_name')
+            ->add('name');
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Country ID', 'country_id')
-                ->searchable()
-                ->sortable(),
-            Column::make('Name', 'name')
-                ->searchable()
-                ->sortable(),
-            Column::make('Code', 'code')
-                ->searchable()
-                ->sortable(),
-            Column::action('Action'),
+            Column::make('Country', 'country_name')->sortable(),
+            Column::make('Name', 'name')->sortable(),
+            Column::action('Action')->fixedOnResponsive(),
         ];
     }
 
     public function filters(): array
     {
         return [
-            Filter::inputText('country_id')->operators(['contains']),
-            Filter::inputText('name')->operators(['contains']),
+            Filter::inputText('country_name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('countries.name', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (empty($searchTerm) || is_array($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('provincies.name', 'like', '%'.$searchTerm.'%');
+                }),
         ];
     }
 
@@ -98,11 +119,11 @@ final class ProvinceTable extends PowerGridComponent
         return [
             Button::add('edit')
                 ->slot('Edit')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->dispatch('province:edit', ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->confirm('Are you sure you want to delete this province?')
                 ->dispatch('province:delete', ['rowId' => $row->id]),
         ];

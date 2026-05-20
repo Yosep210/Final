@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests\Member;
 
-use App\Domain\Member\Support\MemberValidation;
 use App\Models\Member;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -16,7 +14,7 @@ class UpdateMemberRequest extends FormRequest
     }
 
     /**
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
@@ -24,7 +22,7 @@ class UpdateMemberRequest extends FormRequest
         $member = $this->route('member');
 
         return [
-            ...MemberValidation::rules($member),
+            ...StoreMemberRequest::memberRules($member),
             'password' => ['nullable', 'string', Password::default(), 'confirmed'],
         ];
     }
@@ -34,6 +32,6 @@ class UpdateMemberRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return MemberValidation::attributes();
+        return StoreMemberRequest::attributeLabels();
     }
 }

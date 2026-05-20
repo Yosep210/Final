@@ -50,7 +50,6 @@ class Index extends Component
         $this->form = [
             'country_id' => $province->country_id,
             'name' => $province->name,
-            'code' => $province->code,
         ];
 
         $this->resetValidation();
@@ -125,7 +124,6 @@ class Index extends Component
         $this->form = [
             'country_id' => null,
             'name' => null,
-            'code' => null,
         ];
     }
 }

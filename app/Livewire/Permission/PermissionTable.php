@@ -16,6 +16,8 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class PermissionTable extends PowerGridComponent
 {
+    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
+
     public string $tableName = 'permissionTable';
 
     public string $sortField = 'name';
@@ -33,13 +35,17 @@ final class PermissionTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSort = ['name', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSort) ? $this->sortField : 'name';
+        $allowedSort = [
+            'name' => 'permissions.name',
+            'guard_name' => 'permissions.guard_name',
+            'created_at' => 'permissions.created_at',
+        ];
+        $sortField = $allowedSort[$this->sortField] ?? 'permissions.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Permission::query()
             ->select('permissions.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY permissions.'.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function fields(): PowerGridFields
@@ -48,7 +54,7 @@ final class PermissionTable extends PowerGridComponent
             ->add('no')
             ->add('name')
             ->add('guard_name')
-            ->add('created_at_formatted', fn (Permission $model) => optional($model->created_at)->format('d/m/Y H:i:s'));
+            ->add('created_at_formatted', fn (Permission $model) => optional($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array
@@ -57,8 +63,8 @@ final class PermissionTable extends PowerGridComponent
             Column::make('#', 'no'),
             Column::make('Name', 'name')->sortable(),
             Column::make('Guard Name', 'guard_name')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->searchable(),
-            Column::action('Action'),
+            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
+            Column::action('Action')->fixedOnResponsive(),
         ];
     }
 
@@ -67,7 +73,7 @@ final class PermissionTable extends PowerGridComponent
         return [
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('guard_name')->operators(['contains']),
-            Filter::datepicker('created_at_formatted', 'created_at'),
+            Filter::datepicker('created_at'),
         ];
     }
 
@@ -88,11 +94,11 @@ final class PermissionTable extends PowerGridComponent
         return [
             Button::add('edit')
                 ->slot('Edit')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->dispatch('permission:edit', ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->confirm('Are you sure you want to delete this permission?')
                 ->dispatch('permission:delete', ['rowId' => $row->id]),
         ];

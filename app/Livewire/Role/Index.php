@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Role;
 
-use App\Domain\Role\Actions\CreateRoleAction;
-use App\Domain\Role\Actions\UpdateRoleAction;
-use App\Domain\Role\Data\RoleData;
-use App\Domain\Role\Support\RoleValidation;
+use App\Actions\Role\CreateRoleAction;
+use App\Actions\Role\UpdateRoleAction;
+use App\Data\RoleData;
+use App\Http\Requests\Role\StoreRoleRequest;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\RolePermission;
@@ -71,7 +71,7 @@ class Index extends Component
         $this->showModal = true;
     }
 
-    public function save(CreateRoleAction $createRoleAction, UpdateRoleAction $updateRoleAction): void
+    public function save(): void
     {
         $role = $this->editingRoleId
             ? Role::query()->findOrFail($this->editingRoleId)
@@ -86,11 +86,11 @@ class Index extends Component
         $roleData = RoleData::fromArray($validated['form']);
 
         if ($role) {
-            $updateRoleAction->execute($role, $roleData);
+            UpdateRoleAction::run($role, $roleData);
 
             Flux::toast(variant: 'success', text: 'Role updated successfully.');
         } else {
-            $createRoleAction->execute($roleData);
+            CreateRoleAction::run($roleData);
 
             Flux::toast(variant: 'success', text: 'Role created successfully.');
         }
@@ -197,7 +197,7 @@ class Index extends Component
 
     private function prefixedRules(?Role $role = null): array
     {
-        $rules = RoleValidation::rules($role);
+        $rules = StoreRoleRequest::roleRules($role);
 
         $prefixed = [];
         foreach ($rules as $key => $rule) {
@@ -209,7 +209,7 @@ class Index extends Component
 
     private function prefixedAttributes(): array
     {
-        $attributes = RoleValidation::attributes();
+        $attributes = StoreRoleRequest::attributeLabels();
 
         $prefixed = [];
         foreach ($attributes as $key => $attribute) {

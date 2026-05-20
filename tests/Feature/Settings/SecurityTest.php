@@ -49,7 +49,7 @@ test('security settings page renders without two factor when feature is disabled
 });
 
 test('two factor authentication disabled when confirmation abandoned between requests', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
 
     $user->forceFill([
         'two_factor_secret' => encrypt('test-secret'),
@@ -63,7 +63,7 @@ test('two factor authentication disabled when confirmation abandoned between req
 
     $component->assertSet('twoFactorEnabled', false);
 
-    $this->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('members', [
         'id' => $user->id,
         'two_factor_secret' => null,
         'two_factor_recovery_codes' => null,
@@ -71,7 +71,7 @@ test('two factor authentication disabled when confirmation abandoned between req
 });
 
 test('password can be updated', function () {
-    $user = User::factory()->create([
+    $user = Member::factory()->create([
         'password' => Hash::make('password'),
     ]);
 
@@ -89,7 +89,7 @@ test('password can be updated', function () {
 });
 
 test('correct password must be provided to update password', function () {
-    $user = User::factory()->create([
+    $user = Member::factory()->create([
         'password' => Hash::make('password'),
     ]);
 

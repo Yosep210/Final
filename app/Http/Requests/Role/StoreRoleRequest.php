@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Role;
 
-use App\Domain\Role\Support\RoleValidation;
+use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRoleRequest extends FormRequest
 {
@@ -18,11 +19,11 @@ class StoreRoleRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
-        return RoleValidation::rules();
+        return static::roleRules();
     }
 
     /**
@@ -32,6 +33,32 @@ class StoreRoleRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return RoleValidation::attributes();
+        return static::attributeLabels();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function roleRules(?Role $role = null): array
+    {
+        $ignoreName = $role?->id
+            ? Rule::unique('roles', 'name')->ignore($role)
+            : Rule::unique('roles', 'name');
+
+        return [
+            'name' => ['required', 'string', 'max:255', $ignoreName],
+            'guard_name' => ['required', 'string', 'max:255'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function attributeLabels(): array
+    {
+        return [
+            'name' => 'name',
+            'guard_name' => 'guard name',
+        ];
     }
 }

@@ -16,7 +16,7 @@
         $menus = \App\Services\MenuService::get('Menu');
         @endphp
 
-        <flux:sidebar.nav>
+        <flux:sidebar.nav class="overflow-y-auto">
             @foreach ($menus as $menu)
             @if (! empty($menu['sub']))
             <flux:sidebar.group :heading="__($menu['heading'])" icon="{{ $menu['icon'] }}" class="grid" expandable

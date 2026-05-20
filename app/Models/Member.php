@@ -23,7 +23,7 @@ use Spatie\Permission\Traits\HasRoles;
 #[Hidden(['password', 'referral_code', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at'])]
 class Member extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, HasPermissions, HasRoles, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasPermissions, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     public function casts(): array
     {

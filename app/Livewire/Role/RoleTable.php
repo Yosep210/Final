@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Role;
 
-use App\Domain\Role\Actions\DeleteRoleAction;
+use App\Actions\Role\DeleteRoleAction;
 use App\Models\Role;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,6 +16,8 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class RoleTable extends PowerGridComponent
 {
+    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
+
     public string $tableName = 'roleTable';
 
     public string $sortField = 'name';
@@ -33,7 +35,18 @@ final class RoleTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Role::query();
+        $allowedSort = [
+            'name' => 'roles.name',
+            'guard_name' => 'roles.guard_name',
+            'created_at' => 'roles.created_at',
+        ];
+
+        $sortField = $allowedSort[$this->sortField] ?? 'roles.name';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        return Role::query()
+            ->select('roles.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -44,34 +57,20 @@ final class RoleTable extends PowerGridComponent
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
-            ->add('id')
+            ->add('no')
             ->add('name')
             ->add('guard_name')
-            ->add('created_at')
-            ->add('created_at_formatted', fn (Role $model) => $model->created_at->format('d/m/Y H:i'));
+            ->add('created_at_formatted', fn (Role $model) => optional($model->created_at)?->format('d M Y H:i'));
     }
 
     public function columns(): array
     {
         return [
-            Column::make('ID', 'id')
-                ->searchable()
-                ->sortable(),
-
-            Column::make('Name', 'name')
-                ->searchable()
-                ->sortable(),
-
-            Column::make('Guard Name', 'guard_name')
-                ->searchable()
-                ->sortable(),
-
-            Column::make('Created At', 'created_at_formatted', 'created_at')
-                ->searchable()
-                ->sortable(),
-
-            Column::action('Action')
-                ->fixedOnResponsive(),
+            Column::make('#', 'no'),
+            Column::make('Name', 'name')->sortable(),
+            Column::make('Guard Name', 'guard_name')->sortable(),
+            Column::make('Created At', 'created_at_formatted', 'created_at')->sortable(),
+            Column::action('Action')->fixedOnResponsive(),
         ];
     }
 
@@ -87,33 +86,34 @@ final class RoleTable extends PowerGridComponent
     {
         return [
             Button::add('access')
-                ->slot('Access')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->slot('Permissions')
+                ->class(self::BUTTON_CLASS)
                 ->dispatch('role:access', ['roleId' => $role->id]),
 
             Button::add('edit')
                 ->slot('Edit')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class(self::BUTTON_CLASS)
                 ->dispatch('role:edit', ['roleId' => $role->id]),
 
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('delete-role', ['roleId' => $role->id]),
+                ->class(self::BUTTON_CLASS)
+                ->confirm('Delete this role?')
+                ->dispatch('role:delete', ['roleId' => $role->id]),
         ];
     }
 
-    #[On('delete-role')]
-    public function deleteRole(int $roleId, DeleteRoleAction $deleteRoleAction): void
+    #[On('role:delete')]
+    public function delete(int $roleId): void
     {
         $role = Role::query()->findOrFail($roleId);
 
         try {
-            $deleteRoleAction->execute($role);
+            DeleteRoleAction::run($role);
 
             Flux::toast(variant: 'success', text: 'Role deleted successfully.');
-        } catch (\Exception $e) {
-            Flux::toast(variant: 'error', text: $e->getMessage());
+        } catch (\Throwable $throwable) {
+            Flux::toast(variant: 'error', text: $throwable->getMessage());
         }
 
         $this->dispatch('pg:eventRefresh-roleTable');

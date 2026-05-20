@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Role;
 
-use App\Domain\Role\Support\RoleValidation;
 use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -19,14 +18,18 @@ class UpdateRoleRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
-        /** @var Role $role */
+        /** @var Role|int|string|null $role */
         $role = $this->route('role');
 
-        return RoleValidation::rules($role);
+        if (! $role instanceof Role && $role !== null) {
+            $role = Role::query()->findOrFail($role);
+        }
+
+        return StoreRoleRequest::roleRules($role);
     }
 
     /**
@@ -36,6 +39,6 @@ class UpdateRoleRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return RoleValidation::attributes();
+        return StoreRoleRequest::attributeLabels();
     }
 }

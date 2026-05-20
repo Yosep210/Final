@@ -13,7 +13,7 @@ test('users can authenticate using the login screen', function () {
     $user = Member::factory()->create();
 
     $response = $this->post(route('login.store'), [
-        'email' => $user->email,
+        'username' => $user->username,
         'password' => 'password',
     ]);
 
@@ -28,7 +28,7 @@ test('users can not authenticate with invalid password', function () {
     $user = Member::factory()->create();
 
     $response = $this->post(route('login.store'), [
-        'email' => $user->email,
+        'username' => $user->username,
         'password' => 'wrong-password',
     ]);
 
@@ -48,7 +48,7 @@ test('users with two factor enabled are redirected to two factor challenge', fun
     $user = Member::factory()->withTwoFactor()->create();
 
     $response = $this->post(route('login.store'), [
-        'email' => $user->email,
+        'username' => $user->username,
         'password' => 'password',
     ]);
 

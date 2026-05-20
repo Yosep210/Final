@@ -50,6 +50,7 @@ class Index extends Component
         $this->form = [
             'district_id' => $village->district_id,
             'name' => $village->name,
+            'postal_code' => $village->postal_code,
         ];
 
         $this->resetValidation();

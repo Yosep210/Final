@@ -57,7 +57,8 @@ test('user can delete their account', function () {
         ->assertHasNoErrors()
         ->assertRedirect('/');
 
-    expect($user->fresh())->toBeNull();
+    expect(Member::query()->find($user->id))->toBeNull();
+    expect(Member::withTrashed()->find($user->id))->not->toBeNull();
     expect(auth()->check())->toBeFalse();
 });
 
@@ -72,5 +73,5 @@ test('correct password must be provided to delete account', function () {
 
     $response->assertHasErrors(['password']);
 
-    expect($user->fresh())->not->toBeNull();
+    expect(Member::query()->find($user->id))->not->toBeNull();
 });
