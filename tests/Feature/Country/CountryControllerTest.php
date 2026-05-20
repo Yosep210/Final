@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Country;
-use App\Models\User;
+use App\Models\Member;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
@@ -22,7 +22,7 @@ function countryPayload(array $overrides = []): array
 }
 
 it('returns a paginated country list', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
     Sanctum::actingAs($user);
     Country::query()->create(countryPayload());
     Country::query()->create(countryPayload([
@@ -49,7 +49,7 @@ it('returns a paginated country list', function () {
 });
 
 it('stores a country', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
     Sanctum::actingAs($user);
 
     $response = $this
@@ -67,7 +67,7 @@ it('stores a country', function () {
 });
 
 it('fails to store a country with duplicate iso', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
     Sanctum::actingAs($user);
     Country::query()->create(countryPayload());
 
@@ -86,7 +86,7 @@ it('fails to store a country with duplicate iso', function () {
 });
 
 it('shows a country', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
     Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 

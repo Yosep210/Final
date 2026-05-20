@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\User;
+use App\Models\Member;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 it('renders the country management page for authenticated users', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
 
     $this->actingAs($user)
         ->get(route('country.index'))

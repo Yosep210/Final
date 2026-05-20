@@ -1,7 +1,7 @@
 <?php
 
 use App\Livewire\Settings\Security;
-use App\Models\User;
+use App\Models\Member;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Features;
 use Livewire\Livewire;
@@ -16,7 +16,7 @@ beforeEach(function () {
 });
 
 test('security settings page can be rendered', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
 
     $this->actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])
@@ -27,7 +27,7 @@ test('security settings page can be rendered', function () {
 });
 
 test('security settings page requires password confirmation when enabled', function () {
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
 
     $response = $this->actingAs($user)
         ->get(route('security.edit'));
@@ -38,7 +38,7 @@ test('security settings page requires password confirmation when enabled', funct
 test('security settings page renders without two factor when feature is disabled', function () {
     config(['fortify.features' => []]);
 
-    $user = User::factory()->create();
+    $user = Member::factory()->create();
 
     $this->actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])
