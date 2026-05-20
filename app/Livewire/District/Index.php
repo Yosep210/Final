@@ -69,7 +69,7 @@ class Index extends Component
         $districtData = DistrictData::fromArray($validated['form']);
 
         if ($district) {
-            UpdateDistrictAction::run($districtData, $district);
+            UpdateDistrictAction::run($district, $districtData);
             Flux::toast(variant: 'success', text: 'District updated successfully.');
         } else {
             CreateDistrictAction::run($districtData);

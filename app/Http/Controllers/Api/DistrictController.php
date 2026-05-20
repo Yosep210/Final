@@ -45,7 +45,7 @@ class DistrictController extends Controller
 
     public function destroy(District $district): Response
     {
-        DeleteDistrictAction::run(DistrictData::fromModel($district));
+        DeleteDistrictAction::run($district);
 
         return response()->noContent();
     }
