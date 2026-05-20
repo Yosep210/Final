@@ -38,7 +38,6 @@ final class DistrictTable extends PowerGridComponent
         $allowedSort = [
             'name' => 'districts.name',
             'city_name' => 'cities.name',
-            'created_at' => 'districts.created_at',
         ];
 
         $sortField = $allowedSort[$this->sortField] ?? 'cities.name';
@@ -64,8 +63,7 @@ final class DistrictTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('no')
             ->add('city_name')
-            ->add('name')
-            ->add('created_at_formatted', fn (District $district) => optional($district->created_at)?->format('d M Y H:i'));
+            ->add('name');
     }
 
     public function columns(): array
@@ -74,7 +72,6 @@ final class DistrictTable extends PowerGridComponent
             Column::make('#', 'no'),
             Column::make('City', 'city_name')->sortable(),
             Column::make('Name', 'name')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -104,7 +101,6 @@ final class DistrictTable extends PowerGridComponent
 
                     return $query->where('districts.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::datepicker('created_at'),
         ];
     }
 

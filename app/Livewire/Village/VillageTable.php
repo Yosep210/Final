@@ -39,7 +39,6 @@ final class VillageTable extends PowerGridComponent
             'name' => 'villages.name',
             'district_name' => 'districts.name',
             'postal_code' => 'villages.postal_code',
-            'created_at' => 'villages.created_at',
         ];
 
         $sortField = $allowedSort[$this->sortField] ?? 'districts.name';
@@ -66,8 +65,7 @@ final class VillageTable extends PowerGridComponent
             ->add('no')
             ->add('district_name')
             ->add('name')
-            ->add('postal_code')
-            ->add('created_at_formatted', fn (Village $model) => $model->created_at->format('d M Y H:i'));
+            ->add('postal_code');
     }
 
     public function columns(): array
@@ -77,7 +75,6 @@ final class VillageTable extends PowerGridComponent
             Column::make('District', 'district_name')->sortable(),
             Column::make('Name', 'name')->sortable(),
             Column::make('Postal code', 'postal_code')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -107,7 +104,6 @@ final class VillageTable extends PowerGridComponent
                     return $query->where('districts.name', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('postal_code')->operators(['contains']),
-            Filter::datepicker('created_at'),
         ];
     }
 

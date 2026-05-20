@@ -39,7 +39,6 @@ final class CityTable extends PowerGridComponent
             'name' => 'cities.name',
             'province_name' => 'provincies.name',
             'type' => 'cities.type',
-            'created_at' => 'cities.created_at',
         ];
 
         $sortField = $allowedSort[$this->sortField] ?? 'provincies.name';
@@ -66,8 +65,7 @@ final class CityTable extends PowerGridComponent
             ->add('no')
             ->add('province_name')
             ->add('city_name')
-            ->add('type')
-            ->add('created_at_formatted', fn (City $city) => optional($city->created_at)?->format('d M Y H:i'));
+            ->add('type');
     }
 
     public function columns(): array
@@ -77,7 +75,6 @@ final class CityTable extends PowerGridComponent
             Column::make('Province', 'province_name')->sortable(),
             Column::make('Name', 'city_name', 'name')->sortable(),
             Column::make('Type', 'type')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -120,7 +117,6 @@ final class CityTable extends PowerGridComponent
                 ])
                 ->optionValue('id')
                 ->optionLabel('name'),
-            Filter::datepicker('created_at'),
         ];
     }
 
