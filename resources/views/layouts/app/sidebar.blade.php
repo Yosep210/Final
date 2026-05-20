@@ -5,8 +5,9 @@
     @include('partials.head')
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
-    <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+<body class="min-h-screen overflow-x-hidden bg-white dark:bg-zinc-800">
+    <flux:sidebar sticky collapsible
+        class="overflow-x-hidden border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.header>
             <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
             <flux:sidebar.collapse class="hidden lg:flex" />
@@ -16,7 +17,7 @@
         $menus = \App\Services\MenuService::get('Menu');
         @endphp
 
-        <flux:sidebar.nav class="overflow-y-auto">
+        <flux:sidebar.nav class="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-1">
             @foreach ($menus as $menu)
             @if (! empty($menu['sub']))
             <flux:sidebar.group :heading="__($menu['heading'])" icon="{{ $menu['icon'] }}" class="grid" expandable
@@ -37,7 +38,7 @@
             @endforeach
         </flux:sidebar.nav>
 
-        <div class="hidden mt-auto border-t border-zinc-200 pt-2 dark:border-zinc-700 lg:block">
+        <div class="hidden lg:block">
             <x-desktop-user-menu :name="auth()->user()->name" />
         </div>
     </flux:sidebar>
