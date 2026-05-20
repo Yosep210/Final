@@ -52,7 +52,7 @@ final class MemberTable extends PowerGridComponent
 
         return Member::query()
             ->select('members.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY ' . $sortField . ' ' . $sortDirection . ') AS no');
     }
 
     public function relationSearch(): array
@@ -69,7 +69,7 @@ final class MemberTable extends PowerGridComponent
             ->add('username')
             ->add('email')
             ->add('status')
-            ->add('created_at_formatted', fn (Member $member) => optional($member->created_at)?->format('d M Y H:i'));
+            ->add('created_at_formatted', fn(Member $member) => optional($member->created_at)?->format('d M Y H:i'));
     }
 
     public function columns(): array
@@ -123,7 +123,7 @@ final class MemberTable extends PowerGridComponent
     public function delete(int $memberId): void
     {
         $member = Member::query()->findOrFail($memberId);
-        $this->authorize('delete', $member);
+        $this->authorize('Delete', $member);
 
         try {
             DeleteMemberAction::run($member);
