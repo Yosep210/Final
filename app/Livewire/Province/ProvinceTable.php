@@ -20,7 +20,7 @@ final class ProvinceTable extends PowerGridComponent
 
     public string $tableName = 'provinceTable';
 
-    public string $sortField = 'name';
+    public string $sortField = 'country_name';
 
     public string $sortDirection = 'asc';
 
@@ -40,7 +40,7 @@ final class ProvinceTable extends PowerGridComponent
             'name' => 'provincies.name',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'provincies.name';
+        $sortField = $allowedSort[$this->sortField] ?? 'countries.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Province::query()

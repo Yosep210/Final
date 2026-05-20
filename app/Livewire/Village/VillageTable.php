@@ -20,7 +20,7 @@ final class VillageTable extends PowerGridComponent
 
     public string $tableName = 'villageTable';
 
-    public string $sortField = 'name';
+    public string $sortField = 'district_name';
 
     public string $sortDirection = 'asc';
 
@@ -42,7 +42,7 @@ final class VillageTable extends PowerGridComponent
             'created_at' => 'villages.created_at',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'villages.name';
+        $sortField = $allowedSort[$this->sortField] ?? 'districts.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Village::query()

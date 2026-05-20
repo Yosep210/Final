@@ -20,7 +20,7 @@ final class DistrictTable extends PowerGridComponent
 
     public string $tableName = 'districtTable';
 
-    public string $sortField = 'name';
+    public string $sortField = 'city_name';
 
     public string $sortDirection = 'asc';
 
@@ -41,7 +41,7 @@ final class DistrictTable extends PowerGridComponent
             'created_at' => 'districts.created_at',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'districts.name';
+        $sortField = $allowedSort[$this->sortField] ?? 'cities.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return District::query()

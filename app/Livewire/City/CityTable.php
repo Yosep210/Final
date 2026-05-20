@@ -107,7 +107,19 @@ final class CityTable extends PowerGridComponent
 
                     return $query->where('cities.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('type')->operators(['contains']),
+            Filter::select('type', 'type')
+                ->dataSource([
+                    [
+                        'id' => 'Kota',
+                        'name' => 'Kota',
+                    ],
+                    [
+                        'id' => 'Kabupaten',
+                        'name' => 'Kabupaten',
+                    ],
+                ])
+                ->optionValue('id')
+                ->optionLabel('name'),
             Filter::datepicker('created_at'),
         ];
     }
