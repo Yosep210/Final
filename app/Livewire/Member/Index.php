@@ -47,7 +47,7 @@ class Index extends Component
     public function edit(int $memberId): void
     {
         $member = Member::query()->findOrFail($memberId);
-        $this->authorize('update', $member);
+        $this->authorize('Update', $member);
 
         $this->editingMemberId = $member->id;
         $this->form = [
