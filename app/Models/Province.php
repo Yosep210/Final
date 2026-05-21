@@ -15,7 +15,7 @@ class Province extends Model implements Auditable
     use HasFactory;
     use LogsActivity;
 
-    protected $table = 'provincies';
+    protected $table = 'provinces';
 
     /**
      * The attributes that are mass assignable.

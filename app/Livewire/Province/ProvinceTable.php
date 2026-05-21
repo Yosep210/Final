@@ -37,15 +37,15 @@ final class ProvinceTable extends PowerGridComponent
     {
         $allowedSort = [
             'country_name' => 'countries.name',
-            'name' => 'provincies.name',
+            'name' => 'provinces.name',
         ];
 
         $sortField = $allowedSort[$this->sortField] ?? 'countries.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Province::query()
-            ->leftJoin('countries', 'provincies.country_id', '=', 'countries.id')
-            ->select('provincies.*', 'countries.name as country_name')
+            ->leftJoin('countries', 'provinces.country_id', '=', 'countries.id')
+            ->select('provinces.*', 'countries.name as country_name')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
@@ -97,7 +97,7 @@ final class ProvinceTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('provincies.name', 'like', '%'.$searchTerm.'%');
+                    return $query->where('provinces.name', 'like', '%'.$searchTerm.'%');
                 }),
         ];
     }

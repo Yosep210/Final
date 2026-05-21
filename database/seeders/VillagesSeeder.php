@@ -21,7 +21,7 @@ class VillagesSeeder extends Seeder
         ini_set('memory_limit', '512M');
         set_time_limit(0);
         $countryPath = database_path('data/countries.json');
-        $provincePath = database_path('data/provincies.json');
+        $provincePath = database_path('data/provinces.json');
         $postalCodePath = database_path('data/postal_codes.csv');
 
         if (File::exists($countryPath) && File::exists($provincePath)) {
@@ -115,7 +115,7 @@ class VillagesSeeder extends Seeder
                         continue;
                     }
 
-                    DB::table('provincies')->updateOrInsert(
+                    DB::table('provinces')->updateOrInsert(
                         ['id' => data_get($province, 'id')],
                         [
                             'country_id' => $country->id,
@@ -135,7 +135,7 @@ class VillagesSeeder extends Seeder
                     return;
                 }
 
-                $indoProvinces = DB::table('provincies')->where('country_id', $indonesia->id)->get();
+                $indoProvinces = DB::table('provinces')->where('country_id', $indonesia->id)->get();
                 $this->command->info('Found '.$indoProvinces->count().' provinces to process.');
 
                 $matched = 0;

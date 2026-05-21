@@ -39,7 +39,7 @@ class StoreCityRequest extends FormRequest
     public static function cityRules(?City $city = null): array
     {
         return [
-            'province_id' => ['required', 'integer', 'exists:provincies,id'],
+            'province_id' => ['required', 'integer', 'exists:provinces,id'],
             'name' => ['required', 'string', 'max:255'],
             'type' => ['nullable', 'string', 'max:50'],
         ];

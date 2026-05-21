@@ -37,16 +37,16 @@ final class CityTable extends PowerGridComponent
     {
         $allowedSort = [
             'name' => 'cities.name',
-            'province_name' => 'provincies.name',
+            'province_name' => 'provinces.name',
             'type' => 'cities.type',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'provincies.name';
+        $sortField = $allowedSort[$this->sortField] ?? 'provinces.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return City::query()
-            ->leftJoin('provincies', 'cities.province_id', '=', 'provincies.id')
-            ->select('cities.*', 'cities.name as city_name', 'provincies.name as province_name')
+            ->leftJoin('provinces', 'cities.province_id', '=', 'provinces.id')
+            ->select('cities.*', 'cities.name as city_name', 'provinces.name as province_name')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
@@ -91,7 +91,7 @@ final class CityTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('provincies.name', 'like', '%'.$searchTerm.'%');
+                    return $query->where('provinces.name', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('name')
                 ->operators(['contains'])

@@ -43,7 +43,7 @@ class StoreProvinceRequest extends FormRequest
      */
     public static function provinceRules(?Province $province = null): array
     {
-        $ignoreName = $province?->id ? Rule::unique('provincies', 'name')->ignore($province) : Rule::unique('provincies', 'name');
+        $ignoreName = $province?->id ? Rule::unique('provinces', 'name')->ignore($province) : Rule::unique('provinces', 'name');
 
         return [
             'country_id' => ['required', 'integer', 'exists:countries,id'],

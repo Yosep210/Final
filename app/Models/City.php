@@ -49,4 +49,12 @@ class City extends Model implements Auditable
     {
         return $this->belongsTo(Province::class);
     }
+
+    /**
+     * Backwards-compatible alias for legacy calls to `provincies`.
+     */
+    public function provincies()
+    {
+        return $this->belongsTo(Province::class);
+    }
 }

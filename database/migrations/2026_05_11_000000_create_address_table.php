@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('status')->default(true);
         });
 
-        Schema::create('provincies', function (Blueprint $table) {
+        Schema::create('provinces', function (Blueprint $table) {
             $table->id();
             $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
             $table->string('name');
@@ -30,7 +30,7 @@ return new class extends Migration
 
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('province_id')->constrained('provincies')->cascadeOnDelete();
+            $table->foreignId('province_id')->constrained('provinces')->cascadeOnDelete();
             $table->string('name');
             $table->enum('type', ['kota', 'kabupaten'])->default('kota');
         });
@@ -57,7 +57,7 @@ return new class extends Migration
         Schema::dropIfExists('villages');
         Schema::dropIfExists('districts');
         Schema::dropIfExists('cities');
-        Schema::dropIfExists('provincies');
+        Schema::dropIfExists('provinces');
         Schema::dropIfExists('countries');
     }
 };

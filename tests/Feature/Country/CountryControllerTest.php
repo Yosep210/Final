@@ -168,7 +168,7 @@ it('blocks deleting a country that is already referenced by province data', func
     Sanctum::actingAs($user);
     $country = Country::query()->create(countryPayload());
 
-    DB::table('provincies')->insert([
+    DB::table('provinces')->insert([
         'country_id' => $country->id,
         'name' => 'Jawa Barat',
         'created_at' => now(),

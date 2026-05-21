@@ -13,7 +13,7 @@ class DeleteCountryAction
 
     public function handle(Country $country): ?bool
     {
-        if (DB::table('provincies')->where('country_id', $country->id)->exists()) {
+        if (DB::table('provinces')->where('country_id', $country->id)->exists()) {
             throw ValidationException::withMessages([
                 'country' => 'Country cannot be deleted because it is already used by province data.',
             ]);
