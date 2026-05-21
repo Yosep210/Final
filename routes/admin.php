@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\PermissionController;
 use App\Livewire\City\Index as CityIndex;
 use App\Livewire\Country\Index as CountryIndex;
 use App\Livewire\District\Index as DistrictIndex;
@@ -27,5 +26,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('role', RoleIndex::class)->name('role.index');
 
     Route::livewire('permission', PermissionIndex::class)->name('permission.index');
-    Route::apiResource('permissions', PermissionController::class);
 });

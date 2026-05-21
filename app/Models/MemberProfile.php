@@ -8,19 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasPermissions;
-use Spatie\Permission\Traits\HasRoles;
-
-#[HasPermissions()]
-#[HasRoles()]
-#[HasApiTokens()]
 
 #[Fillable(['member_id', 'gender', 'birth_date', 'phone', 'profile_photo', 'country_id', 'province_id', 'city_id', 'district_id', 'village_id', 'address'])]
 #[Hidden(['id_card_number', 'id_card_photo', 'npwp_number'])]
 class MemberProfile extends Model
 {
-    use HasApiTokens, HasFactory, HasPermissions, HasRoles, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes;
 
     protected $table = 'member_profile';
 

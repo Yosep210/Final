@@ -22,9 +22,6 @@ class UpdateDistrictRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** @var District $district */
-        $district = $this->route('district');
-
         return StoreDistrictRequest::districtRules($this->route('district'));
     }
 

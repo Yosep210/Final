@@ -15,10 +15,6 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
 
-#[HasPermissions()]
-#[HasRoles()]
-#[HasApiTokens()]
-
 #[Fillable(['name', 'username', 'email', 'password', 'status', 'email_verified_at', 'last_login_at'])]
 #[Hidden(['password', 'referral_code', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at'])]
 class Member extends Authenticatable implements MustVerifyEmail

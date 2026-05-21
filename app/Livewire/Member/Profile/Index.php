@@ -119,7 +119,7 @@ class Index extends Component
         $villages = Village::query()->orderBy('name')->pluck('name', 'id')->toArray();
 
         return view('livewire.member.profile.index', compact('members', 'countries', 'provinces', 'cities', 'districts', 'villages'))
-            ->extends('layouts.app', ['title' => __('Member Profile')]);
+            ->layout('layouts.app', ['title' => __('Member Profile')]);
     }
 
     private function prefixedRules(?MemberProfile $profile = null): array

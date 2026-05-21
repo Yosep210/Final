@@ -38,7 +38,7 @@ class DistrictController extends Controller
 
     public function update(UpdateDistrictRequest $request, District $district): JsonResponse
     {
-        $district = UpdateDistrictAction::run(DistrictData::fromArray($request->validated()), $district);
+        $district = UpdateDistrictAction::run($district, DistrictData::fromArray($request->validated()));
 
         return DistrictResource::make($district)->response();
     }
