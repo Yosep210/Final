@@ -39,7 +39,6 @@ final class MemberTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'id' => 'members.id',
             'name' => 'members.name',
             'username' => 'members.username',
             'email' => 'members.email',
@@ -64,7 +63,6 @@ final class MemberTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('id')
             ->add('name')
             ->add('username')
             ->add('email')
@@ -76,7 +74,6 @@ final class MemberTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('ID', 'id')->sortable(),
             Column::make('Name', 'name')->sortable(),
             Column::make('Username', 'username')->sortable(),
             Column::make('Email', 'email')->sortable(),

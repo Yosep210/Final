@@ -6,7 +6,13 @@ use App\Actions\Member\Profile\CreateProfileAction;
 use App\Actions\Member\Profile\UpdateProfileAction;
 use App\Data\MemberProfileData;
 use App\Http\Requests\Member\Profile\StoreProfileRequest;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\District;
+use App\Models\Member;
 use App\Models\MemberProfile;
+use App\Models\Province;
+use App\Models\Village;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
@@ -79,9 +85,9 @@ class Index extends Component
         }
 
         $validated = $this->validate(
-            $profile
-                ? UpdateProfileRequest::rules($profile)
-                : StoreProfileRequest::rules()
+            ['form' => ['array'], 'form.*' => ['nullable'], ...$this->prefixedRules($profile)],
+            [],
+            $this->prefixedAttributes()
         );
 
         $profileData = MemberProfileData::fromArray($validated['form']);
@@ -105,15 +111,44 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.member.profile.index')
+        $members = Member::query()->orderBy('name')->get();
+        $countries = Country::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $provinces = Province::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $cities = City::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $districts = District::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $villages = Village::query()->orderBy('name')->pluck('name', 'id')->toArray();
+
+        return view('livewire.member.profile.index', compact('members', 'countries', 'provinces', 'cities', 'districts', 'villages'))
             ->extends('layouts.app', ['title' => __('Member Profile')]);
+    }
+
+    private function prefixedRules(?MemberProfile $profile = null): array
+    {
+        $rules = $this->rules($profile);
+
+        $prefixed = [];
+        foreach ($rules as $key => $rule) {
+            $prefixed["form.{$key}"] = $rule;
+        }
+
+        return $prefixed;
+    }
+
+    private function prefixedAttributes(): array
+    {
+        $attributes = $this->attributes();
+
+        $prefixed = [];
+        foreach ($attributes as $key => $label) {
+            $prefixed["form.{$key}"] = $label;
+        }
+
+        return $prefixed;
     }
 
     public function rules(?MemberProfile $profile = null): array
     {
-        return $profile
-            ? UpdateProfileRequest::rules($profile)
-            : StoreProfileRequest::rules();
+        return StoreProfileRequest::rules($profile);
     }
 
     public function attributes(): array

@@ -3,12 +3,22 @@
 namespace App\Livewire\Member;
 
 use App\Actions\Member\CreateMemberAction;
+use App\Actions\Member\Network\CreateMemberNetworkAction;
+use App\Actions\Member\Profile\CreateProfileAction;
 use App\Actions\Member\UpdateMemberAction;
 use App\Data\MemberData;
+use App\Data\MemberProfileData;
+use App\Http\Requests\Member\Profile\StoreProfileRequest;
 use App\Http\Requests\Member\StoreMemberRequest;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\District;
 use App\Models\Member;
+use App\Models\Province;
+use App\Models\Village;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -27,6 +37,24 @@ class Index extends Component
      * @var array<string, mixed>
      */
     public array $form = [];
+
+    /**
+     * @var array<string, mixed>
+     */
+    public array $profile = [];
+
+    /**
+     * @var array<string, mixed>
+     */
+    public array $network = [];
+
+    public string $sponsorUsername = '';
+
+    public ?string $sponsorName = null;
+
+    public string $parentUsername = '';
+
+    public ?string $parentName = null;
 
     public function mount(): void
     {
@@ -85,7 +113,34 @@ class Index extends Component
             UpdateMemberAction::run($member, $memberData);
             Flux::toast(variant: 'success', text: 'Member updated successfully.');
         } else {
-            CreateMemberAction::run($memberData);
+            $created = CreateMemberAction::run($memberData);
+
+                if ($this->hasProfileInput($validated['profile'] ?? [])) {
+                $profileArr = $validated['profile'];
+                $profileArr['member_id'] = $created->id;
+                $profileData = MemberProfileData::fromArray($profileArr);
+                CreateProfileAction::run($profileData);
+            }
+
+            if ($this->hasNetworkInput($validated['network'] ?? []) || ! empty($validated['sponsorUsername']) || ! empty($validated['parentUsername'])) {
+                $networkArr = $validated['network'];
+                $networkArr['member_id'] = $created->id;
+
+                if (! empty($validated['sponsorUsername'])) {
+                    $networkArr['sponsored_id'] = Member::query()
+                        ->where('username', $validated['sponsorUsername'])
+                        ->value('id');
+                }
+
+                if (! empty($validated['parentUsername'])) {
+                    $networkArr['parent_id'] = Member::query()
+                        ->where('username', $validated['parentUsername'])
+                        ->value('id');
+                }
+
+                CreateMemberNetworkAction::run($networkArr);
+            }
+
             Flux::toast(variant: 'success', text: 'Member created successfully.');
         }
 
@@ -103,7 +158,13 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.member.index')
+        $countries = Country::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $provinces = Province::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $cities = City::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $districts = District::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $villages = Village::query()->orderBy('name')->pluck('name', 'id')->toArray();
+
+        return view('livewire.member.index', compact('countries', 'provinces', 'cities', 'districts', 'villages'))
             ->layout('layouts.app', ['title' => __('Member')]);
     }
 
@@ -115,11 +176,30 @@ class Index extends Component
         $rules = [
             'form' => ['array'],
             'form.*' => ['nullable'],
+            'profile' => ['array'],
+            'profile.*' => ['nullable'],
+            'network' => ['array'],
+            'network.*' => ['nullable'],
         ];
 
         foreach (StoreMemberRequest::memberRules($member) as $key => $ruleSet) {
             $rules["form.$key"] = $ruleSet;
         }
+
+        $profileRules = StoreProfileRequest::rules();
+        unset($profileRules['member_id']);
+
+        foreach ($profileRules as $key => $ruleSet) {
+            $rules["profile.$key"] = $ruleSet;
+        }
+
+        $rules['network.sponsored_id'] = ['nullable', 'integer', Rule::exists('members', 'id')];
+        $rules['network.parent_id'] = ['nullable', 'integer', Rule::exists('members', 'id')];
+        $rules['network.position'] = ['nullable', 'in:left,right'];
+        $rules['network.rank'] = ['nullable', 'integer'];
+        $rules['network.group'] = ['nullable', 'integer'];
+        $rules['sponsorUsername'] = ['nullable', 'string', Rule::exists('members', 'username')];
+        $rules['parentUsername'] = ['nullable', 'string', Rule::exists('members', 'username')];
 
         $rules['form.password'] = $member
             ? ['nullable', 'string', Password::default(), 'confirmed']
@@ -142,10 +222,84 @@ class Index extends Component
             $attributes["form.$key"] = $value;
         }
 
+        foreach (StoreProfileRequest::attributeLabels() as $key => $value) {
+            $attributes["profile.$key"] = $value;
+        }
+
+        $attributes['sponsorUsername'] = 'Sponsor Username';
+        $attributes['parentUsername'] = 'Parent Username';
         $attributes['form.password'] = 'password';
         $attributes['form.password_confirmation'] = 'password confirmation';
 
         return $attributes;
+    }
+
+    private function hasProfileInput(array $profile): bool
+    {
+        foreach ($profile as $key => $value) {
+            if ($key === 'member_id') {
+                continue;
+            }
+
+            if ($value !== null && $value !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasNetworkInput(array $network): bool
+    {
+        foreach ($network as $key => $value) {
+            if ($key === 'member_id') {
+                continue;
+            }
+
+            if ($value !== null && $value !== '' && $value !== 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function updatedSponsorUsername(): void
+    {
+        $this->resolveSponsorUsername();
+    }
+
+    public function updatedParentUsername(): void
+    {
+        $this->resolveParentUsername();
+    }
+
+    private function resolveSponsorUsername(): void
+    {
+        if ($this->sponsorUsername === '') {
+            $this->sponsorName = null;
+            $this->network['sponsored_id'] = null;
+
+            return;
+        }
+
+        $member = Member::query()->where('username', $this->sponsorUsername)->first();
+        $this->sponsorName = $member?->name;
+        $this->network['sponsored_id'] = $member?->id;
+    }
+
+    private function resolveParentUsername(): void
+    {
+        if ($this->parentUsername === '') {
+            $this->parentName = null;
+            $this->network['parent_id'] = null;
+
+            return;
+        }
+
+        $member = Member::query()->where('username', $this->parentUsername)->first();
+        $this->parentName = $member?->name;
+        $this->network['parent_id'] = $member?->id;
     }
 
     private function resetForm(): void
@@ -161,5 +315,35 @@ class Index extends Component
             'email_verified_at' => '',
             'last_login_at' => '',
         ];
+
+        $this->profile = [
+            'member_id' => null,
+            'gender' => null,
+            'birth_date' => null,
+            'phone' => null,
+            'profile_photo' => null,
+            'country_id' => null,
+            'province_id' => null,
+            'city_id' => null,
+            'district_id' => null,
+            'village_id' => null,
+            'address' => null,
+        ];
+
+        $this->network = [
+            'member_id' => null,
+            'sponsored_id' => null,
+            'parent_id' => null,
+            'position' => null,
+            'path' => null,
+            'generation' => 0,
+            'group' => 0,
+            'rank' => 0,
+        ];
+
+        $this->sponsorUsername = '';
+        $this->sponsorName = null;
+        $this->parentUsername = '';
+        $this->parentName = null;
     }
 }
