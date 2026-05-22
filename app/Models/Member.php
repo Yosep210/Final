@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,19 +14,39 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'username', 'email', 'password', 'status', 'email_verified_at', 'last_login_at'])]
-#[Hidden(['password', 'referral_code', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at'])]
 class Member extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, HasPermissions, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
-    public function casts(): array
+    protected $fillable = [
+        'name',
+        'username',
+        'email',
+        'password',
+        'status',
+        'referral_code',
+        'email_verified_at',
+        'last_login_at',
+    ];
+
+    protected $hidden = [
+        'password',
+        'referral_code',
+        'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    public function profile(): HasOne
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'last_login_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasOne(MemberProfile::class);
     }
 
     /**
@@ -38,7 +57,7 @@ class Member extends Authenticatable implements MustVerifyEmail
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
+            ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
 }
