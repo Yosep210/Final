@@ -29,8 +29,10 @@ class Village extends Model implements Auditable
 
     protected $casts = [
         'district_id' => 'integer',
-        'postal_code' => 'integer',
+        'postal_code' => 'string',
     ];
+
+    public $timestamps = false;
 
     public function district(): BelongsTo
     {
@@ -47,5 +49,10 @@ class Village extends Model implements Auditable
             ])
             ->logOnlyDirty()
             ->useLogName('village');
+    }
+
+    public function memberProfiles(): HasMany
+    {
+        return $this->hasMany(MemberProfile::class);
     }
 }

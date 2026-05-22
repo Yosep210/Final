@@ -13,9 +13,9 @@ class DeleteVillageAction
 
     public function handle(Village $village): ?bool
     {
-        if (DB::table('hamlets')->where('village_id', $village->id)->exists()) {
+        if ($village->memberProfiles()->exists()) {
             throw ValidationException::withMessages([
-                'village' => 'Village cannot be deleted because it is already used by hamlet data.',
+                'village' => 'Village cannot be deleted because it is still used by member profiles.',
             ]);
         }
 

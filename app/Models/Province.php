@@ -35,13 +35,14 @@ class Province extends Model implements Auditable
         'country_id' => 'integer',
     ];
 
+    public $timestamps = false;
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly([
                 'country_id',
                 'name',
-                'code',
             ])
             ->logOnlyDirty()
             ->useLogName('province');

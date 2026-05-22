@@ -19,8 +19,9 @@ class GetVillageAction
             ->allowedFilters([
                 AllowedFilter::exact('id'),
                 AllowedFilter::partial('name'),
+                AllowedFilter::partial('postal_code'),
             ])
-            ->allowedSorts('id', 'name', 'created_at')
+            ->allowedSorts('id', 'name', 'postal_code')
             ->paginate($perPage);
     }
 }

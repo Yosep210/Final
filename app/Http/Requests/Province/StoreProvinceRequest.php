@@ -48,7 +48,6 @@ class StoreProvinceRequest extends FormRequest
         return [
             'country_id' => ['required', 'integer', 'exists:countries,id'],
             'name' => ['required', 'string', 'max:255', $ignoreName],
-            'code' => ['nullable', 'string', 'max:50'],
         ];
     }
 
@@ -62,7 +61,6 @@ class StoreProvinceRequest extends FormRequest
         return [
             'country_id' => 'country',
             'name' => 'name',
-            'code' => 'code',
         ];
     }
 }

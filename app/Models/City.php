@@ -33,6 +33,8 @@ class City extends Model implements Auditable
         'province_id' => 'integer',
     ];
 
+    public $timestamps = false;
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
