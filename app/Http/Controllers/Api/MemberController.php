@@ -7,12 +7,15 @@ use App\Actions\Member\DeleteMemberAction;
 use App\Actions\Member\GetMemberAction;
 use App\Actions\Member\UpdateMemberAction;
 use App\Data\MemberData;
+use App\Events\MemberPromoted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\StoreMemberRequest;
 use App\Http\Requests\Member\UpdateMemberRequest;
 use App\Http\Resources\MemberResource;
 use App\Models\Member;
+use App\Models\MemberNetwork;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class MemberController extends Controller
@@ -39,7 +42,7 @@ class MemberController extends Controller
     {
         $this->authorize('view', $member);
 
-        return MemberResource::make($member)->response();
+        return MemberResource::make($member->load('profile', 'network'))->response();
     }
 
     public function update(UpdateMemberRequest $request, Member $member): JsonResponse
@@ -56,5 +59,25 @@ class MemberController extends Controller
         DeleteMemberAction::run($member);
 
         return response()->noContent();
+    }
+
+    public function network(Member $member): JsonResponse
+    {
+        $this->authorize('view', $member);
+
+        $network = $member->network ?? MemberNetwork::where('member_id', $member->id)->first();
+
+        return response()->json($network);
+    }
+
+    public function promote(Request $request, Member $member): JsonResponse
+    {
+        $this->authorize('update', $member);
+
+        $payload = $request->all();
+
+        event(new MemberPromoted($member, $payload));
+
+        return response()->json(['status' => 'ok']);
     }
 }

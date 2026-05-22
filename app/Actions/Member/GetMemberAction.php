@@ -23,6 +23,7 @@ class GetMemberAction
                 AllowedFilter::partial('email'),
                 AllowedFilter::exact('status'),
             )
+            ->allowedIncludes('profile', 'network')
             ->allowedSorts('id', 'name', 'username', 'email', 'status', 'created_at')
             ->paginate($perPage);
     }

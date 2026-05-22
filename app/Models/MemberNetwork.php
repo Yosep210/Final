@@ -22,4 +22,24 @@ class MemberNetwork extends Model
         'group',
         'rank',
     ];
+
+    public function member()
+    {
+        return $this->belongsTo(Member::class, 'member_id');
+    }
+
+    public function sponsor()
+    {
+        return $this->belongsTo(Member::class, 'sponsored_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Member::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(self::class, 'parent_id');
+    }
 }

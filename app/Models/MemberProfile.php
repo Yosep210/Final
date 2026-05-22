@@ -25,6 +25,9 @@ class MemberProfile extends Model
         'district_id',
         'village_id',
         'address',
+        'id_card_number',
+        'id_card_photo',
+        'npwp_number',
     ];
 
     protected $hidden = [

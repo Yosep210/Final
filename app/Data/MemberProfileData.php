@@ -22,6 +22,9 @@ class MemberProfileData extends Data
         public readonly ?int $districtId,
         public readonly ?int $villageId,
         public readonly ?string $address,
+        public readonly ?string $idCardNumber,
+        public readonly ?string $idCardPhoto,
+        public readonly ?string $npwpNumber,
     ) {}
 
     public static function fromArray(array $data): self
@@ -40,6 +43,9 @@ class MemberProfileData extends Data
             districtId: $normalized['districtId'] !== null ? (int) $normalized['districtId'] : null,
             villageId: $normalized['villageId'] !== null ? (int) $normalized['villageId'] : null,
             address: $normalized['address'] !== null ? (string) $normalized['address'] : null,
+            idCardNumber: $normalized['idCardNumber'] !== null ? (string) $normalized['idCardNumber'] : null,
+            idCardPhoto: $normalized['idCardPhoto'] !== null ? (string) $normalized['idCardPhoto'] : null,
+            npwpNumber: $normalized['npwpNumber'] !== null ? (string) $normalized['npwpNumber'] : null,
         );
     }
 
@@ -57,6 +63,9 @@ class MemberProfileData extends Data
             districtId: $profile->district_id !== null ? (int) $profile->district_id : null,
             villageId: $profile->village_id !== null ? (int) $profile->village_id : null,
             address: $profile->address !== null ? (string) $profile->address : null,
+            idCardNumber: $profile->id_card_number !== null ? (string) $profile->id_card_number : null,
+            idCardPhoto: $profile->id_card_photo !== null ? (string) $profile->id_card_photo : null,
+            npwpNumber: $profile->npwp_number !== null ? (string) $profile->npwp_number : null,
         );
     }
 
@@ -74,6 +83,9 @@ class MemberProfileData extends Data
             'districtId' => isset($data['district_id']) && $data['district_id'] !== '' ? (int) $data['district_id'] : null,
             'villageId' => isset($data['village_id']) && $data['village_id'] !== '' ? (int) $data['village_id'] : null,
             'address' => isset($data['address']) && $data['address'] !== '' ? (string) $data['address'] : null,
+            'idCardNumber' => isset($data['id_card_number']) && $data['id_card_number'] !== '' ? (string) $data['id_card_number'] : null,
+            'idCardPhoto' => isset($data['id_card_photo']) && $data['id_card_photo'] !== '' ? (string) $data['id_card_photo'] : null,
+            'npwpNumber' => isset($data['npwp_number']) && $data['npwp_number'] !== '' ? (string) $data['npwp_number'] : null,
         ];
     }
 }

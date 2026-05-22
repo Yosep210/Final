@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\District;
 
-use App\Models\District;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateDistrictRequest extends FormRequest

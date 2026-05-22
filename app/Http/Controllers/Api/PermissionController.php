@@ -11,9 +11,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Permission\StorePermissionRequest;
 use App\Http\Requests\Permission\UpdatePermissionRequest;
 use App\Http\Resources\PermissionResource;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
 {

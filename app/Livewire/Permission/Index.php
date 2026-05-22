@@ -6,11 +6,11 @@ use App\Actions\Permission\CreatePermissionAction;
 use App\Actions\Permission\UpdatePermissionAction;
 use App\Data\PermissionData;
 use App\Http\Requests\Permission\StorePermissionRequest;
-use Spatie\Permission\Models\Permission;
 use Flux\Flux;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Spatie\Permission\Models\Permission;
 
 #[Title('Permission')]
 class Index extends Component
@@ -97,14 +97,14 @@ class Index extends Component
         $rules = StorePermissionRequest::permissionRules($permission);
 
         return collect($rules)
-            ->mapWithKeys(fn(array $ruleSet, string $field) => ["form.$field" => $ruleSet])
+            ->mapWithKeys(fn (array $ruleSet, string $field) => ["form.$field" => $ruleSet])
             ->all();
     }
 
     protected function prefixedAttributes(): array
     {
         return collect(StorePermissionRequest::attributeLabels())
-            ->mapWithKeys(fn(string $label, string $field) => ["form.$field" => $label])
+            ->mapWithKeys(fn (string $label, string $field) => ["form.$field" => $label])
             ->all();
     }
 

@@ -3,7 +3,6 @@
 namespace App\Actions\Village;
 
 use App\Models\Village;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsAction;
 

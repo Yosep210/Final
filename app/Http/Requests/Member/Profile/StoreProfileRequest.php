@@ -35,6 +35,9 @@ class StoreProfileRequest extends FormRequest
             'district_id' => ['nullable', 'integer'],
             'village_id' => ['nullable', 'integer'],
             'address' => ['nullable', 'string', 'max:255'],
+            'id_card_number' => ['nullable', 'string', 'max:255'],
+            'id_card_photo' => ['nullable', 'string', 'max:255'],
+            'npwp_number' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -65,6 +68,9 @@ class StoreProfileRequest extends FormRequest
             'district_id' => 'District',
             'village_id' => 'Village',
             'address' => 'Address',
+            'id_card_number' => 'ID Card Number',
+            'id_card_photo' => 'ID Card Photo',
+            'npwp_number' => 'NPWP Number',
         ];
     }
 }

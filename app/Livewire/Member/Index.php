@@ -3,7 +3,6 @@
 namespace App\Livewire\Member;
 
 use App\Actions\Member\CreateMemberAction;
-use App\Actions\Member\Network\CreateMemberNetworkAction;
 use App\Actions\Member\Profile\CreateProfileAction;
 use App\Actions\Member\UpdateMemberAction;
 use App\Data\MemberData;
@@ -14,8 +13,10 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\District;
 use App\Models\Member;
+use App\Models\MemberNetwork;
 use App\Models\Province;
 use App\Models\Village;
+use App\Services\MemberNetworkPlacementService;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
@@ -115,7 +116,7 @@ class Index extends Component
         } else {
             $created = CreateMemberAction::run($memberData);
 
-                if ($this->hasProfileInput($validated['profile'] ?? [])) {
+            if ($this->hasProfileInput($validated['profile'] ?? [])) {
                 $profileArr = $validated['profile'];
                 $profileArr['member_id'] = $created->id;
                 $profileData = MemberProfileData::fromArray($profileArr);
@@ -138,7 +139,29 @@ class Index extends Component
                         ->value('id');
                 }
 
-                CreateMemberNetworkAction::run($networkArr);
+                $placementService = app(MemberNetworkPlacementService::class);
+                $resolvedNetwork = $placementService->resolvePlacement(
+                    $created,
+                    $created->referral_code,
+                    $networkArr['sponsored_id'] ?? null,
+                    $networkArr['parent_id'] ?? null,
+                    $networkArr['position'] ?? null,
+                );
+
+                $networkArr = array_merge($resolvedNetwork, array_filter([
+                    'group' => $networkArr['group'] ?? null,
+                    'rank' => $networkArr['rank'] ?? null,
+                    'generation' => $networkArr['generation'] ?? null,
+                    'path' => $networkArr['path'] ?? null,
+                ], fn ($value) => $value !== null));
+
+                MemberNetwork::updateOrCreate(
+                    ['member_id' => $created->id],
+                    $networkArr,
+                );
+
+                $sponsor = isset($networkArr['sponsored_id']) ? Member::find($networkArr['sponsored_id']) : null;
+                $placementService->updateSponsorRank($sponsor);
             }
 
             Flux::toast(variant: 'success', text: 'Member created successfully.');
@@ -158,14 +181,70 @@ class Index extends Component
 
     public function render()
     {
-        $countries = Country::query()->orderBy('name')->pluck('name', 'id')->toArray();
-        $provinces = Province::query()->orderBy('name')->pluck('name', 'id')->toArray();
-        $cities = City::query()->orderBy('name')->pluck('name', 'id')->toArray();
-        $districts = District::query()->orderBy('name')->pluck('name', 'id')->toArray();
-        $villages = Village::query()->orderBy('name')->pluck('name', 'id')->toArray();
-
-        return view('livewire.member.index', compact('countries', 'provinces', 'cities', 'districts', 'villages'))
+        return view('livewire.member.index', $this->getLocationOptions())
             ->layout('layouts.app', ['title' => __('Member')]);
+    }
+
+    /**
+     * Mengambil opsi pilihan wilayah secara cascading.
+     *
+     * @return array<string, array<int, string>>
+     */
+    private function getLocationOptions(): array
+    {
+        if (! $this->showModal) {
+            return [
+                'countries' => [],
+                'provinces' => [],
+                'cities' => [],
+                'districts' => [],
+                'villages' => [],
+            ];
+        }
+
+        $profile = $this->profile;
+
+        $countryId = $profile['country_id'] ?? null;
+        $provinceId = $profile['province_id'] ?? null;
+        $cityId = $profile['city_id'] ?? null;
+        $districtId = $profile['district_id'] ?? null;
+
+        return [
+            'countries' => Country::where('status', true)->orderBy('name')->pluck('name', 'id')->all(),
+
+            'provinces' => ! empty($countryId)
+                ? Province::where('country_id', $countryId)->orderBy('name')->pluck('name', 'id')->all()
+                : [],
+
+            'cities' => ! empty($provinceId)
+                ? City::where('province_id', $provinceId)->orderBy('name')->pluck('name', 'id')->all()
+                : [],
+
+            'districts' => ! empty($cityId)
+                ? District::where('city_id', $cityId)->orderBy('name')->pluck('name', 'id')->all()
+                : [],
+
+            'villages' => ! empty($districtId)
+                ? Village::where('district_id', $districtId)->orderBy('name')->pluck('name', 'id')->all()
+                : [],
+        ];
+    }
+
+    public function updatedProfile($value, $key): void
+    {
+        // Reset level di bawahnya jika level di atasnya berubah
+        $resets = [
+            'country_id' => ['province_id', 'city_id', 'district_id', 'village_id'],
+            'province_id' => ['city_id', 'district_id', 'village_id'],
+            'city_id' => ['district_id', 'village_id'],
+            'district_id' => ['village_id'],
+        ];
+
+        if (isset($resets[$key])) {
+            foreach ($resets[$key] as $field) {
+                $this->profile[$field] = null;
+            }
+        }
     }
 
     /**

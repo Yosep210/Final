@@ -3,7 +3,6 @@
 namespace App\Livewire\Permission;
 
 use App\Actions\Permission\DeletePermissionAction;
-use Spatie\Permission\Models\Permission;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -13,6 +12,7 @@ use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
+use Spatie\Permission\Models\Permission;
 
 final class PermissionTable extends PowerGridComponent
 {
@@ -45,7 +45,7 @@ final class PermissionTable extends PowerGridComponent
 
         return Permission::query()
             ->select('permissions.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY ' . $sortField . ' ' . $sortDirection . ') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function fields(): PowerGridFields
@@ -54,7 +54,7 @@ final class PermissionTable extends PowerGridComponent
             ->add('no')
             ->add('name')
             ->add('guard_name')
-            ->add('created_at_formatted', fn(Permission $model) => optional($model->created_at)->format('d M Y H:i'));
+            ->add('created_at_formatted', fn (Permission $model) => optional($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array

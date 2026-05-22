@@ -50,6 +50,22 @@ class Member extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Member's network record
+     */
+    public function network(): HasOne
+    {
+        return $this->hasOne(MemberNetwork::class, 'member_id');
+    }
+
+    /**
+     * Networks where this member is the sponsor
+     */
+    public function sponsoredNetworks()
+    {
+        return $this->hasMany(MemberNetwork::class, 'sponsored_id');
+    }
+
+    /**
      * Get the member's initials
      */
     public function initials(): string
@@ -57,7 +73,7 @@ class Member extends Authenticatable implements MustVerifyEmail
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn($word) => Str::substr($word, 0, 1))
+            ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
 }

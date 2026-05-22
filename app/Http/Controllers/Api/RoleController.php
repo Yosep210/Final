@@ -11,9 +11,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\StoreRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Http\Resources\RoleResource;
-use Spatie\Permission\Models\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {

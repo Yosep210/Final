@@ -6,12 +6,12 @@ use App\Actions\Role\CreateRoleAction;
 use App\Actions\Role\UpdateRoleAction;
 use App\Data\RoleData;
 use App\Http\Requests\Role\StoreRoleRequest;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\RolePermission;
 use Flux\Flux;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 #[Title('Role')]
 class Index extends Component
@@ -115,10 +115,7 @@ class Index extends Component
         $this->permissionRoleName = $role->name;
         $this->permissionOptions = Permission::query()->orderBy('name')->pluck('name', 'id')->toArray();
 
-        $assignedPermissions = RolePermission::query()
-            ->where('role_id', $role->id)
-            ->pluck('permission_id')
-            ->toArray();
+        $assignedPermissions = $role->permissions()->pluck('id')->toArray();
 
         $this->permissionAccess = array_fill_keys(array_keys($this->permissionOptions), false);
 
@@ -144,27 +141,11 @@ class Index extends Component
         }
 
         $selectedPermissionIds = array_keys(array_filter($this->permissionAccess));
-        $existingPermissionIds = RolePermission::query()
-            ->where('role_id', $this->permissionRoleId)
-            ->pluck('permission_id')
-            ->toArray();
 
-        $toAttach = array_diff($selectedPermissionIds, $existingPermissionIds);
-        $toDetach = array_diff($existingPermissionIds, $selectedPermissionIds);
+        $role = Role::query()->findOrFail($this->permissionRoleId);
 
-        foreach ($toAttach as $permissionId) {
-            RolePermission::query()->create([
-                'role_id' => $this->permissionRoleId,
-                'permission_id' => $permissionId,
-            ]);
-        }
-
-        if (! empty($toDetach)) {
-            RolePermission::query()
-                ->where('role_id', $this->permissionRoleId)
-                ->whereIn('permission_id', $toDetach)
-                ->delete();
-        }
+        // The Spatie package handles the diffing and database updates automatically
+        $role->syncPermissions($selectedPermissionIds);
 
         Flux::toast(variant: 'success', text: 'Role permissions updated successfully.');
         $this->closePermissionModal();

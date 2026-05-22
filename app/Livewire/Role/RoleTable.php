@@ -3,7 +3,6 @@
 namespace App\Livewire\Role;
 
 use App\Actions\Role\DeleteRoleAction;
-use Spatie\Permission\Models\Role;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -13,6 +12,7 @@ use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
+use Spatie\Permission\Models\Role;
 
 final class RoleTable extends PowerGridComponent
 {
@@ -46,7 +46,7 @@ final class RoleTable extends PowerGridComponent
 
         return Role::query()
             ->select('roles.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY ' . $sortField . ' ' . $sortDirection . ') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -60,7 +60,7 @@ final class RoleTable extends PowerGridComponent
             ->add('no')
             ->add('name')
             ->add('guard_name')
-            ->add('created_at_formatted', fn(Role $model) => optional($model->created_at)?->format('d M Y H:i'));
+            ->add('created_at_formatted', fn (Role $model) => optional($model->created_at)?->format('d M Y H:i'));
     }
 
     public function columns(): array

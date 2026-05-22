@@ -23,6 +23,8 @@ class MemberResource extends JsonResource
             'referral_code' => $this->referral_code,
             'email_verified_at' => $this->email_verified_at?->toIso8601String(),
             'last_login_at' => $this->last_login_at?->toIso8601String(),
+            'profile' => MemberProfileResource::make($this->whenLoaded('profile')),
+            'network' => MemberNetworkResource::make($this->whenLoaded('network')),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

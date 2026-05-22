@@ -25,7 +25,6 @@ class Province extends Model implements Auditable
     protected $fillable = [
         'country_id',
         'name',
-        'code',
     ];
 
     /**
