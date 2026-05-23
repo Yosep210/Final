@@ -15,6 +15,8 @@ use App\Http\Resources\MemberResource;
 use App\Models\Member;
 use App\Models\MemberNetwork;
 use Illuminate\Http\JsonResponse;
+use App\Http\Requests\Member\PromoteMemberRequest;
+use App\Services\MemberRankService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -70,13 +72,20 @@ class MemberController extends Controller
         return response()->json($network);
     }
 
-    public function promote(Request $request, Member $member): JsonResponse
+    public function promote(PromoteMemberRequest $request, Member $member, MemberRankService $rankService): JsonResponse
     {
         $this->authorize('update', $member);
+        $payload = $request->validatedPayload();
 
-        $payload = $request->all();
-
-        event(new MemberPromoted($member, $payload));
+        // Optionally evaluate rank server-side and persist
+        if (isset($payload['rank'])) {
+            // write to network via listener or directly
+            event(new MemberPromoted($member, $payload));
+        } else {
+            // evaluate based on metrics
+            $newRank = $rankService->evaluateAndAssign($member);
+            event(new MemberPromoted($member, array_merge($payload, ['rank' => $newRank])));
+        }
 
         return response()->json(['status' => 'ok']);
     }

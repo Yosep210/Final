@@ -21,6 +21,18 @@ class MemberNetwork extends Model
         'generation',
         'group',
         'rank',
+        'left_volume',
+        'right_volume',
+        'total_volume',
+        'qualified_legs',
+        'current_rank',
+    ];
+
+    protected $casts = [
+        'left_volume' => 'decimal:2',
+        'right_volume' => 'decimal:2',
+        'total_volume' => 'decimal:2',
+        'qualified_legs' => 'integer',
     ];
 
     public function member()

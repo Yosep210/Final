@@ -30,9 +30,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        // Register simple event listeners for member network operations
-        Event::listen(MemberRegistered::class, [CreateMemberNetworkListener::class, 'handle']);
-        Event::listen(MemberPromoted::class, [UpdateMemberHierarchyListener::class, 'handle']);
+        // Event listeners moved to EventServiceProvider for clearer structure.
     }
 
     /**
@@ -46,14 +44,15 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
+        Password::defaults(
+            fn(): ?Password => app()->isProduction()
+                ? Password::min(12)
                 ->mixedCase()
                 ->letters()
                 ->numbers()
                 ->symbols()
                 ->uncompromised()
-            : null,
+                : null,
         );
     }
 }
