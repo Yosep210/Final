@@ -126,17 +126,5 @@ return [
             //         ],
             //     ],
         ],
-        [
-            'heading' => 'Transactions',
-            'icon' => 'currency-dollar',
-            'route' => ['transaction.*'],
-            'sub' => [
-                [
-                    'title' => 'Transaction List',
-                    'href' => 'dashboard',
-                    // 'role' => 'admin',
-                ],
-            ],
-        ],
     ],
 ];

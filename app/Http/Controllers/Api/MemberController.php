@@ -9,15 +9,14 @@ use App\Actions\Member\UpdateMemberAction;
 use App\Data\MemberData;
 use App\Events\MemberPromoted;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Member\PromoteMemberRequest;
 use App\Http\Requests\Member\StoreMemberRequest;
 use App\Http\Requests\Member\UpdateMemberRequest;
 use App\Http\Resources\MemberResource;
 use App\Models\Member;
 use App\Models\MemberNetwork;
-use Illuminate\Http\JsonResponse;
-use App\Http\Requests\Member\PromoteMemberRequest;
 use App\Services\MemberRankService;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
 class MemberController extends Controller
