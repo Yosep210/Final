@@ -4,21 +4,20 @@ namespace App\Livewire\Member;
 
 use App\Actions\Member\CreateMemberAction;
 use App\Actions\Member\Profile\CreateProfileAction;
+use App\Actions\Member\Profile\UpdateProfileAction;
 use App\Actions\Member\UpdateMemberAction;
 use App\Data\MemberData;
 use App\Data\MemberProfileData;
 use App\Http\Requests\Member\Profile\StoreProfileRequest;
 use App\Http\Requests\Member\StoreMemberRequest;
-use App\Models\City;
 use App\Models\Country;
-use App\Models\District;
 use App\Models\Member;
 use App\Models\MemberNetwork;
-use App\Models\Province;
-use App\Models\Village;
 use App\Services\MemberNetworkPlacementService;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Password as PasswordBroker;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\On;
@@ -29,6 +28,8 @@ use Livewire\Component;
 class Index extends Component
 {
     use AuthorizesRequests;
+
+    public bool $canManageMembers = false;
 
     public bool $showModal = false;
 
@@ -49,6 +50,12 @@ class Index extends Component
      */
     public array $network = [];
 
+    public ?string $phoneCode = null;
+
+    public string $phoneNumber = '';
+
+    public ?int $countryId = null;
+
     public string $sponsorUsername = '';
 
     public ?string $sponsorName = null;
@@ -59,6 +66,8 @@ class Index extends Component
 
     public function mount(): void
     {
+        $this->authorize('viewAny', Member::class);
+        $this->canManageMembers = auth()->user()?->can('create', Member::class) ?? false;
         $this->resetForm();
     }
 
@@ -75,7 +84,7 @@ class Index extends Component
     #[On('member:edit')]
     public function edit(int $memberId): void
     {
-        $member = Member::query()->findOrFail($memberId);
+        $member = Member::query()->with(['profile', 'network.sponsor', 'network.parent'])->findOrFail($memberId);
         $this->authorize('Update', $member);
 
         $this->editingMemberId = $member->id;
@@ -91,12 +100,22 @@ class Index extends Component
             'last_login_at' => optional($member->last_login_at)->format('Y-m-d\TH:i'),
         ];
 
+        $this->fillProfileForm($member);
+        $this->fillNetworkForm($member);
+
         $this->resetValidation();
         $this->showModal = true;
     }
 
     public function save(): void
     {
+        // Combine phone code + phone number
+        if ($this->phoneCode && $this->phoneNumber) {
+            $this->profile['phone'] = $this->phoneCode.preg_replace('/^0+/', '', $this->phoneNumber);
+        } elseif ($this->phoneNumber) {
+            $this->profile['phone'] = $this->phoneNumber;
+        }
+
         $member = $this->editingMemberId
             ? Member::query()->findOrFail($this->editingMemberId)
             : null;
@@ -108,10 +127,31 @@ class Index extends Component
         }
 
         $validated = $this->validate($this->rules($member), [], $this->attributes());
+
+        if (! $member) {
+            $temporaryPassword = $this->generateTemporaryPassword();
+            $validated['form']['password'] = $temporaryPassword;
+            $validated['form']['password_confirmation'] = $temporaryPassword;
+        }
+
         $memberData = MemberData::fromArray($validated['form']);
 
         if ($member) {
             UpdateMemberAction::run($member, $memberData);
+
+            if ($this->hasProfileInput($validated['profile'] ?? [])) {
+                $profileArr = $validated['profile'];
+                $profileArr['member_id'] = $member->id;
+                $profileData = MemberProfileData::fromArray($profileArr);
+
+                if ($member->profile) {
+                    UpdateProfileAction::run($member->profile, $profileData);
+                } else {
+                    CreateProfileAction::run($profileData);
+                }
+            }
+
+            $this->syncNetwork($member, $validated);
             Flux::toast(variant: 'success', text: 'Member updated successfully.');
         } else {
             $created = CreateMemberAction::run($memberData);
@@ -123,46 +163,8 @@ class Index extends Component
                 CreateProfileAction::run($profileData);
             }
 
-            if ($this->hasNetworkInput($validated['network'] ?? []) || ! empty($validated['sponsorUsername']) || ! empty($validated['parentUsername'])) {
-                $networkArr = $validated['network'];
-                $networkArr['member_id'] = $created->id;
-
-                if (! empty($validated['sponsorUsername'])) {
-                    $networkArr['sponsored_id'] = Member::query()
-                        ->where('username', $validated['sponsorUsername'])
-                        ->value('id');
-                }
-
-                if (! empty($validated['parentUsername'])) {
-                    $networkArr['parent_id'] = Member::query()
-                        ->where('username', $validated['parentUsername'])
-                        ->value('id');
-                }
-
-                $placementService = app(MemberNetworkPlacementService::class);
-                $resolvedNetwork = $placementService->resolvePlacement(
-                    $created,
-                    $created->referral_code,
-                    $networkArr['sponsored_id'] ?? null,
-                    $networkArr['parent_id'] ?? null,
-                    $networkArr['position'] ?? null,
-                );
-
-                $networkArr = array_merge($resolvedNetwork, array_filter([
-                    'group' => $networkArr['group'] ?? null,
-                    'rank' => $networkArr['rank'] ?? null,
-                    'generation' => $networkArr['generation'] ?? null,
-                    'path' => $networkArr['path'] ?? null,
-                ], fn ($value) => $value !== null));
-
-                MemberNetwork::updateOrCreate(
-                    ['member_id' => $created->id],
-                    $networkArr,
-                );
-
-                $sponsor = isset($networkArr['sponsored_id']) ? Member::find($networkArr['sponsored_id']) : null;
-                $placementService->updateSponsorRank($sponsor);
-            }
+            $this->syncNetwork($created, $validated);
+            $this->sendPasswordSetupLink($created);
 
             Flux::toast(variant: 'success', text: 'Member created successfully.');
         }
@@ -192,47 +194,18 @@ class Index extends Component
      */
     private function getLocationOptions(): array
     {
-        if (! $this->showModal) {
-            return [
-                'countries' => [],
-                'provinces' => [],
-                'cities' => [],
-                'districts' => [],
-                'villages' => [],
-            ];
-        }
-
-        $profile = $this->profile;
-
-        $countryId = $profile['country_id'] ?? null;
-        $provinceId = $profile['province_id'] ?? null;
-        $cityId = $profile['city_id'] ?? null;
-        $districtId = $profile['district_id'] ?? null;
-
         return [
-            'countries' => Country::where('status', true)->orderBy('name')->pluck('name', 'id')->all(),
-
-            'provinces' => ! empty($countryId)
-                ? Province::where('country_id', $countryId)->orderBy('name')->pluck('name', 'id')->all()
-                : [],
-
-            'cities' => ! empty($provinceId)
-                ? City::where('province_id', $provinceId)->orderBy('name')->pluck('name', 'id')->all()
-                : [],
-
-            'districts' => ! empty($cityId)
-                ? District::where('city_id', $cityId)->orderBy('name')->pluck('name', 'id')->all()
-                : [],
-
-            'villages' => ! empty($districtId)
-                ? Village::where('district_id', $districtId)->orderBy('name')->pluck('name', 'id')->all()
-                : [],
+            'countries' => Country::where('status', true)->orderBy('nice_name')->pluck('nice_name', 'id')->all(),
         ];
     }
 
     public function updatedProfile($value, $key): void
     {
-        // Reset level di bawahnya jika level di atasnya berubah
+        if ($key === 'country_id') {
+            $this->phoneCode = $this->resolvePhoneCodeFromCountry($value);
+            $this->phoneNumber = ''; // Reset nomor saat negara berubah
+        }
+
         $resets = [
             'country_id' => ['province_id', 'city_id', 'district_id', 'village_id'],
             'province_id' => ['city_id', 'district_id', 'village_id'],
@@ -280,12 +253,8 @@ class Index extends Component
         $rules['sponsorUsername'] = ['nullable', 'string', Rule::exists('members', 'username')];
         $rules['parentUsername'] = ['nullable', 'string', Rule::exists('members', 'username')];
 
-        $rules['form.password'] = $member
-            ? ['nullable', 'string', Password::default(), 'confirmed']
-            : ['required', 'string', Password::default(), 'confirmed'];
-        $rules['form.password_confirmation'] = $member
-            ? ['nullable', 'string']
-            : ['required', 'string'];
+        $rules['form.password'] = ['nullable', 'string', Password::default(), 'confirmed'];
+        $rules['form.password_confirmation'] = ['nullable', 'string'];
 
         return $rules;
     }
@@ -343,6 +312,52 @@ class Index extends Component
         return false;
     }
 
+    private function syncNetwork(Member $member, array $validated): void
+    {
+        if (! $this->hasNetworkInput($validated['network'] ?? []) && empty($validated['sponsorUsername']) && empty($validated['parentUsername'])) {
+            return;
+        }
+
+        $networkArr = $validated['network'] ?? [];
+        $networkArr['member_id'] = $member->id;
+
+        if (! empty($validated['sponsorUsername'])) {
+            $networkArr['sponsored_id'] = Member::query()
+                ->where('username', $validated['sponsorUsername'])
+                ->value('id');
+        }
+
+        if (! empty($validated['parentUsername'])) {
+            $networkArr['parent_id'] = Member::query()
+                ->where('username', $validated['parentUsername'])
+                ->value('id');
+        }
+
+        $placementService = app(MemberNetworkPlacementService::class);
+        $resolvedNetwork = $placementService->resolvePlacement(
+            $member,
+            null,
+            $networkArr['sponsored_id'] ?? null,
+            $networkArr['parent_id'] ?? null,
+            $networkArr['position'] ?? null,
+        );
+
+        $networkArr = array_merge($resolvedNetwork, array_filter([
+            'group' => $networkArr['group'] ?? null,
+            'rank' => $networkArr['rank'] ?? null,
+            'generation' => $networkArr['generation'] ?? null,
+            'path' => $networkArr['path'] ?? null,
+        ], fn ($value) => $value !== null));
+
+        MemberNetwork::updateOrCreate(
+            ['member_id' => $member->id],
+            $networkArr,
+        );
+
+        $sponsor = isset($networkArr['sponsored_id']) ? Member::find($networkArr['sponsored_id']) : null;
+        $placementService->updateSponsorRank($sponsor);
+    }
+
     public function updatedSponsorUsername(): void
     {
         $this->resolveSponsorUsername();
@@ -381,6 +396,115 @@ class Index extends Component
         $this->network['parent_id'] = $member?->id;
     }
 
+    private function resolveDefaultCountryId(): ?int
+    {
+        // Indonesia: iso bisa 'ID' atau 'id', nice_name='Indonesia'
+        return Country::where('status', true)
+            ->where(function ($query) {
+                $query->whereRaw('UPPER(iso) = ?', ['ID'])
+                    ->orWhere('nice_name', 'Indonesia');
+            })
+            ->first()?->id;
+    }
+
+    private function resolvePhoneCodeFromCountry(?int $countryId): ?string
+    {
+        if (! $countryId) {
+            return null;
+        }
+
+        $phonecode = Country::where('id', $countryId)->value('phonecode');
+
+        return $phonecode ? '+'.ltrim((string) $phonecode, '+') : null;
+    }
+
+    private function generateTemporaryPassword(): string
+    {
+        return 'Tmp#'.Str::random(12).'9a';
+    }
+
+    private function sendPasswordSetupLink(Member $member): void
+    {
+        try {
+            $status = PasswordBroker::broker(config('fortify.passwords'))->sendResetLink([
+                'email' => $member->email,
+            ]);
+
+            if ($status !== PasswordBroker::RESET_LINK_SENT) {
+                Flux::toast(variant: 'warning', text: 'Member created, but the password setup email could not be sent.');
+            }
+        } catch (\Throwable) {
+            Flux::toast(variant: 'warning', text: 'Member created, but the password setup email could not be sent.');
+        }
+    }
+
+    private function fillProfileForm(Member $member): void
+    {
+        $profile = $member->profile;
+
+        if (! $profile) {
+            return;
+        }
+
+        $this->profile = [
+            'member_id' => $member->id,
+            'gender' => $profile->gender,
+            'birth_date' => $profile->birth_date?->format('Y-m-d'),
+            'phone' => $profile->phone,
+            'profile_photo' => $profile->profile_photo,
+            'country_id' => $profile->country_id !== null ? (string) $profile->country_id : '',
+            'province_id' => $profile->province_id,
+            'city_id' => $profile->city_id,
+            'district_id' => $profile->district_id,
+            'village_id' => $profile->village_id,
+            'address' => $profile->address,
+            'id_card_number' => $profile->id_card_number,
+            'id_card_photo' => $profile->id_card_photo,
+            'npwp_number' => $profile->npwp_number,
+        ];
+
+        $this->phoneCode = $this->resolvePhoneCodeFromCountry($profile->country_id);
+        $this->phoneNumber = $this->extractPhoneNumber($profile->phone, $this->phoneCode);
+    }
+
+    private function fillNetworkForm(Member $member): void
+    {
+        $network = $member->network;
+
+        if (! $network) {
+            return;
+        }
+
+        $this->network = [
+            'member_id' => $member->id,
+            'sponsored_id' => $network->sponsored_id,
+            'parent_id' => $network->parent_id,
+            'position' => $network->position,
+            'path' => $network->path,
+            'generation' => $network->generation,
+            'group' => $network->group,
+            'rank' => $network->rank,
+        ];
+
+        $this->sponsorUsername = $network->sponsor?->username ?? '';
+        $this->sponsorName = $network->sponsor?->name;
+        $this->parentUsername = $network->parent?->username ?? '';
+        $this->parentName = $network->parent?->name;
+    }
+
+    private function extractPhoneNumber(?string $phone, ?string $phoneCode): string
+    {
+        if (! $phone) {
+            return '';
+        }
+
+        if ($phoneCode && str_starts_with($phone, $phoneCode)) {
+            return ltrim(substr($phone, strlen($phoneCode)), '0');
+        }
+
+        return $phone;
+    }
+
     private function resetForm(): void
     {
         $this->form = [
@@ -395,19 +519,24 @@ class Index extends Component
             'last_login_at' => '',
         ];
 
+        $defaultCountryId = $this->resolveDefaultCountryId();
+
         $this->profile = [
             'member_id' => null,
             'gender' => null,
             'birth_date' => null,
             'phone' => null,
             'profile_photo' => null,
-            'country_id' => null,
+            'country_id' => $defaultCountryId !== null ? (string) $defaultCountryId : '',
             'province_id' => null,
             'city_id' => null,
             'district_id' => null,
             'village_id' => null,
             'address' => null,
         ];
+
+        $this->phoneCode = $this->resolvePhoneCodeFromCountry($defaultCountryId);
+        $this->phoneNumber = '';
 
         $this->network = [
             'member_id' => null,

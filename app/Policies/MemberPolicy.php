@@ -6,6 +6,11 @@ use App\Models\Member;
 
 class MemberPolicy
 {
+    private function isAdmin(Member $member): bool
+    {
+        return $member->status === 'active' && $member->hasRole('Admin');
+    }
+
     /**
      * Determine whether the member can view any members.
      */
@@ -19,7 +24,7 @@ class MemberPolicy
      */
     public function view(Member $member, Member $model): bool
     {
-        return $member->id === $model->id || $member->status === 'active';
+        return $this->isAdmin($member);
     }
 
     /**
@@ -27,7 +32,7 @@ class MemberPolicy
      */
     public function create(Member $member): bool
     {
-        return $member->status === 'active';
+        return $this->isAdmin($member);
     }
 
     /**
@@ -35,7 +40,7 @@ class MemberPolicy
      */
     public function update(Member $member, Member $model): bool
     {
-        return $member->id === $model->id || $member->status === 'active';
+        return $this->isAdmin($member);
     }
 
     /**
@@ -43,7 +48,7 @@ class MemberPolicy
      */
     public function delete(Member $member, Member $model): bool
     {
-        return $member->id === $model->id || $member->status === 'active';
+        return $this->isAdmin($member);
     }
 
     /**
@@ -51,7 +56,7 @@ class MemberPolicy
      */
     public function restore(Member $member, Member $model): bool
     {
-        return $member->status === 'active';
+        return $this->isAdmin($member);
     }
 
     /**
@@ -59,6 +64,6 @@ class MemberPolicy
      */
     public function forceDelete(Member $member, Member $model): bool
     {
-        return $member->status === 'active';
+        return $this->isAdmin($member);
     }
 }

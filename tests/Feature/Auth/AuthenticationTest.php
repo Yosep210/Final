@@ -9,11 +9,11 @@ test('login screen can be rendered', function () {
     $response->assertOk();
 });
 
-test('users can authenticate using the login screen', function () {
-    $user = Member::factory()->create();
+test('members can authenticate using the login screen', function () {
+    $member = Member::factory()->create();
 
     $response = $this->post(route('login.store'), [
-        'username' => $user->username,
+        'username' => $member->username,
         'password' => 'password',
     ]);
 
@@ -24,11 +24,11 @@ test('users can authenticate using the login screen', function () {
     $this->assertAuthenticated();
 });
 
-test('users can not authenticate with invalid password', function () {
-    $user = Member::factory()->create();
+test('members can not authenticate with invalid password', function () {
+    $member = Member::factory()->create();
 
     $response = $this->post(route('login.store'), [
-        'username' => $user->username,
+        'username' => $member->username,
         'password' => 'wrong-password',
     ]);
 
@@ -37,7 +37,7 @@ test('users can not authenticate with invalid password', function () {
     $this->assertGuest();
 });
 
-test('users with two factor enabled are redirected to two factor challenge', function () {
+test('members with two factor enabled are redirected to two factor challenge', function () {
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
 
     Features::twoFactorAuthentication([
@@ -45,10 +45,10 @@ test('users with two factor enabled are redirected to two factor challenge', fun
         'confirmPassword' => true,
     ]);
 
-    $user = Member::factory()->withTwoFactor()->create();
+    $member = Member::factory()->withTwoFactor()->create();
 
     $response = $this->post(route('login.store'), [
-        'username' => $user->username,
+        'username' => $member->username,
         'password' => 'password',
     ]);
 
@@ -56,10 +56,10 @@ test('users with two factor enabled are redirected to two factor challenge', fun
     $this->assertGuest();
 });
 
-test('users can logout', function () {
-    $user = Member::factory()->create();
+test('members can logout', function () {
+    $member = Member::factory()->create();
 
-    $response = $this->actingAs($user)->post(route('logout'));
+    $response = $this->actingAs($member)->post(route('logout'));
 
     $response->assertRedirect(route('home'));
 

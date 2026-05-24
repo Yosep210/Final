@@ -21,7 +21,7 @@ class RecoveryCodes extends Component
     }
 
     /**
-     * Generate new recovery codes for the user.
+     * Generate new recovery codes for the member.
      */
     public function regenerateRecoveryCodes(GenerateNewRecoveryCodes $generateNewRecoveryCodes): void
     {
@@ -31,15 +31,15 @@ class RecoveryCodes extends Component
     }
 
     /**
-     * Load the recovery codes for the user.
+     * Load the recovery codes for the member.
      */
     private function loadRecoveryCodes(): void
     {
-        $user = auth()->user();
+        $member = auth()->user();
 
-        if ($user->hasEnabledTwoFactorAuthentication() && $user->two_factor_recovery_codes) {
+        if ($member->hasEnabledTwoFactorAuthentication() && $member->two_factor_recovery_codes) {
             try {
-                $this->recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
+                $this->recoveryCodes = json_decode(decrypt($member->two_factor_recovery_codes), true);
             } catch (Exception) {
                 $this->addError('recoveryCodes', 'Failed to load recovery codes');
 

@@ -27,8 +27,13 @@ final class MemberTable extends PowerGridComponent
 
     public string $sortDirection = 'asc';
 
+    public bool $canManageMembers = false;
+
     public function setUp(): array
     {
+        $this->authorize('viewAny', Member::class);
+        $this->canManageMembers = auth()->user()?->can('create', Member::class) ?? false;
+
         return [
             PowerGrid::footer()
                 ->showPerPage()
@@ -103,6 +108,10 @@ final class MemberTable extends PowerGridComponent
 
     public function actions(Member $member): array
     {
+        if (! $this->canManageMembers) {
+            return [];
+        }
+
         return [
             Button::add('edit')
                 ->slot('Edit')

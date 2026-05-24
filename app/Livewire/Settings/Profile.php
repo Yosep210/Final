@@ -17,6 +17,8 @@ class Profile extends Component
 
     public string $name = '';
 
+    public string $username = '';
+
     public string $email = '';
 
     /**
@@ -25,43 +27,44 @@ class Profile extends Component
     public function mount(): void
     {
         $this->name = Auth::user()->name;
+        $this->username = Auth::user()->username;
         $this->email = Auth::user()->email;
     }
 
     /**
-     * Update the profile information for the currently authenticated user.
+     * Update the profile information for the currently authenticated member.
      */
     public function updateProfileInformation(): void
     {
-        $user = Auth::user();
+        $member = Auth::user();
 
-        $validated = $this->validate($this->profileRules($user->id));
+        $validated = $this->validate($this->profileRules($member->id));
 
-        $user->fill($validated);
+        $member->fill($validated);
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+        if ($member->isDirty('email')) {
+            $member->email_verified_at = null;
         }
 
-        $user->save();
+        $member->save();
 
         Flux::toast(variant: 'success', text: __('Profile updated.'));
     }
 
     /**
-     * Send an email verification notification to the current user.
+     * Send an email verification notification to the current member.
      */
     public function resendVerificationNotification(): void
     {
-        $user = Auth::user();
+        $member = Auth::user();
 
-        if ($user->hasVerifiedEmail()) {
+        if ($member->hasVerifiedEmail()) {
             $this->redirectIntended(default: route('dashboard', absolute: false));
 
             return;
         }
 
-        $user->sendEmailVerificationNotification();
+        $member->sendEmailVerificationNotification();
 
         Flux::toast(text: __('A new verification link has been sent to your email address.'));
     }
@@ -73,7 +76,7 @@ class Profile extends Component
     }
 
     #[Computed]
-    public function showDeleteUser(): bool
+    public function showDeleteMember(): bool
     {
         return ! Auth::user() instanceof MustVerifyEmail
             || (Auth::user() instanceof MustVerifyEmail && Auth::user()->hasVerifiedEmail());

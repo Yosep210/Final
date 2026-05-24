@@ -39,11 +39,11 @@
         </flux:sidebar.nav>
 
         <div class="hidden lg:block">
-            <x-desktop-user-menu :name="auth()->user()->name" />
+            <x-desktop-member-menu :name="auth()->user()->name" />
         </div>
     </flux:sidebar>
 
-    <!-- Mobile User Menu -->
+    <!-- Mobile Member Menu -->
     <flux:header class="lg:hidden">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 

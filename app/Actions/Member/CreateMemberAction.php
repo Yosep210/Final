@@ -7,6 +7,7 @@ use App\Events\MemberRegistered;
 use App\Models\Member;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Spatie\Permission\Models\Role;
 
 class CreateMemberAction
 {
@@ -21,6 +22,8 @@ class CreateMemberAction
         }
 
         $member = Member::query()->create($attributes);
+        Role::findOrCreate('Member', 'web');
+        $member->assignRole('Member');
 
         event(new MemberRegistered($member));
 

@@ -3,8 +3,21 @@
 use App\Models\Member;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
+
+function actingAsAdmin(): Member
+{
+    Role::findOrCreate('Admin', 'web');
+
+    $admin = Member::factory()->active()->create();
+    $admin->assignRole('Admin');
+
+    Sanctum::actingAs($admin);
+
+    return $admin;
+}
 
 function memberPayload(array $overrides = []): array
 {
@@ -22,7 +35,7 @@ function memberPayload(array $overrides = []): array
 }
 
 it('returns a paginated member list', function () {
-    Sanctum::actingAs(Member::factory()->active()->create());
+    actingAsAdmin();
 
     Member::factory()->create(['username' => 'member1', 'email' => 'member1@example.com']);
     Member::factory()->create(['username' => 'member2', 'email' => 'member2@example.com']);
@@ -39,7 +52,7 @@ it('returns a paginated member list', function () {
 });
 
 it('stores a member', function () {
-    Sanctum::actingAs(Member::factory()->active()->create());
+    actingAsAdmin();
 
     $this->postJson(route('members.store'), memberPayload())
         ->assertCreated()
@@ -52,7 +65,7 @@ it('stores a member', function () {
 });
 
 it('fails to store a duplicate member username', function () {
-    Sanctum::actingAs(Member::factory()->active()->create());
+    actingAsAdmin();
     Member::factory()->create(['username' => 'johndoe', 'email' => 'other@example.com']);
 
     $this->postJson(route('members.store'), memberPayload())
@@ -61,7 +74,7 @@ it('fails to store a duplicate member username', function () {
 });
 
 it('shows a member', function () {
-    Sanctum::actingAs(Member::factory()->active()->create());
+    actingAsAdmin();
     $member = Member::factory()->create();
 
     $this->getJson(route('members.show', $member))
@@ -70,7 +83,7 @@ it('shows a member', function () {
 });
 
 it('updates a member', function () {
-    Sanctum::actingAs(Member::factory()->active()->create());
+    actingAsAdmin();
     $member = Member::factory()->create();
 
     $this->putJson(route('members.update', $member), memberPayload([
@@ -91,11 +104,30 @@ it('updates a member', function () {
 });
 
 it('deletes a member', function () {
-    Sanctum::actingAs(Member::factory()->active()->create());
+    actingAsAdmin();
     $member = Member::factory()->create();
 
     $this->deleteJson(route('members.destroy', $member))
         ->assertNoContent();
 
     $this->assertSoftDeleted('members', ['id' => $member->id]);
+});
+
+it('rejects guests from listing members', function () {
+    $this->getJson(route('members.index'))
+        ->assertUnauthorized();
+});
+
+it('allows non-admin active users to list members', function () {
+    Sanctum::actingAs(Member::factory()->active()->create());
+
+    $this->getJson(route('members.index'))
+        ->assertOk();
+});
+
+it('forbids non-admin users from storing members', function () {
+    Sanctum::actingAs(Member::factory()->active()->create());
+
+    $this->postJson(route('members.store'), memberPayload())
+        ->assertForbidden();
 });

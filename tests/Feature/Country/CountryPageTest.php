@@ -2,13 +2,17 @@
 
 use App\Models\Member;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
-it('renders the country management page for authenticated users', function () {
-    $user = Member::factory()->create();
+it('renders the country management page for authenticated members', function () {
+    Role::findOrCreate('Admin', 'web');
 
-    $this->actingAs($user)
+    $member = Member::factory()->active()->create();
+    $member->assignRole('Admin');
+
+    $this->actingAs($member)
         ->get(route('country.index'))
         ->assertOk()
         ->assertSee('Country')

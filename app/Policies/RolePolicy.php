@@ -12,7 +12,7 @@ class RolePolicy
      */
     public function viewAny(Member $member): bool
     {
-        return $member->hasRole('admin') || $member->status === 'active';
+        return $member->hasRole('Admin') || $member->status === 'active';
     }
 
     /**
@@ -20,7 +20,7 @@ class RolePolicy
      */
     public function view(Member $member, Role $role): bool
     {
-        return $member->hasRole('admin') || $member->status === 'active';
+        return $member->hasRole('Admin') || $member->status === 'active';
     }
 
     /**
@@ -28,7 +28,7 @@ class RolePolicy
      */
     public function create(Member $member): bool
     {
-        return $member->hasRole('admin');
+        return $member->hasRole('Admin');
     }
 
     /**
@@ -36,7 +36,7 @@ class RolePolicy
      */
     public function update(Member $member, Role $role): bool
     {
-        return $member->hasRole('admin');
+        return $member->hasRole('Admin');
     }
 
     /**
@@ -44,6 +44,6 @@ class RolePolicy
      */
     public function delete(Member $member, Role $role): bool
     {
-        return $member->hasRole('admin') && ! $role->users()->exists(); // Business guard: jangan hapus jika ada user yang pakai
+        return $member->hasRole('Admin') && ! $role->users()->exists(); // Business guard: jangan hapus jika ada user yang pakai
     }
 }

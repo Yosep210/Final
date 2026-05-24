@@ -19,9 +19,13 @@ class CreateMemberNetworkListener
     {
         $member = $event->member;
 
+        if ($member->network()->exists()) {
+            return;
+        }
+
         $networkData = $this->placementService->resolvePlacement(
             $member,
-            $member->referral_code,
+            null,
             null,
             null,
             null,

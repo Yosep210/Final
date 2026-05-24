@@ -7,8 +7,9 @@ use App\Concerns\ProfileValidationRules;
 use App\Models\Member;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Spatie\Permission\Models\Role;
 
-class CreateNewUser implements CreatesNewUsers
+class CreateNewMember implements CreatesNewUsers
 {
     use PasswordValidationRules, ProfileValidationRules;
 
@@ -24,11 +25,16 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return Member::create([
+        $member = Member::create([
             'name' => $input['name'],
             'username' => $input['username'],
             'email' => $input['email'],
             'password' => $input['password'],
         ]);
+
+        Role::findOrCreate('Member', 'web');
+        $member->assignRole('Member');
+
+        return $member;
     }
 }

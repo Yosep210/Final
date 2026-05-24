@@ -69,7 +69,7 @@ class Security extends Component
     }
 
     /**
-     * Update the password for the currently authenticated user.
+     * Update the password for the currently authenticated member.
      */
     public function updatePassword(): void
     {
@@ -94,7 +94,7 @@ class Security extends Component
     }
 
     /**
-     * Enable two-factor authentication for the user.
+     * Enable two-factor authentication for the member.
      */
     public function enable(EnableTwoFactorAuthentication $enableTwoFactorAuthentication): void
     {
@@ -110,15 +110,15 @@ class Security extends Component
     }
 
     /**
-     * Load the two-factor authentication setup data for the user.
+     * Load the two-factor authentication setup data for the member.
      */
     private function loadSetupData(): void
     {
-        $user = auth()->user();
+        $member = auth()->user();
 
         try {
-            $this->qrCodeSvg = $user?->twoFactorQrCodeSvg();
-            $this->manualSetupKey = decrypt($user->two_factor_secret);
+            $this->qrCodeSvg = $member?->twoFactorQrCodeSvg();
+            $this->manualSetupKey = decrypt($member->two_factor_secret);
         } catch (Exception) {
             $this->addError('setupData', 'Failed to fetch setup data.');
 
@@ -143,7 +143,7 @@ class Security extends Component
     }
 
     /**
-     * Confirm two-factor authentication for the user.
+     * Confirm two-factor authentication for the member.
      */
     public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirmTwoFactorAuthentication): void
     {
@@ -167,7 +167,7 @@ class Security extends Component
     }
 
     /**
-     * Disable two-factor authentication for the user.
+     * Disable two-factor authentication for the member.
      */
     public function disable(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
     {
