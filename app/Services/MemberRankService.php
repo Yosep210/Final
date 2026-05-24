@@ -22,7 +22,7 @@ class MemberRankService
 
         $left = (float) $network->left_volume;
         $right = (float) $network->right_volume;
-        $personal = Member::where('sponsored_id', $member->id)->count();
+        $personal = MemberNetwork::where('sponsored_id', $member->id)->count();
 
         // Example thresholds
         if ($personal >= 4 && $left >= 2000 && $right >= 2000) {

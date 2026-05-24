@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDisplayName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class District extends Model implements Auditable
 {
     use AuditableTrait;
+    use HasDisplayName;
     use HasFactory;
     use LogsActivity;
 
@@ -33,6 +35,11 @@ class District extends Model implements Auditable
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function villages()
+    {
+        return $this->hasMany(Village::class);
     }
 
     /**

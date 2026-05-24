@@ -19,6 +19,17 @@ trait ProfileValidationRules
             'name' => $this->nameRules(),
             'username' => $this->usernameRules($memberId),
             'email' => $this->emailRules($memberId),
+            'gender' => ['nullable', 'string', 'in:male,female'],
+            'birth_date' => ['nullable', 'date'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'country_id' => ['nullable', 'integer', Rule::exists('countries', 'id')],
+            'province_id' => ['nullable', 'integer', Rule::exists('provinces', 'id')],
+            'city_id' => ['nullable', 'integer', Rule::exists('cities', 'id')],
+            'district_id' => ['nullable', 'integer', Rule::exists('districts', 'id')],
+            'village_id' => ['nullable', 'integer', Rule::exists('villages', 'id')],
+            'address' => ['nullable', 'string', 'max:255'],
+            'id_card_number' => ['nullable', 'string', 'max:255'],
+            'npwp_number' => ['nullable', 'string', 'max:255'],
         ];
     }
 

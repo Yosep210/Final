@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDisplayName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class Village extends Model implements Auditable
 {
     use AuditableTrait;
+    use HasDisplayName;
     use HasFactory;
     use LogsActivity;
 

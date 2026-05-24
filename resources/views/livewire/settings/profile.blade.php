@@ -5,10 +5,12 @@
 
     <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
-            <flux:input wire:model="username" :label="__('Username')" type="text" required autocomplete="username" />
+            <div class="grid gap-4 md:grid-cols-2">
 
-            <div>
+                <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+                <flux:input wire:model="username" :label="__('Username')" type="text" required
+                    autocomplete="username" />
+
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
 
                 @if ($this->hasUnverifiedEmail)
@@ -23,6 +25,55 @@
 
                 </div>
                 @endif
+
+                <flux:input wire:model="phone" :label="__('Phone / WhatsApp')" type="tel" />
+                <flux:input wire:model="id_card_number" :label="__('ID Card Number')" />
+                <flux:input wire:model="npwp_number" :label="__('NPWP Number')" />
+
+                <flux:select wire:model="gender" :label="__('Gender')">
+                    <flux:select.option value="">{{ __('Select gender') }}</flux:select.option>
+                    <flux:select.option value="male">{{ __('Male') }}</flux:select.option>
+                    <flux:select.option value="female">{{ __('Female') }}</flux:select.option>
+                </flux:select>
+
+                <flux:input wire:model="birth_date" type="date" :label="__('Birth Date')" />
+
+                <flux:select wire:model="country_id" :label="__('Country')">
+                    <flux:select.option value="">{{ __('Select a country') }}</flux:select.option>
+                    @foreach($countries as $id => $country)
+                    <flux:select.option :value="$id">{{ $country }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
+                <flux:select wire:model="province_id" :label="__('Province')">
+                    <flux:select.option value="">{{ __('Select a province') }}</flux:select.option>
+                    @foreach($provinces as $id => $province)
+                    <flux:select.option :value="$id">{{ $province }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
+                <flux:select wire:model="city_id" :label="__('City')">
+                    <flux:select.option value="">{{ __('Select a city') }}</flux:select.option>
+                    @foreach($cities as $id => $city)
+                    <flux:select.option :value="$id">{{ $city }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
+                <flux:select wire:model="district_id" :label="__('District')">
+                    <flux:select.option value="">{{ __('Select a district') }}</flux:select.option>
+                    @foreach($districts as $id => $district)
+                    <flux:select.option :value="$id">{{ $district }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
+                <flux:select wire:model="village_id" :label="__('Village')">
+                    <flux:select.option value="">{{ __('Select a village') }}</flux:select.option>
+                    @foreach($villages as $id => $village)
+                    <flux:select.option :value="$id">{{ $village }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
+                <flux:input wire:model="address" :label="__('Address')" />
             </div>
 
             <div class="flex items-center gap-4">

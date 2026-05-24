@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDisplayName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Auditable as AuditableTrait;
@@ -12,6 +13,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class City extends Model implements Auditable
 {
     use AuditableTrait;
+    use HasDisplayName;
     use HasFactory;
     use LogsActivity;
 
@@ -48,6 +50,11 @@ class City extends Model implements Auditable
     public function province()
     {
         return $this->belongsTo(Province::class);
+    }
+
+    public function districts()
+    {
+        return $this->hasMany(District::class);
     }
 
     /**

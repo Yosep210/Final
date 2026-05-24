@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDisplayName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Auditable as AuditableTrait;
@@ -12,6 +13,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class Country extends Model implements Auditable
 {
     use AuditableTrait;
+    use HasDisplayName;
     use HasFactory;
     use LogsActivity;
 
@@ -38,6 +40,11 @@ class Country extends Model implements Auditable
         'phonecode' => 'integer',
         'status' => 'boolean',
     ];
+
+    public function provinces()
+    {
+        return $this->hasMany(Province::class);
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

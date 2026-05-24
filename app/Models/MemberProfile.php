@@ -36,6 +36,14 @@ class MemberProfile extends Model
         'npwp_number',
     ];
 
+    protected $appends = [
+        'country_name',
+        'province_name',
+        'city_name',
+        'district_name',
+        'village_name',
+    ];
+
     protected $casts = [
         'member_id' => 'integer',
         'birth_date' => 'date',
@@ -75,5 +83,30 @@ class MemberProfile extends Model
     public function village(): BelongsTo
     {
         return $this->belongsTo(Village::class);
+    }
+
+    public function getCountryNameAttribute(): ?string
+    {
+        return $this->country?->display_name;
+    }
+
+    public function getProvinceNameAttribute(): ?string
+    {
+        return $this->province?->display_name;
+    }
+
+    public function getCityNameAttribute(): ?string
+    {
+        return $this->city?->display_name;
+    }
+
+    public function getDistrictNameAttribute(): ?string
+    {
+        return $this->district?->display_name;
+    }
+
+    public function getVillageNameAttribute(): ?string
+    {
+        return $this->village?->display_name;
     }
 }
