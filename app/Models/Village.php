@@ -33,8 +33,6 @@ class Village extends Model implements Auditable
         'postal_code' => 'string',
     ];
 
-    public $timestamps = false;
-
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);

@@ -39,8 +39,6 @@ class Country extends Model implements Auditable
         'status' => 'boolean',
     ];
 
-    public $timestamps = false;
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

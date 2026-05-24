@@ -16,8 +16,6 @@ class District extends Model implements Auditable
     use HasFactory;
     use LogsActivity;
 
-    public $timestamps = false;
-
     /**
      * The attributes that are mass assignable.
      *
