@@ -63,7 +63,7 @@ final class MemberTable extends PowerGridComponent
         return Member::query()
             ->leftJoin('member_profile as profile', 'profile.member_id', '=', 'members.id')
             ->leftJoin('member_networks as network', 'network.member_id', '=', 'members.id')
-            ->withoutRole(['admin'])
+            // ->withoutRole(['admin'])
             ->select('members.*')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
@@ -105,8 +105,8 @@ final class MemberTable extends PowerGridComponent
             Column::make('#', 'no'),
             Column::make('Name', 'name')->sortable(),
             Column::make('Username', 'username')->sortable(),
-            Column::make('Email', 'email')->sortable(),
             Column::make('Rank', 'rank')->sortable(),
+            Column::make('Email', 'email')->sortable(),
             Column::make('Phone', 'phone')->sortable(),
             Column::make('Sponsor', 'sponsor')->sortable(),
             Column::make('Parent', 'parent')->sortable(),
@@ -122,12 +122,18 @@ final class MemberTable extends PowerGridComponent
         return [
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('username')->operators(['contains']),
+            Filter::inputText('rank')->operators(['contains']),
             Filter::inputText('email')->operators(['contains']),
             Filter::inputText('phone')->operators(['contains']),
-            Filter::inputText('rank')->operators(['contains']),
             Filter::inputText('sponsor')->operators(['contains']),
             Filter::inputText('parent')->operators(['contains']),
-            Filter::inputText('position')->operators(['contains']),
+            Filter::select('position')
+                ->dataSource(collect([
+                    ['id' => 'Left', 'name' => 'Left'],
+                    ['id' => 'Right', 'name' => 'Right'],
+                ]))
+                ->optionValue('id')
+                ->optionLabel('name'),
             Filter::select('status', 'status')
                 ->dataSource(collect([
                     ['id' => 'active', 'name' => 'Active'],
