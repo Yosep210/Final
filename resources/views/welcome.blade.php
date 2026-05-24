@@ -24,11 +24,11 @@
                             </p>
                             <div class="animated slideInUp flex flex-wrap gap-3 justify-center md:justify-start">
                                 <flux:button href="{{ route('about') }}" variant="primary"
-                                    class="rounded-full !px-10 !py-4 shadow-xl shadow-primary-500/30 font-semibold">
+                                    class="rounded-full px-10! py-4! shadow-xl shadow-primary-500/30 font-semibold">
                                     Kenali Kami
                                 </flux:button>
                                 <flux:button href="{{ route('opportunity') }}"
-                                    class="rounded-full !px-10 !py-4 backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
+                                    class="rounded-full px-10! py-4! backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
                                     Gabung Bersama Kami
                                 </flux:button>
                             </div>
@@ -56,11 +56,11 @@
                             </p>
                             <div class="animated slideInUp flex flex-wrap gap-3 justify-center md:justify-start">
                                 <flux:button href="{{ route('about') }}" variant="primary"
-                                    class="rounded-full !px-10 !py-4 shadow-xl shadow-primary-500/30 font-semibold">
+                                    class="rounded-full px-10! py-4! shadow-xl shadow-primary-500/30 font-semibold">
                                     Kenali Kami
                                 </flux:button>
                                 <flux:button href="{{ route('opportunity') }}"
-                                    class="rounded-full !px-10 !py-4 backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
+                                    class="rounded-full px-10! py-4! backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
                                     Gabung Bersama Kami
                                 </flux:button>
                             </div>
@@ -88,11 +88,11 @@
                             </p>
                             <div class="animated slideInUp flex flex-wrap gap-3 justify-center md:justify-start">
                                 <flux:button href="{{ route('about') }}" variant="primary"
-                                    class="rounded-full !px-10 !py-4 shadow-xl shadow-primary-500/30 font-semibold">
+                                    class="rounded-full px-10! py-4! shadow-xl shadow-primary-500/30 font-semibold">
                                     Kenali Kami
                                 </flux:button>
                                 <flux:button href="{{ route('opportunity') }}"
-                                    class="rounded-full !px-10 !py-4 backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
+                                    class="rounded-full px-10! py-4! backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
                                     Gabung Bersama Kami
                                 </flux:button>
                             </div>
@@ -114,8 +114,7 @@
                         <div class="absolute -inset-4 bg-primary-100/50 dark:bg-primary-900/20 rounded-3xl -rotate-3
                                     transition-all duration-500 group-hover:rotate-0 group-hover:scale-105"></div>
                         <img class="relative w-full h-full object-cover rounded-3xl"
-                            src="{{ asset('assets/img/about.png') }}"
-                            alt="Tentang Jagad Pesona Buana" loading="lazy"
+                            src="{{ asset('assets/img/about.png') }}" alt="Tentang Jagad Pesona Buana" loading="lazy"
                             style="min-height: 400px;">
                     </div>
                 </div>
@@ -131,25 +130,29 @@
                         </p>
                         <div class="space-y-4 mb-8">
                             <div class="flex items-start gap-3">
-                                <div class="shrink-0 w-9 h-9 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600">
+                                <div
+                                    class="shrink-0 w-9 h-9 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600">
                                     <i class="fa fa-heart"></i>
                                 </div>
-                                <p class="text-neutral-500 text-sm pt-2">Fokus pada kesehatan dan kesejahteraan holistik.</p>
+                                <p class="text-neutral-500 text-sm pt-2">Fokus pada kesehatan dan kesejahteraan
+                                    holistik.</p>
                             </div>
                             <div class="flex items-start gap-3">
-                                <div class="shrink-0 w-9 h-9 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600">
+                                <div
+                                    class="shrink-0 w-9 h-9 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600">
                                     <i class="fa fa-users"></i>
                                 </div>
-                                <p class="text-neutral-500 text-sm pt-2">Membangun komunitas yang edukatif dan produktif.</p>
+                                <p class="text-neutral-500 text-sm pt-2">Membangun komunitas yang edukatif dan
+                                    produktif.</p>
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
                             <flux:button href="{{ route('about') }}" variant="primary"
-                                class="rounded-full !px-10 !py-3 font-semibold shadow-lg">
+                                class="rounded-full px-10! py-3! font-semibold shadow-lg">
                                 Kenali Kami
                             </flux:button>
                             <flux:button href="{{ route('opportunity') }}" variant="ghost"
-                                class="rounded-full !px-10 !py-3 border-2 border-primary-600 text-primary-600 hover:bg-primary-50 transition-all">
+                                class="rounded-full px-10! py-3! border-2 border-primary-600 text-primary-600 hover:bg-primary-50 transition-all">
                                 Gabung Bersama Kami
                             </flux:button>
                         </div>
@@ -174,9 +177,11 @@
                                 dark:shadow-none hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 group
                                 border border-neutral-100 dark:border-neutral-700">
                         <div class="flex items-center gap-5 mb-6">
-                            <div class="shrink-0 w-16 h-16 flex items-center justify-center bg-primary-50
+                            <div
+                                class="shrink-0 w-16 h-16 flex items-center justify-center bg-primary-50
                                         dark:bg-neutral-700 rounded-2xl group-hover:bg-primary-600 transition-all duration-500">
-                                <i class="fa fa-eye text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
+                                <i
+                                    class="fa fa-eye text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
                             </div>
                             <h3 class="text-2xl font-bold">Visi Perusahaan</h3>
                         </div>
@@ -192,9 +197,11 @@
                                 dark:shadow-none hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 group
                                 border border-neutral-100 dark:border-neutral-700">
                         <div class="flex items-center gap-5 mb-6">
-                            <div class="shrink-0 w-16 h-16 flex items-center justify-center bg-primary-50
+                            <div
+                                class="shrink-0 w-16 h-16 flex items-center justify-center bg-primary-50
                                         dark:bg-neutral-700 rounded-2xl group-hover:bg-primary-600 transition-all duration-500">
-                                <i class="fa fa-bullseye text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
+                                <i
+                                    class="fa fa-bullseye text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
                             </div>
                             <h3 class="text-2xl font-bold">Misi Perusahaan</h3>
                         </div>
@@ -213,7 +220,7 @@
                             </li>
                         </ul>
                         <flux:button variant="primary" href="{{ route('opportunity') }}"
-                            class="rounded-full !px-10 !py-3 font-semibold shadow-lg">
+                            class="rounded-full px-10! py-3! font-semibold shadow-lg">
                             Selengkapnya <i class="fa fa-arrow-right ml-2 text-xs"></i>
                         </flux:button>
                     </div>
@@ -239,8 +246,10 @@
                         <div class="flex items-center justify-center bg-neutral-100 dark:bg-neutral-700/50
                                     group-hover:bg-primary-50 transition-colors" style="height: 220px;">
                             <div class="text-center p-3">
-                                <i class="fa fa-leaf text-5xl text-neutral-300 group-hover:text-primary-500 transition-colors mb-3 block"></i>
-                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">Segera Hadir</span>
+                                <i
+                                    class="fa fa-leaf text-5xl text-neutral-300 group-hover:text-primary-500 transition-colors mb-3 block"></i>
+                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">Segera
+                                    Hadir</span>
                             </div>
                         </div>
                         <div class="p-8 flex-1 flex flex-col">
@@ -253,18 +262,20 @@
                 <div class="w-full lg:w-1/3 flex flex-col wow fadeInUp" data-wow-delay="0.1s">
                     <div class="h-full flex flex-col group rounded-[2.5rem] overflow-hidden shadow-2xl
                                 bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700">
-                        <div class="overflow-hidden flex items-center justify-center bg-neutral-50" style="height: 220px;">
+                        <div class="overflow-hidden flex items-center justify-center bg-neutral-50"
+                            style="height: 220px;">
                             <img class="max-h-full transition-transform duration-700 group-hover:scale-110"
                                 src="{{ asset('assets/img/lovaura.png') }}" alt="LOVAURA Face Mist">
                         </div>
                         <div class="p-10 pt-6 flex-1 flex flex-col">
                             <h4 class="text-3xl font-bold mb-1">LOVAURA</h4>
-                            <p class="text-primary-600 font-bold mb-4 tracking-widest text-xs uppercase">Face Mist Aura Care</p>
+                            <p class="text-primary-600 font-bold mb-4 tracking-widest text-xs uppercase">Face Mist Aura
+                                Care</p>
                             <p class="text-neutral-500 leading-relaxed mb-6 flex-1">
                                 Diciptakan untuk mendukung perawatan kulit dan keseimbangan energi harian Anda.
                             </p>
                             <div>
-                                <flux:button href="{{ route('product') }}" variant="primary" class="rounded-full !px-8">
+                                <flux:button href="{{ route('product') }}" variant="primary" class="rounded-full px-8!">
                                     Lihat Detail <i class="fa fa-arrow-right ml-2"></i>
                                 </flux:button>
                             </div>
@@ -279,8 +290,10 @@
                         <div class="flex items-center justify-center bg-neutral-100 dark:bg-neutral-700/50
                                     group-hover:bg-primary-50 transition-colors" style="height: 220px;">
                             <div class="text-center p-3">
-                                <i class="fa fa-coffee text-5xl text-neutral-300 group-hover:text-primary-500 transition-colors mb-3 block"></i>
-                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">Segera Hadir</span>
+                                <i
+                                    class="fa fa-coffee text-5xl text-neutral-300 group-hover:text-primary-500 transition-colors mb-3 block"></i>
+                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">Segera
+                                    Hadir</span>
                             </div>
                         </div>
                         <div class="p-8 flex-1 flex flex-col">
@@ -301,7 +314,8 @@
 
                 <div class="w-full lg:w-1/2 wow fadeIn" data-wow-delay="0.1s">
                     <div class="text-center lg:text-left">
-                        <h6 class="text-primary-600 font-bold uppercase mb-3 tracking-[0.2em] text-sm">Inovasi Bisnis</h6>
+                        <h6 class="text-primary-600 font-bold uppercase mb-3 tracking-[0.2em] text-sm">Inovasi Bisnis
+                        </h6>
                         <h1 class="text-4xl font-extrabold tracking-tight mb-4">Model Bisnis Hybrid</h1>
                         <p class="text-neutral-500 dark:text-neutral-400 leading-relaxed mb-4">
                             Jagad Pesona Buana mengembangkan model bisnis hybrid yang menggabungkan metode
@@ -310,9 +324,10 @@
                         <p class="text-neutral-500 dark:text-neutral-400 leading-relaxed mb-6 hidden md:block">
                             Pendekatan konvensional dilakukan melalui presentasi one-on-one, table talk, seminar, dan
                             pengembangan komunitas. Sementara itu, pemanfaatan teknologi digital dilakukan melalui
-                            media sosial, aplikasi, landing page, dan sistem otomatisasi untuk mendukung efektivitas jaringan.
+                            media sosial, aplikasi, landing page, dan sistem otomatisasi untuk mendukung efektivitas
+                            jaringan.
                         </p>
-                        <flux:button href="{{ route('opportunity') }}" variant="primary" class="rounded-full !px-8">
+                        <flux:button href="{{ route('opportunity') }}" variant="primary" class="rounded-full px-8!">
                             Pelajari Lebih Lanjut <i class="fa fa-arrow-right ml-2"></i>
                         </flux:button>
                     </div>
@@ -340,17 +355,21 @@
                     pengembangan motivasi, kesadaran diri, terapi energi, pengetahuan penjualan langsung profesional,
                     serta digital marketing.
                 </p>
-                <flux:button href="{{ route('edukasi') }}" variant="primary" class="rounded-full !px-8">
+                <flux:button href="{{ route('edukasi') }}" variant="primary" class="rounded-full px-8!">
                     Pelajari Kurikulum Kami <i class="fa fa-arrow-right ml-2"></i>
                 </flux:button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach ([
-                ['delay' => '0.1s', 'icon' => 'fa-brain', 'title' => 'Motivasi', 'desc' => 'Pengembangan mental dan emosional untuk fondasi bisnis yang kuat.'],
-                ['delay' => '0.3s', 'icon' => 'fa-bolt', 'title' => 'Terapi Energi', 'desc' => 'Keseimbangan fisik dan mental untuk performa maksimal dalam kehidupan sehari-hari.'],
-                ['delay' => '0.5s', 'icon' => 'fa-handshake', 'title' => 'Direct Selling', 'desc' => 'Keterampilan penjualan langsung yang etis, modern, dan profesional.'],
-                ['delay' => '0.7s', 'icon' => 'fa-laptop', 'title' => 'Digital Marketing', 'desc' => 'Strategi pemasaran digital untuk mengembangkan jaringan bisnis global.'],
+                ['delay' => '0.1s', 'icon' => 'fa-brain', 'title' => 'Motivasi', 'desc' => 'Pengembangan mental dan
+                emosional untuk fondasi bisnis yang kuat.'],
+                ['delay' => '0.3s', 'icon' => 'fa-bolt', 'title' => 'Terapi Energi', 'desc' => 'Keseimbangan fisik dan
+                mental untuk performa maksimal dalam kehidupan sehari-hari.'],
+                ['delay' => '0.5s', 'icon' => 'fa-handshake', 'title' => 'Direct Selling', 'desc' => 'Keterampilan
+                penjualan langsung yang etis, modern, dan profesional.'],
+                ['delay' => '0.7s', 'icon' => 'fa-laptop', 'title' => 'Digital Marketing', 'desc' => 'Strategi pemasaran
+                digital untuk mengembangkan jaringan bisnis global.'],
                 ] as $item)
                 <div class="wow fadeIn" data-wow-delay="{{ $item['delay'] }}">
                     <div class="bg-white dark:bg-neutral-800 rounded-3xl p-6 text-center shadow-sm border
@@ -358,7 +377,8 @@
                                 duration-300 group h-full">
                         <div class="w-16 h-16 flex items-center justify-center bg-neutral-100 dark:bg-neutral-700
                                     group-hover:bg-primary-600 rounded-2xl mx-auto mb-4 transition-all duration-300">
-                            <i class="fa {{ $item['icon'] }} text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
+                            <i
+                                class="fa {{ $item['icon'] }} text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
                         </div>
                         <h5 class="text-base font-bold mb-3">{{ $item['title'] }}</h5>
                         <p class="text-neutral-500 text-sm leading-relaxed">{{ $item['desc'] }}</p>
