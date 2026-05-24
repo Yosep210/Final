@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\City;
 
+use App\Models\City;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCityRequest extends FormRequest
@@ -21,7 +22,10 @@ class UpdateCityRequest extends FormRequest
      */
     public function rules(): array
     {
-        return StoreCityRequest::cityRules();
+        /** @var City $city */
+        $city = $this->route('city');
+
+        return StoreCityRequest::cityRules($city);
     }
 
     /**

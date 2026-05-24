@@ -43,7 +43,7 @@ class StoreVillageRequest extends FormRequest
 
         return [
             'district_id' => ['required', 'integer', 'exists:districts,id'],
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', $ignoreName],
             'postal_code' => ['nullable', 'string', 'max:20'],
         ];
     }

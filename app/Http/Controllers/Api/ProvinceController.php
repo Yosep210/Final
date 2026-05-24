@@ -59,7 +59,7 @@ class ProvinceController extends Controller
     /**
      * Remove the specified province.
      */
-    public function destroy(Province $province): JsonResponse
+    public function destroy(Province $province): Response
     {
         DeleteProvinceAction::run($province);
 

@@ -4,10 +4,18 @@ namespace App\Services;
 
 use App\Models\Member;
 use App\Models\MemberNetwork;
+use Illuminate\Support\Facades\DB;
 
 class MemberNetworkPlacementService
 {
     public function resolvePlacement(Member $member, ?string $referralCode = null, ?int $explicitSponsorId = null, ?int $explicitParentId = null, ?string $position = null): array
+    {
+        return DB::transaction(function () use ($member, $referralCode, $explicitSponsorId, $explicitParentId, $position) {
+            return $this->performPlacement($member, $referralCode, $explicitSponsorId, $explicitParentId, $position);
+        });
+    }
+
+    private function performPlacement(Member $member, ?string $referralCode = null, ?int $explicitSponsorId = null, ?int $explicitParentId = null, ?string $position = null): array
     {
         $sponsor = $this->findSponsor($referralCode, $explicitSponsorId);
         $parent = $this->findParent($explicitParentId);

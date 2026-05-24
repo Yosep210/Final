@@ -5,6 +5,7 @@ namespace App\Actions\Member;
 use App\Data\MemberData;
 use App\Events\MemberRegistered;
 use App\Models\Member;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Spatie\Permission\Models\Role;
@@ -15,19 +16,21 @@ class CreateMemberAction
 
     public function handle(MemberData $data): Member
     {
-        $attributes = $data->toArray();
+        return DB::transaction(function () use ($data) {
+            $attributes = $data->toArray();
 
-        if (empty($attributes['referral_code'])) {
-            $attributes['referral_code'] = $this->generateUniqueReferralCode();
-        }
+            if (empty($attributes['referral_code'])) {
+                $attributes['referral_code'] = $this->generateUniqueReferralCode();
+            }
 
-        $member = Member::query()->create($attributes);
-        Role::findOrCreate('Member', 'web');
-        $member->assignRole('Member');
+            $member = Member::query()->create($attributes);
+            Role::findOrCreate('Member', 'web');
+            $member->assignRole('Member');
 
-        event(new MemberRegistered($member));
+            event(new MemberRegistered($member));
 
-        return $member;
+            return $member;
+        });
     }
 
     private function generateUniqueReferralCode(): string

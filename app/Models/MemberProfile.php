@@ -36,14 +36,6 @@ class MemberProfile extends Model
         'npwp_number',
     ];
 
-    protected $appends = [
-        'country_name',
-        'province_name',
-        'city_name',
-        'district_name',
-        'village_name',
-    ];
-
     protected $casts = [
         'member_id' => 'integer',
         'birth_date' => 'date',
