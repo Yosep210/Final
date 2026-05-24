@@ -1,11 +1,10 @@
-<div class="relative w-full h-[300px] md:h-[400px] overflow-hidden mb-0">
+<div class="relative w-full h-75 md:h-100 overflow-hidden mb-0">
 
     {{-- Background image --}}
-    <img src="{{ $imgbg }}" alt="{{ $title }}"
-        class="absolute inset-0 w-full h-full object-cover object-center">
+    <img src="{{ $imgbg }}" alt="{{ $title }}" class="absolute inset-0 w-full h-full object-cover object-center">
 
     {{-- Overlay --}}
-    <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+    <div class="absolute inset-0 bg-linear-to-b from-black/50 via-black/40 to-black/60"></div>
 
     {{-- Konten --}}
     <div class="relative z-10 h-full flex flex-col justify-center">
