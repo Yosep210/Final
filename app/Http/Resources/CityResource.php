@@ -19,6 +19,8 @@ class CityResource extends JsonResource
             'province_id' => $this->province_id,
             'name' => $this->name,
             'type' => $this->type,
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

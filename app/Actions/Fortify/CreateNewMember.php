@@ -2,12 +2,13 @@
 
 namespace App\Actions\Fortify;
 
+use App\Actions\Member\CreateMemberAction;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
+use App\Data\MemberData;
 use App\Models\Member;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use Spatie\Permission\Models\Role;
 
 class CreateNewMember implements CreatesNewUsers
 {
@@ -25,16 +26,19 @@ class CreateNewMember implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        $member = Member::create([
-            'name' => $input['name'],
-            'username' => $input['username'],
-            'email' => $input['email'],
-            'password' => $input['password'],
-        ]);
+        // Convert input array to MemberData and use CreateMemberAction
+        // This ensures MemberRegistered event is fired and network is created
+        $memberData = new MemberData(
+            name: $input['name'],
+            username: $input['username'],
+            email: $input['email'],
+            password: $input['password'],
+            status: 'active',
+            referralCode: null,
+            emailVerifiedAt: null,
+            lastLoginAt: null,
+        );
 
-        Role::findOrCreate('Member', 'web');
-        $member->assignRole('Member');
-
-        return $member;
+        return CreateMemberAction::run($memberData);
     }
 }

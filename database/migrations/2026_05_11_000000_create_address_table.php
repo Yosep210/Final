@@ -20,12 +20,14 @@ return new class extends Migration
             $table->smallInteger('numcode')->nullable()->unique();
             $table->integer('phonecode')->unique();
             $table->boolean('status')->default(true);
+            $table->timestamps();
         });
 
         Schema::create('provinces', function (Blueprint $table) {
             $table->id();
             $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
             $table->string('name');
+            $table->timestamps();
         });
 
         Schema::create('cities', function (Blueprint $table) {
@@ -33,12 +35,14 @@ return new class extends Migration
             $table->foreignId('province_id')->constrained('provinces')->cascadeOnDelete();
             $table->string('name');
             $table->enum('type', ['kota', 'kabupaten'])->default('kota');
+            $table->timestamps();
         });
 
         Schema::create('districts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('city_id')->constrained('cities')->cascadeOnDelete();
             $table->string('name');
+            $table->timestamps();
         });
 
         Schema::create('villages', function (Blueprint $table) {
@@ -46,6 +50,7 @@ return new class extends Migration
             $table->foreignId('district_id')->constrained('districts')->cascadeOnDelete();
             $table->string('name');
             $table->string('postal_code')->nullable();
+            $table->timestamps();
         });
     }
 

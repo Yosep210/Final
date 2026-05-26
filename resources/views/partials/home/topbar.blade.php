@@ -65,11 +65,17 @@
         </flux:navbar.item>
     </flux:navbar>
 
-    {{-- Tombol Login (Desktop) --}}
+    @if (Route::has('login'))
+    <flux:button href="{{ route('dashboard') }}" variant="primary" size="sm"
+        class="hidden lg:flex rounded-full px-6! mr-3 font-semibold" wire:navigate>
+        {{ __('Dashboard') }}
+    </flux:button>
+    @else
     <flux:button href="{{ route('login') }}" variant="primary" size="sm"
         class="hidden lg:flex rounded-full px-6! mr-3 font-semibold" wire:navigate>
         {{ __('Login') }}
     </flux:button>
+    @endif
 
     {{-- Mobile Menu --}}
     <flux:dropdown class="lg:hidden">
@@ -95,10 +101,17 @@
                 {{ __('Contact') }}
             </flux:navlist.item>
             <div class="p-3 border-t border-zinc-100 dark:border-zinc-700">
+                @if (Route::has('login'))
+                <flux:button href="{{ route('dashboard') }}" variant="primary" class="w-full rounded-full font-semibold"
+                    wire:navigate>
+                    {{ __('Dashboard') }}
+                </flux:button>
+                @else
                 <flux:button href="{{ route('login') }}" variant="primary" class="w-full rounded-full font-semibold"
                     wire:navigate>
                     {{ __('Login') }}
                 </flux:button>
+                @endif
             </div>
         </flux:menu>
     </flux:dropdown>

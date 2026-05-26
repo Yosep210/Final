@@ -2,10 +2,10 @@
 
 namespace App\Data;
 
-use App\Models\Permission;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Spatie\Permission\Models\Permission;
 
 #[MapName(SnakeCaseMapper::class)]
 class PermissionData extends Data

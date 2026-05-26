@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Permission;
 
-use App\Models\Permission;
 use Illuminate\Foundation\Http\FormRequest;
+use Spatie\Permission\Models\Permission;
 
 class UpdatePermissionRequest extends FormRequest
 {

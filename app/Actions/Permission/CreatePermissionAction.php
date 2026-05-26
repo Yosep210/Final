@@ -3,8 +3,8 @@
 namespace App\Actions\Permission;
 
 use App\Data\PermissionData;
-use App\Models\Permission;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Spatie\Permission\Models\Permission;
 
 class CreatePermissionAction
 {

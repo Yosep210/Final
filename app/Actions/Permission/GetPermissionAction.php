@@ -2,9 +2,9 @@
 
 namespace App\Actions\Permission;
 
-use App\Models\Permission;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Spatie\Permission\Models\Permission;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 

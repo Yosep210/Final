@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Permission;
 
-use App\Models\Permission;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Permission;
 
 class StorePermissionRequest extends FormRequest
 {

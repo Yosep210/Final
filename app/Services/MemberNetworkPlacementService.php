@@ -149,29 +149,55 @@ class MemberNetworkPlacementService
 
     private function findAvailablePositionRecursively(int $startParentId): array
     {
+        // Pre-load all networks once to avoid N queries
+        $allNetworks = MemberNetwork::query()
+            ->select('member_id', 'parent_id', 'position', 'generation', 'path', 'group')
+            ->get()
+            ->keyBy('member_id');
+
+        // Create indexed lookup for parent -> children mapping
+        $childrenByParent = collect();
+        foreach ($allNetworks as $network) {
+            if ($network->parent_id) {
+                if (! $childrenByParent->has($network->parent_id)) {
+                    $childrenByParent->put($network->parent_id, collect());
+                }
+                $childrenByParent->get($network->parent_id)->push($network->member_id);
+            }
+        }
+
+        // Create position lookup: parent_id + position => exists?
+        $positionMap = collect();
+        foreach ($allNetworks as $network) {
+            if ($network->parent_id) {
+                $key = "{$network->parent_id}:{$network->position}";
+                $positionMap->put($key, true);
+            }
+        }
+
         $queue = [$startParentId];
 
         while (! empty($queue)) {
             $current = array_shift($queue);
 
-            if (! $this->positionExistsForParent($current, 'left')) {
+            if (! $positionMap->has("{$current}:left")) {
                 return [
                     'parent_id' => $current,
                     'position' => 'left',
-                    'parent_network' => MemberNetwork::where('member_id', $current)->first(),
+                    'parent_network' => $allNetworks->get($current),
                 ];
             }
 
-            if (! $this->positionExistsForParent($current, 'right')) {
+            if (! $positionMap->has("{$current}:right")) {
                 return [
                     'parent_id' => $current,
                     'position' => 'right',
-                    'parent_network' => MemberNetwork::where('member_id', $current)->first(),
+                    'parent_network' => $allNetworks->get($current),
                 ];
             }
 
-            $children = MemberNetwork::where('parent_id', $current)->pluck('member_id')->all();
-
+            // Add children to queue
+            $children = $childrenByParent->get($current, collect())->all();
             foreach ($children as $childId) {
                 $queue[] = $childId;
             }

@@ -2,10 +2,10 @@
 
 namespace App\Actions\Permission;
 
-use App\Models\Permission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Spatie\Permission\Models\Permission;
 
 class DeletePermissionAction
 {

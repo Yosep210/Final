@@ -14,7 +14,7 @@ class UpdateMemberHierarchyListener
     {
         $member = $event->member;
 
-        // Placeholder: update rank/generation based on promotion payload.
+        // Update rank/generation based on promotion payload.
         $network = MemberNetwork::where('member_id', $member->id)->first();
 
         if (! $network) {
@@ -22,7 +22,7 @@ class UpdateMemberHierarchyListener
         }
 
         if (isset($event->payload['rank'])) {
-            $network->rank = $event->payload['rank'];
+            $network->current_rank = $event->payload['rank'];
         }
 
         if (isset($event->payload['generation'])) {

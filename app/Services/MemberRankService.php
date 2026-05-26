@@ -2,15 +2,18 @@
 
 namespace App\Services;
 
+use App\Events\MemberDemoted;
+use App\Events\MemberPromoted;
 use App\Models\Member;
 use App\Models\MemberNetwork;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MemberRankService
 {
     /**
-     * Evaluate and assign rank for a member based on metrics.
-     * This is a basic example — adapt thresholds to your business rules.
+     * Evaluate and assign rank for a member based on config rules.
+     * Uses thresholds defined in config/mlm.php
      */
     public function evaluateAndAssign(Member $member): ?string
     {
@@ -20,28 +23,123 @@ class MemberRankService
             return null;
         }
 
-        $left = (float) $network->left_volume;
-        $right = (float) $network->right_volume;
-        $personal = MemberNetwork::where('sponsored_id', $member->id)->count();
+        $rank = $this->determineRank($member, $network);
+        $previousRank = $network->current_rank;
 
-        // Example thresholds
-        if ($personal >= 4 && $left >= 2000 && $right >= 2000) {
-            $rank = 'gold';
-        } elseif ($personal >= 2 && $left >= 500 && $right >= 500) {
-            $rank = 'silver';
-        } elseif ($personal >= 1) {
-            $rank = 'bronze';
-        } else {
-            $rank = 'member';
+        // Only update if rank changed
+        if ($rank === $previousRank) {
+            return $rank;
         }
 
-        // persist atomically
-        DB::transaction(function () use ($network, $rank) {
+        // Persist atomically
+        DB::transaction(function () use ($network, $rank, $previousRank) {
             $network->current_rank = $rank;
             $network->save();
+
+            // Trigger promotion or demotion event
+            if ($this->isPromotion($previousRank, $rank)) {
+                event(new MemberPromoted($network->member, ['rank' => $rank, 'previous_rank' => $previousRank]));
+                Log::info('Member promoted', [
+                    'member_id' => $network->member_id,
+                    'from_rank' => $previousRank,
+                    'to_rank' => $rank,
+                ]);
+            } else {
+                event(new MemberDemoted($network->member, ['rank' => $rank, 'previous_rank' => $previousRank]));
+                Log::info('Member demoted', [
+                    'member_id' => $network->member_id,
+                    'from_rank' => $previousRank,
+                    'to_rank' => $rank,
+                ]);
+            }
         });
 
         return $rank;
+    }
+
+    /**
+     * Determine the appropriate rank based on member metrics and config.
+     */
+    private function determineRank(Member $member, MemberNetwork $network): string
+    {
+        $left = (float) ($network->left_volume ?? 0);
+        $right = (float) ($network->right_volume ?? 0);
+        $personal = MemberNetwork::where('sponsored_id', $member->id)->count();
+
+        $ranks = config('mlm.ranks', []);
+
+        // Check from highest to lowest rank
+        $rankHierarchy = ['gold', 'silver', 'bronze', 'member'];
+
+        foreach ($rankHierarchy as $rankName) {
+            if (! isset($ranks[$rankName])) {
+                continue;
+            }
+
+            $requirements = $ranks[$rankName];
+
+            if ($this->meetsRequirements($personal, $left, $right, $requirements)) {
+                return $rankName;
+            }
+        }
+
+        return 'member';
+    }
+
+    /**
+     * Check if member meets requirements for a rank.
+     */
+    private function meetsRequirements(int $personal, float $left, float $right, array $requirements): bool
+    {
+        return $personal >= ($requirements['personal_recruits'] ?? 0)
+            && $left >= ($requirements['left_volume'] ?? 0)
+            && $right >= ($requirements['right_volume'] ?? 0);
+    }
+
+    /**
+     * Check if transitioning from oldRank to newRank is a promotion.
+     */
+    private function isPromotion(?string $oldRank, string $newRank): bool
+    {
+        $hierarchy = ['member' => 0, 'bronze' => 1, 'silver' => 2, 'gold' => 3];
+
+        return ($hierarchy[$newRank] ?? -1) > ($hierarchy[$oldRank] ?? -1);
+    }
+
+    /**
+     * Re-evaluate all members' ranks (for scheduled tasks).
+     * Useful for demotions when members don't maintain volume.
+     */
+    public function reEvaluateAllRanks(): array
+    {
+        $results = [
+            'evaluated' => 0,
+            'promoted' => 0,
+            'demoted' => 0,
+            'unchanged' => 0,
+        ];
+
+        Member::query()
+            ->where('status', 'active')
+            ->with('network')
+            ->chunk(100, function ($members) use (&$results) {
+                foreach ($members as $member) {
+                    $previousRank = $member->network?->current_rank;
+                    $newRank = $this->evaluateAndAssign($member);
+
+                    $results['evaluated']++;
+
+                    if ($newRank === $previousRank) {
+                        $results['unchanged']++;
+                    } elseif ($this->isPromotion($previousRank, $newRank)) {
+                        $results['promoted']++;
+                    } else {
+                        $results['demoted']++;
+                    }
+                }
+            });
+
+        return $results;
     }
 
     /**

@@ -18,6 +18,8 @@ class DistrictResource extends JsonResource
             'id' => $this->id,
             'city_id' => $this->city_id,
             'name' => $this->name,
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

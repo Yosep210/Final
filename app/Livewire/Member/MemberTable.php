@@ -49,23 +49,65 @@ final class MemberTable extends PowerGridComponent
             'rank' => 'network.rank',
             'email' => 'members.email',
             'phone' => 'profile.phone',
-            'sponsor' => 'network.sponsored_id',
-            'parent' => 'network.parent_id',
+            'sponsor' => 'sponsor_member.name',
+            'parent' => 'parent_member.name',
             'position' => 'network.position',
             'status' => 'members.status',
             'created_at' => 'members.created_at',
-
         ];
 
         $sortField = $allowedSort[$this->sortField] ?? 'members.name';
-        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        $sortDirection = $this->sortDirection === 'desc'
+            ? 'desc'
+            : 'asc';
 
         return Member::query()
-            ->leftJoin('member_profile as profile', 'profile.member_id', '=', 'members.id')
-            ->leftJoin('member_networks as network', 'network.member_id', '=', 'members.id')
-            // ->withoutRole(['admin'])
-            ->select('members.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
+            ->leftJoin(
+                'member_networks as network',
+                'network.member_id',
+                '=',
+                'members.id'
+            )
+
+            ->leftJoin(
+                'member_profile as profile',
+                'profile.member_id',
+                '=',
+                'members.id'
+            )
+
+            ->leftJoin(
+                'members as sponsor_member',
+                'network.sponsored_id',
+                '=',
+                'sponsor_member.id'
+            )
+
+            ->leftJoin(
+                'members as parent_member',
+                'network.parent_id',
+                '=',
+                'parent_member.id'
+            )
+
+            ->select([
+                'members.*',
+
+                'network.rank as network_rank',
+                'network.position as network_position',
+
+                'profile.phone as profile_phone',
+
+                'sponsor_member.name as sponsor_name',
+                'parent_member.name as parent_name',
+            ])
+
+            ->selectRaw("
+            ROW_NUMBER() OVER (
+                ORDER BY {$sortField} {$sortDirection}
+            ) AS no
+        ");
     }
 
     public function relationSearch(): array
@@ -87,16 +129,45 @@ final class MemberTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
+
             ->add('name')
+
             ->add('username')
-            ->add('rank', fn (Member $member) => optional($member->network)->rank)
+
+            ->add(
+                'rank',
+                fn (Member $member) => $member->network_rank
+            )
+
             ->add('email')
-            ->add('phone', fn (Member $member) => $member->profile?->phone)
-            ->add('sponsor', fn (Member $member) => optional($member->network?->sponsor)->name)
-            ->add('parent', fn (Member $member) => optional($member->network?->parent)->name)
-            ->add('position', fn (Member $member) => optional($member->network)->position)
+
+            ->add(
+                'phone',
+                fn (Member $member) => $member->profile_phone
+            )
+
+            ->add(
+                'sponsor',
+                fn (Member $member) => $member->sponsor_name
+            )
+
+            ->add(
+                'parent',
+                fn (Member $member) => $member->parent_name
+            )
+
+            ->add(
+                'position',
+                fn (Member $member) => $member->network_position
+            )
+
             ->add('status')
-            ->add('created_at_formatted', fn (Member $member) => optional($member->created_at)?->format('d M Y H:i'));
+
+            ->add(
+                'created_at_formatted',
+                fn (Member $member) => optional($member->created_at)
+                    ->format('d M Y H:i')
+            );
     }
 
     public function columns(): array

@@ -3,8 +3,8 @@
 namespace App\Actions\Role;
 
 use App\Data\RoleData;
-use App\Models\Role;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Spatie\Permission\Models\Role;
 
 class CreateRoleAction
 {

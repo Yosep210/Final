@@ -2,8 +2,8 @@
 
 namespace App\Actions\Role;
 
-use App\Models\Role;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Spatie\Permission\Models\Role;
 
 class DeleteRoleAction
 {

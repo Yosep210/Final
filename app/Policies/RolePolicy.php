@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Member;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 
 class RolePolicy
 {

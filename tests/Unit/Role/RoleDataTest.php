@@ -1,7 +1,7 @@
 <?php
 
 use App\Data\RoleData;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 
 it('normalizes role data from array input', function () {
     $data = RoleData::fromArray([

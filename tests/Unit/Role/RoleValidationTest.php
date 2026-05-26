@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Requests\Role\StoreRoleRequest;
-use App\Models\Role;
 use Illuminate\Validation\Rules\Unique;
+use Spatie\Permission\Models\Role;
 
 it('builds create role rules without ignored model', function () {
     $rules = StoreRoleRequest::roleRules();
