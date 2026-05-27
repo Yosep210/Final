@@ -17,7 +17,7 @@ class UpdateProfileRequest extends FormRequest
         $profile = $this->route('profile');
 
         return $profile !== null
-            && ($this->user()?->can('Update', $profile) ?? false);
+            && ($this->user()?->can('update', $profile) ?? false);
     }
 
     /**

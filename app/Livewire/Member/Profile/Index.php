@@ -52,7 +52,7 @@ class Index extends Component
     public function edit(int $profileId): void
     {
         $profile = MemberProfile::query()->findOrFail($profileId);
-        $this->authorize('Update', $profile);
+        $this->authorize('update', $profile);
 
         $this->editingProfileId = $profile->id;
         $this->form = [
@@ -79,9 +79,9 @@ class Index extends Component
             : null;
 
         if ($profile) {
-            $this->authorize('Update', $profile);
+            $this->authorize('update', $profile);
         } else {
-            $this->authorize('Create', MemberProfile::class);
+            $this->authorize('create', MemberProfile::class);
         }
 
         $validated = $this->validate(

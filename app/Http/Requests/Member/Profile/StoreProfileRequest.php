@@ -13,7 +13,7 @@ class StoreProfileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()?->can('Create', MemberProfile::class) ?? false; // Authorization logic can be implemented here if needed
+        return $this->user()?->can('create', MemberProfile::class) ?? false; // Authorization logic can be implemented here if needed
     }
 
     /**

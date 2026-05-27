@@ -105,7 +105,7 @@ class Index extends Component
         $rules = StoreProvinceRequest::provinceRules($province);
 
         return collect($rules)
-            ->mapWithKeys(fn (array $ruleSet, string $field) => ["form.$field" => $ruleSet])
+            ->mapWithKeys(fn(array $ruleSet, string $field) => ["form.$field" => $ruleSet])
             ->all();
     }
 
@@ -115,7 +115,7 @@ class Index extends Component
     protected function prefixedAttributes(): array
     {
         return collect(StoreProvinceRequest::attributeLabels())
-            ->mapWithKeys(fn (string $label, string $field) => ["form.$field" => $label])
+            ->mapWithKeys(fn(string $label, string $field) => ["form.$field" => $label])
             ->all();
     }
 

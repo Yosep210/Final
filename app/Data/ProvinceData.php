@@ -35,7 +35,7 @@ class ProvinceData extends Data
 
     /**
      * @param  array<string, mixed>  $data
-     * @return array<string, int|string>
+     * @return array<string, int|string|null>
      */
     protected static function normalize(array $data): array
     {

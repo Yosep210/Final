@@ -7,15 +7,26 @@ use App\Events\MemberRegistered;
 use App\Models\Member;
 use App\Services\MemberNetworkPlacementService;
 use App\Services\MemberRankService;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class CreateMemberNetworkListener
+class CreateMemberNetworkListener implements ShouldQueue
 {
-    public function __construct(private MemberNetworkPlacementService $placementService, private MemberRankService $rankService) {}
+    use InteractsWithQueue;
+
+    public int $tries = 3;
+
+    public int $backoff = 10; // retry setelah 10 detik
+
+    public function __construct(
+        private MemberNetworkPlacementService $placementService,
+        private MemberRankService $rankService
+    ) {}
 
     /**
-     * Handle the event with comprehensive error handling.
+     * Handle the event dengan queue support.
      */
     public function handle(MemberRegistered $event): void
     {
@@ -56,9 +67,22 @@ class CreateMemberNetworkListener
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Don't re-throw - allow member registration to complete
-            // Network can be manually created or re-attempted later
-            // In production, you might want to notify admins via alert/queue
+            // Re-throw agar retry bisa berjalan
+            throw $e;
         }
+    }
+
+    /**
+     * Handle job failure setelah semua retries habis.
+     */
+    public function failed(MemberRegistered $event, Throwable $exception): void
+    {
+        Log::critical('Network creation failed permanently', [
+            'member_id' => $event->member->id,
+            'member_name' => $event->member->name,
+            'error' => $exception->getMessage(),
+        ]);
+
+        // TODO: Kirim notifikasi ke admin untuk manual intervention
     }
 }

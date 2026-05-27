@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\MemberDemoted;
 use App\Events\MemberPromoted;
 use App\Events\MemberRegistered;
 use App\Events\MemberVolumeUpdated;
@@ -18,6 +19,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         MemberPromoted::class => [
             UpdateMemberHierarchyListener::class,
+        ],
+        MemberDemoted::class => [
+            // Listener untuk handle demotion bisa ditambahkan di sini
         ],
         MemberVolumeUpdated::class => [
             CalculateCommissionOnVolumeUpdate::class,

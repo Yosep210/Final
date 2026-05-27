@@ -39,7 +39,13 @@ class StoreVillageRequest extends FormRequest
      */
     public static function villageRules(?Village $village = null): array
     {
-        $ignoreName = $village?->id ? Rule::unique('villages', 'name')->ignore($village) : Rule::unique('villages', 'name');
+        // Unique validation: name harus unique per district, bukan global
+        $ignoreName = $village?->id
+            ? Rule::unique('villages', 'name')
+                ->where('district_id', request('district_id'))
+                ->ignore($village)
+            : Rule::unique('villages', 'name')
+                ->where('district_id', request('district_id'));
 
         return [
             'district_id' => ['required', 'integer', 'exists:districts,id'],

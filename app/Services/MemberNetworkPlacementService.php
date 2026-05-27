@@ -11,6 +11,21 @@ class MemberNetworkPlacementService
     public function resolvePlacement(Member $member, ?string $referralCode = null, ?int $explicitSponsorId = null, ?int $explicitParentId = null, ?string $position = null): array
     {
         return DB::transaction(function () use ($member, $referralCode, $explicitSponsorId, $explicitParentId, $position) {
+            // Gunakan pessimistic locking untuk cegah race condition
+            // Lock sponsor jika ada untuk ensure atomic placement
+            if ($explicitSponsorId) {
+                MemberNetwork::where('member_id', $explicitSponsorId)
+                    ->lockForUpdate()
+                    ->first();
+            } elseif ($referralCode) {
+                $refMember = Member::where('referral_code', $referralCode)->lockForUpdate()->first();
+                if ($refMember) {
+                    MemberNetwork::where('member_id', $refMember->id)
+                        ->lockForUpdate()
+                        ->first();
+                }
+            }
+
             return $this->performPlacement($member, $referralCode, $explicitSponsorId, $explicitParentId, $position);
         });
     }

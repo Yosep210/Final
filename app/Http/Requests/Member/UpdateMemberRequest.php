@@ -14,7 +14,7 @@ class UpdateMemberRequest extends FormRequest
         $member = $this->route('member');
 
         return $member !== null
-            && ($this->user()?->can('Update', $member) ?? false);
+            && ($this->user()?->can('update', $member) ?? false);
     }
 
     /**

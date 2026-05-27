@@ -4,15 +4,23 @@ namespace App\Listeners;
 
 use App\Events\MemberVolumeUpdated;
 use App\Services\CommissionCalculationService;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class CalculateCommissionOnVolumeUpdate
+class CalculateCommissionOnVolumeUpdate implements ShouldQueue
 {
+    use InteractsWithQueue;
+
+    public int $tries = 3;
+
+    public int $backoff = 10; // retry setelah 10 detik
+
     public function __construct(private CommissionCalculationService $commissionService) {}
 
     /**
-     * Handle the event.
+     * Handle the event dengan queue support.
      */
     public function handle(MemberVolumeUpdated $event): void
     {
@@ -45,6 +53,22 @@ class CalculateCommissionOnVolumeUpdate
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            // Re-throw untuk memungkinkan retry
+            throw $e;
         }
+    }
+
+    /**
+     * Handle job failure setelah semua retries habis.
+     */
+    public function failed(MemberVolumeUpdated $event, Throwable $exception): void
+    {
+        Log::critical('Commission calculation failed permanently', [
+            'member_id' => $event->member->id,
+            'error' => $exception->getMessage(),
+        ]);
+
+        // TODO: Notifikasi admin untuk manual check
     }
 }

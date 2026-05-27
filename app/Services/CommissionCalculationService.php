@@ -11,18 +11,6 @@ use Illuminate\Support\Facades\Log;
 class CommissionCalculationService
 {
     /**
-     * Commission rate configuration (can be moved to config/mlm.php)
-     */
-    private const BINARY_COMMISSION_RATES = [
-        'member' => 0.03,      // 3%
-        'bronze' => 0.05,      // 5%
-        'silver' => 0.07,      // 7%
-        'gold' => 0.10,        // 10%
-    ];
-
-    private const TAX_RATE = 0.15; // 15% tax
-
-    /**
      * Calculate and log commission for a member for a specific month/year.
      *
      * @param  ?int  $year  Current year if null
@@ -55,12 +43,12 @@ class CommissionCalculationService
                 return $existing;
             }
 
-            $leftVolume = $network->left_volume ?? 0;
-            $rightVolume = $network->right_volume ?? 0;
+            $leftVolume = (float) ($network->left_volume ?? 0);
+            $rightVolume = (float) ($network->right_volume ?? 0);
             $matchedVolume = min($leftVolume, $rightVolume);
 
-            // Minimum volume threshold (can be configured)
-            $minVolume = 100;
+            // Baca minimum volume dari config
+            $minVolume = (float) config('mlm.commission.minimum_volume', 100);
             if ($matchedVolume < $minVolume) {
                 Log::info('Member volume below minimum threshold', [
                     'member_id' => $member->id,
@@ -71,13 +59,14 @@ class CommissionCalculationService
                 return null;
             }
 
-            // Get commission rate based on rank
+            // Baca commission rate dari config berdasarkan rank
             $rank = $network->current_rank ?? 'member';
-            $commissionRate = self::BINARY_COMMISSION_RATES[$rank] ?? self::BINARY_COMMISSION_RATES['member'];
+            $commissionRate = (float) config("mlm.commission.rates.{$rank}", 3) / 100;
+            $taxRate = (float) config('mlm.commission.tax_rate', 15) / 100;
 
             // Calculate commissions
             $grossCommission = $matchedVolume * $commissionRate;
-            $taxAmount = $grossCommission * self::TAX_RATE;
+            $taxAmount = $grossCommission * $taxRate;
             $netCommission = $grossCommission - $taxAmount;
 
             // Create commission log
@@ -91,13 +80,17 @@ class CommissionCalculationService
                 'gross_commission' => $grossCommission,
                 'tax_amount' => $taxAmount,
                 'net_commission' => $netCommission,
-                'commission_rate' => $commissionRate * 100, // Store as percentage
-                'tax_rate' => self::TAX_RATE * 100,
+                'commission_rate' => $commissionRate * 100,
+                'tax_rate' => $taxRate * 100,
                 'member_rank' => $rank,
                 'commission_year' => $year,
                 'commission_month' => $month,
                 'sponsored_by_id' => $network->sponsored_id,
-                'notes' => "Binary commission: {$matchedVolume} matched volume at ".($commissionRate * 100).'%',
+                'notes' => sprintf(
+                    'Binary commission: %.2f matched volume at %.1f%%',
+                    $matchedVolume,
+                    $commissionRate * 100
+                ),
             ]);
 
             Log::info('Commission calculated successfully', [
@@ -127,11 +120,6 @@ class CommissionCalculationService
         $month = $month ?? now()->month;
 
         return DB::transaction(function () use ($year, $month) {
-            $members = Member::query()
-                ->where('status', 'active')
-                ->with('network')
-                ->get();
-
             $results = [
                 'success' => 0,
                 'failed' => 0,
@@ -139,16 +127,21 @@ class CommissionCalculationService
                 'total_commission' => 0,
             ];
 
-            foreach ($members as $member) {
-                $commission = $this->calculateBinaryCommission($member, $year, $month);
+            Member::query()
+                ->where('status', 'active')
+                ->with('network')
+                ->chunk(100, function ($members) use (&$results, $year, $month) {
+                    foreach ($members as $member) {
+                        $commission = $this->calculateBinaryCommission($member, $year, $month);
 
-                if ($commission) {
-                    $results['success']++;
-                    $results['total_commission'] += $commission->net_commission;
-                } else {
-                    $results['skipped']++;
-                }
-            }
+                        if ($commission) {
+                            $results['success']++;
+                            $results['total_commission'] += $commission->net_commission;
+                        } else {
+                            $results['skipped']++;
+                        }
+                    }
+                });
 
             return $results;
         });
@@ -164,19 +157,16 @@ class CommissionCalculationService
             $month = $month ?? now()->month;
 
             // Get all commission logs for this period
-            $commissions = CommissionLog::where('member_id', $member->id)
+            $totalAmount = (float) CommissionLog::where('member_id', $member->id)
                 ->where('commission_year', $year)
                 ->where('commission_month', $month)
-                ->get();
+                ->sum('net_commission');
 
-            if ($commissions->isEmpty()) {
+            if ($totalAmount <= 0) {
                 return null;
             }
 
-            $totalAmount = $commissions->sum('net_commission');
-
-            // Find existing payout
-            $payout = CommissionPayout::firstOrCreate(
+            $payout = CommissionPayout::updateOrCreate(
                 [
                     'member_id' => $member->id,
                     'payout_year' => $year,
@@ -184,18 +174,10 @@ class CommissionCalculationService
                 ],
                 [
                     'total_amount' => $totalAmount,
-                    'amount_remaining' => $totalAmount,
+                    'amount_remaining' => DB::raw("GREATEST(0, {$totalAmount} - COALESCE(amount_paid, 0))"),
                     'status' => 'pending',
                 ]
             );
-
-            // Update amounts if commissions changed
-            if ($payout->total_amount !== $totalAmount) {
-                $payout->update([
-                    'total_amount' => $totalAmount,
-                    'amount_remaining' => $totalAmount - $payout->amount_paid,
-                ]);
-            }
 
             return $payout;
         } catch (\Throwable $e) {

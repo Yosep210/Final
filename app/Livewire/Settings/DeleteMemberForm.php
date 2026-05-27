@@ -22,7 +22,13 @@ class DeleteMemberForm extends Component
             'password' => $this->currentPasswordRules(),
         ]);
 
-        tap(Auth::user(), $logout(...))->delete();
+        $member = Auth::user();
+
+        // Delete member account SEBELUM logout
+        $member->delete();
+
+        // Kemudian logout
+        $logout();
 
         $this->redirect('/', navigate: true);
     }

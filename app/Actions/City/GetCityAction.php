@@ -14,7 +14,8 @@ class GetCityAction
 
     public function handle(int $perPage = 15): LengthAwarePaginator
     {
-        return QueryBuilder::for(City::class)
+        return QueryBuilder::for(City::query())
+            ->defaultSort('-id')
             ->allowedFilters([
                 AllowedFilter::exact('id'),
                 AllowedFilter::partial('name'),

@@ -12,6 +12,11 @@
 
 return [
     /**
+     * Default Role for New Members
+     */
+    'default_member_role' => 'Member',
+
+    /**
      * Commission Rates Configuration
      * Percentage rates applied based on member rank
      */

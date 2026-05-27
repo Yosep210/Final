@@ -15,7 +15,7 @@ class CreateNewMember implements CreatesNewUsers
     use PasswordValidationRules, ProfileValidationRules;
 
     /**
-     * Validate and create a newly registered user.
+     * Validate and create a newly registered member.
      *
      * @param  array<string, string>  $input
      */
@@ -26,8 +26,6 @@ class CreateNewMember implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        // Convert input array to MemberData and use CreateMemberAction
-        // This ensures MemberRegistered event is fired and network is created
         $memberData = new MemberData(
             name: $input['name'],
             username: $input['username'],

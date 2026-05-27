@@ -24,8 +24,11 @@ class CreateMemberAction
             }
 
             $member = Member::query()->create($attributes);
-            Role::findOrCreate('Member', 'web');
-            $member->assignRole('Member');
+
+            // Gunakan role default dari config
+            $defaultRole = config('mlm.default_member_role', 'Member');
+            Role::findOrCreate($defaultRole, 'web');
+            $member->assignRole($defaultRole);
 
             event(new MemberRegistered($member));
 
