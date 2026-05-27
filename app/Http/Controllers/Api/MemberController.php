@@ -32,6 +32,8 @@ class MemberController extends Controller
 
     public function store(StoreMemberRequest $request): JsonResponse
     {
+        $this->authorize('create', Member::class);
+
         $member = CreateMemberAction::run(MemberData::fromArray($request->validated()));
 
         return MemberResource::make($member)
@@ -48,6 +50,8 @@ class MemberController extends Controller
 
     public function update(UpdateMemberRequest $request, Member $member): JsonResponse
     {
+        $this->authorize('update', $member);
+
         $member = UpdateMemberAction::run($member, MemberData::fromArray($request->validated()));
 
         return MemberResource::make($member)->response();

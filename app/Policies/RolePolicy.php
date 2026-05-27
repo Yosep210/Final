@@ -12,7 +12,7 @@ class RolePolicy
      */
     public function viewAny(Member $member): bool
     {
-        return $member->hasRole('Admin') || $member->status === 'active';
+        return $member->hasRole('Admin');
     }
 
     /**
@@ -20,7 +20,7 @@ class RolePolicy
      */
     public function view(Member $member, Role $role): bool
     {
-        return $member->hasRole('Admin') || $member->status === 'active';
+        return $member->hasRole('Admin');
     }
 
     /**

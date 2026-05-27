@@ -5,6 +5,7 @@ use App\Models\Member;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
@@ -21,9 +22,20 @@ function countryPayload(array $overrides = []): array
     ], $overrides);
 }
 
+function actingAsAdminForCountryApi(): Member
+{
+    Role::findOrCreate('Admin', 'web');
+
+    $admin = Member::factory()->active()->create();
+    $admin->assignRole('Admin');
+
+    Sanctum::actingAs($admin);
+
+    return $admin;
+}
+
 it('returns a paginated country list', function () {
-    $user = Member::factory()->create();
-    Sanctum::actingAs($user);
+    actingAsAdminForCountryApi();
     Country::query()->create(countryPayload());
     Country::query()->create(countryPayload([
         'iso' => 'MY',
@@ -49,8 +61,7 @@ it('returns a paginated country list', function () {
 });
 
 it('stores a country', function () {
-    $user = Member::factory()->create();
-    Sanctum::actingAs($user);
+    actingAsAdminForCountryApi();
 
     $response = $this
         ->postJson(route('countries.store'), countryPayload());
@@ -67,8 +78,7 @@ it('stores a country', function () {
 });
 
 it('fails to store a country with duplicate iso', function () {
-    $user = Member::factory()->create();
-    Sanctum::actingAs($user);
+    actingAsAdminForCountryApi();
     Country::query()->create(countryPayload());
 
     $response = $this
@@ -86,8 +96,7 @@ it('fails to store a country with duplicate iso', function () {
 });
 
 it('shows a country', function () {
-    $user = Member::factory()->create();
-    Sanctum::actingAs($user);
+    actingAsAdminForCountryApi();
     $country = Country::query()->create(countryPayload());
 
     $response = $this
@@ -101,8 +110,7 @@ it('shows a country', function () {
 });
 
 it('updates a country', function () {
-    $user = Member::factory()->create();
-    Sanctum::actingAs($user);
+    actingAsAdminForCountryApi();
     $country = Country::query()->create(countryPayload());
 
     $response = $this
@@ -121,8 +129,7 @@ it('updates a country', function () {
 });
 
 it('fails to update a country with duplicate iso', function () {
-    $user = Member::factory()->create();
-    Sanctum::actingAs($user);
+    actingAsAdminForCountryApi();
     Country::query()->create(countryPayload());
     $country = Country::query()->create(countryPayload([
         'iso' => 'MY',
@@ -149,8 +156,7 @@ it('fails to update a country with duplicate iso', function () {
 });
 
 it('deletes a country', function () {
-    $user = Member::factory()->create();
-    Sanctum::actingAs($user);
+    actingAsAdminForCountryApi();
     $country = Country::query()->create(countryPayload());
 
     $response = $this
@@ -164,8 +170,7 @@ it('deletes a country', function () {
 });
 
 it('blocks deleting a country that is already referenced by province data', function () {
-    $user = Member::factory()->create();
-    Sanctum::actingAs($user);
+    actingAsAdminForCountryApi();
     $country = Country::query()->create(countryPayload());
 
     DB::table('provinces')->insert([
@@ -185,4 +190,16 @@ it('blocks deleting a country that is already referenced by province data', func
     $this->assertDatabaseHas('countries', [
         'id' => $country->id,
     ]);
+});
+
+it('rejects guests from listing countries', function () {
+    $this->getJson(route('countries.index'))
+        ->assertUnauthorized();
+});
+
+it('forbids non-admin members from listing countries', function () {
+    Sanctum::actingAs(Member::factory()->active()->create());
+
+    $this->getJson(route('countries.index'))
+        ->assertForbidden();
 });

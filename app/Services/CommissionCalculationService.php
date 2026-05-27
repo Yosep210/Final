@@ -166,18 +166,21 @@ class CommissionCalculationService
                 return null;
             }
 
-            $payout = CommissionPayout::updateOrCreate(
-                [
-                    'member_id' => $member->id,
-                    'payout_year' => $year,
-                    'payout_month' => $month,
-                ],
-                [
-                    'total_amount' => $totalAmount,
-                    'amount_remaining' => DB::raw("GREATEST(0, {$totalAmount} - COALESCE(amount_paid, 0))"),
-                    'status' => 'pending',
-                ]
-            );
+            $payout = CommissionPayout::firstOrNew([
+                'member_id' => $member->id,
+                'payout_year' => $year,
+                'payout_month' => $month,
+            ]);
+
+            $amountPaid = (float) ($payout->amount_paid ?? 0);
+
+            $payout->fill([
+                'total_amount' => $totalAmount,
+                'amount_remaining' => max(0, $totalAmount - $amountPaid),
+                'status' => 'pending',
+            ]);
+
+            $payout->save();
 
             return $payout;
         } catch (\Throwable $e) {

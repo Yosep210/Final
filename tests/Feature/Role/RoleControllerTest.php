@@ -15,8 +15,20 @@ function rolePayload(array $overrides = []): array
     ], $overrides);
 }
 
+function actingAsAdminForRoleApi(): Member
+{
+    Role::findOrCreate('Admin', 'web');
+
+    $admin = Member::factory()->active()->create();
+    $admin->assignRole('Admin');
+
+    Sanctum::actingAs($admin);
+
+    return $admin;
+}
+
 it('returns a paginated role list', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    actingAsAdminForRoleApi();
 
     Role::query()->create(rolePayload());
     Role::query()->create(rolePayload(['name' => 'Manager']));
@@ -33,7 +45,7 @@ it('returns a paginated role list', function () {
 });
 
 it('stores a role', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    actingAsAdminForRoleApi();
 
     $this->postJson(route('roles.store'), rolePayload())
         ->assertCreated()
@@ -43,7 +55,7 @@ it('stores a role', function () {
 });
 
 it('fails to store a duplicate role', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    actingAsAdminForRoleApi();
     Role::query()->create(rolePayload());
 
     $this->postJson(route('roles.store'), rolePayload())
@@ -52,7 +64,7 @@ it('fails to store a duplicate role', function () {
 });
 
 it('shows a role', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    actingAsAdminForRoleApi();
     $role = Role::query()->create(rolePayload());
 
     $this->getJson(route('roles.show', $role))
@@ -61,7 +73,7 @@ it('shows a role', function () {
 });
 
 it('updates a role', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    actingAsAdminForRoleApi();
     $role = Role::query()->create(rolePayload());
 
     $this->putJson(route('roles.update', $role), rolePayload(['name' => 'Supervisor']))
@@ -75,7 +87,7 @@ it('updates a role', function () {
 });
 
 it('fails to update a role with duplicate name', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    actingAsAdminForRoleApi();
     Role::query()->create(rolePayload());
     $role = Role::query()->create(rolePayload(['name' => 'Manager']));
 
@@ -85,11 +97,23 @@ it('fails to update a role with duplicate name', function () {
 });
 
 it('deletes a role', function () {
-    Sanctum::actingAs(Member::factory()->create());
+    actingAsAdminForRoleApi();
     $role = Role::query()->create(rolePayload());
 
     $this->deleteJson(route('roles.destroy', $role))
         ->assertNoContent();
 
     $this->assertDatabaseMissing('roles', ['id' => $role->id]);
+});
+
+it('rejects guests from listing roles', function () {
+    $this->getJson(route('roles.index'))
+        ->assertUnauthorized();
+});
+
+it('forbids non-admin members from listing roles', function () {
+    Sanctum::actingAs(Member::factory()->active()->create());
+
+    $this->getJson(route('roles.index'))
+        ->assertForbidden();
 });

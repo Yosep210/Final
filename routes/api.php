@@ -11,14 +11,17 @@ use App\Http\Controllers\Api\VillageController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('countries', CountryController::class);
-    Route::apiResource('provinces', ProvinceController::class);
-    Route::apiResource('cities', CityController::class);
-    Route::apiResource('districts', DistrictController::class);
-    Route::apiResource('villages', VillageController::class);
     Route::apiResource('members', MemberController::class);
     Route::get('members/{member}/network', [MemberController::class, 'network']);
     Route::post('members/{member}/promote', [MemberController::class, 'promote']);
-    Route::apiResource('permissions', PermissionController::class);
-    Route::apiResource('roles', RoleController::class);
+
+    Route::middleware('role:Admin')->group(function () {
+        Route::apiResource('countries', CountryController::class);
+        Route::apiResource('provinces', ProvinceController::class);
+        Route::apiResource('cities', CityController::class);
+        Route::apiResource('districts', DistrictController::class);
+        Route::apiResource('villages', VillageController::class);
+        Route::apiResource('permissions', PermissionController::class);
+        Route::apiResource('roles', RoleController::class);
+    });
 });

@@ -111,7 +111,7 @@ class Index extends Component
     {
         // Combine phone code + phone number
         if ($this->phoneCode && $this->phoneNumber) {
-            $this->profile['phone'] = $this->phoneCode . preg_replace('/^0+/', '', $this->phoneNumber);
+            $this->profile['phone'] = $this->phoneCode.preg_replace('/^0+/', '', $this->phoneNumber);
         } elseif ($this->phoneNumber) {
             $this->profile['phone'] = $this->phoneNumber;
         }
@@ -347,7 +347,7 @@ class Index extends Component
             'rank' => $networkArr['rank'] ?? null,
             'generation' => $networkArr['generation'] ?? null,
             'path' => $networkArr['path'] ?? null,
-        ], fn($value) => $value !== null));
+        ], fn ($value) => $value !== null));
 
         MemberNetwork::updateOrCreate(
             ['member_id' => $member->id],
@@ -415,12 +415,12 @@ class Index extends Component
 
         $phonecode = Country::where('id', $countryId)->value('phonecode');
 
-        return $phonecode ? '+' . ltrim((string) $phonecode, '+') : null;
+        return $phonecode ? '+'.ltrim((string) $phonecode, '+') : null;
     }
 
     private function generateTemporaryPassword(): string
     {
-        return 'Tmp#' . Str::random(12) . '9a';
+        return 'Tmp#'.Str::random(12).'9a';
     }
 
     private function sendPasswordSetupLink(Member $member): void
