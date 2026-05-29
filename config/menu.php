@@ -10,11 +10,26 @@ return [
         [
             'heading' => 'Data Member',
             'icon' => 'users',
-            'route' => ['member.*'],
+            'route' => ['member.*', 'sponsor.*', 'group.*', 'network.*'],
             'sub' => [
                 [
                     'title' => 'Member List',
                     'href' => 'member.index',
+                ],
+                [
+                    'title' => 'Sponsor List',
+                    'href' => 'sponsor.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Group List',
+                    'href' => 'group.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Jaringan Binary',
+                    'href' => 'network.index',
+                    'role' => 'Admin',
                 ],
             ],
         ],

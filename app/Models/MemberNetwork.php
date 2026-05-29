@@ -29,11 +29,32 @@ class MemberNetwork extends Model
     ];
 
     protected $casts = [
-        'left_volume' => 'decimal:2',
-        'right_volume' => 'decimal:2',
-        'total_volume' => 'decimal:2',
         'qualified_legs' => 'integer',
     ];
+
+    protected function normalizeNumeric(mixed $value): float
+    {
+        if ($value === null || $value === '') {
+            return 0.0;
+        }
+
+        return (float) str_replace([',', ' '], '', (string) $value);
+    }
+
+    public function getLeftVolumeAttribute(mixed $value): float
+    {
+        return $this->normalizeNumeric($value);
+    }
+
+    public function getRightVolumeAttribute(mixed $value): float
+    {
+        return $this->normalizeNumeric($value);
+    }
+
+    public function getTotalVolumeAttribute(mixed $value): float
+    {
+        return $this->normalizeNumeric($value);
+    }
 
     public function member()
     {

@@ -23,7 +23,7 @@ final class MemberTable extends PowerGridComponent
 
     public string $tableName = 'memberTable';
 
-    public string $sortField = 'name';
+    public string $sortField = 'username';
 
     public string $sortDirection = 'asc';
 
@@ -44,19 +44,19 @@ final class MemberTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'name' => 'members.name',
             'username' => 'members.username',
+            'name' => 'members.name',
             'rank' => 'network.rank',
-            'email' => 'members.email',
-            'phone' => 'profile.phone',
+            'contact' => 'members.email',
             'sponsor' => 'sponsor_member.name',
             'parent' => 'parent_member.name',
             'position' => 'network.position',
             'status' => 'members.status',
-            'created_at' => 'members.created_at',
+            'datecreated' => 'members.created_at',
+            'last_login' => 'members.last_login_at',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'members.name';
+        $sortField = $allowedSort[$this->sortField] ?? 'members.username';
 
         $sortDirection = $this->sortDirection === 'desc'
             ? 'desc'
@@ -129,22 +129,21 @@ final class MemberTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
+            ->add('username')
 
             ->add('name')
-
-            ->add('username')
 
             ->add(
                 'rank',
                 fn (Member $member) => $member->network_rank
             )
 
-            ->add('email')
+            ->add('contact', function (Member $member) {
+                $email = $member->email ?: '-';
+                $phone = $member->profile_phone ?: '-';
 
-            ->add(
-                'phone',
-                fn (Member $member) => $member->profile_phone
-            )
+                return $email.' / '.$phone;
+            })
 
             ->add(
                 'sponsor',
@@ -164,8 +163,14 @@ final class MemberTable extends PowerGridComponent
             ->add('status')
 
             ->add(
-                'created_at_formatted',
+                'datecreated_formatted',
                 fn (Member $member) => optional($member->created_at)
+                    ->format('d M Y H:i')
+            )
+
+            ->add(
+                'last_login_formatted',
+                fn (Member $member) => optional($member->last_login_at)
                     ->format('d M Y H:i')
             );
     }
@@ -174,16 +179,16 @@ final class MemberTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Name', 'name')->sortable(),
             Column::make('Username', 'username')->sortable(),
+            Column::make('Name', 'name')->sortable(),
             Column::make('Rank', 'rank')->sortable(),
-            Column::make('Email', 'email')->sortable(),
-            Column::make('Phone', 'phone')->sortable(),
+            Column::make('Contact', 'contact')->sortable(),
             Column::make('Sponsor', 'sponsor')->sortable(),
-            Column::make('Parent', 'parent')->sortable(),
+            Column::make('Upline', 'parent')->sortable(),
             Column::make('Position', 'position')->sortable(),
             Column::make('Status', 'status')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
+            Column::make('Datecreated', 'datecreated_formatted', 'created_at')->sortable(),
+            Column::make('Last Login', 'last_login_formatted', 'last_login_at')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -191,13 +196,83 @@ final class MemberTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::inputText('name')->operators(['contains']),
-            Filter::inputText('username')->operators(['contains']),
-            Filter::inputText('rank')->operators(['contains']),
-            Filter::inputText('email')->operators(['contains']),
-            Filter::inputText('phone')->operators(['contains']),
-            Filter::inputText('sponsor')->operators(['contains']),
-            Filter::inputText('parent')->operators(['contains']),
+            Filter::inputText('name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('members.name', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('username')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('members.username', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('rank')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('network.rank', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('email')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('members.email', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('phone')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('profile.phone', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('sponsor')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('sponsor_member.name', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('parent')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('parent_member.name', 'like', '%'.$searchTerm.'%');
+                }),
             Filter::select('position')
                 ->dataSource(collect([
                     ['id' => 'Left', 'name' => 'Left'],
@@ -205,7 +280,7 @@ final class MemberTable extends PowerGridComponent
                 ]))
                 ->optionValue('id')
                 ->optionLabel('name'),
-            Filter::select('status', 'status')
+            Filter::select('status', 'members.status')
                 ->dataSource(collect([
                     ['id' => 'active', 'name' => 'Active'],
                     ['id' => 'suspended', 'name' => 'Suspended'],
@@ -213,7 +288,7 @@ final class MemberTable extends PowerGridComponent
                 ]))
                 ->optionValue('id')
                 ->optionLabel('name'),
-            Filter::datepicker('created_at'),
+            Filter::datepicker('created_at', 'members.created_at'),
         ];
     }
 

@@ -16,14 +16,15 @@ class GetCityAction
     {
         return QueryBuilder::for(City::query())
             ->defaultSort('-id')
-            ->allowedFilters([
+            ->allowedFilters(
                 AllowedFilter::exact('id'),
                 AllowedFilter::partial('name'),
-            ])
-            ->allowedSorts([
+            )
+            ->allowedSorts(
                 'id',
                 'name',
-            ])
+                'created_at'
+            )
             ->paginate($perPage);
     }
 }
