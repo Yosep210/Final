@@ -20,7 +20,7 @@ final class ProvinceTable extends PowerGridComponent
 
     public string $tableName = 'provinceTable';
 
-    public string $sortField = 'country_name';
+    public string $sortField = 'provinces.name';
 
     public string $sortDirection = 'asc';
 
@@ -36,24 +36,26 @@ final class ProvinceTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'country_name' => 'countries.name',
-            'name' => 'provinces.name',
+            'countries.nice_name' => 'countries.nice_name',
+            'provinces.name' => 'provinces.name',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'countries.name';
+        $sortColumn = $allowedSort[$this->sortField] ?? '   provinces.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        $this->sortField = $sortColumn;
 
         return Province::query()
             ->leftJoin('countries', 'provinces.country_id', '=', 'countries.id')
-            ->select('provinces.*', 'countries.name as country_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
+            ->select('provinces.*', 'countries.nice_name as country_name')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortColumn.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
     {
         return [
             'country' => [
-                'name',
+                'nice_name',
             ],
         ];
     }
@@ -70,8 +72,8 @@ final class ProvinceTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Country', 'country_name')->sortable(),
-            Column::make('Name', 'name')->sortable(),
+            Column::make('Country', 'country_name', 'countries.nice_name')->sortable(),
+            Column::make('Name', 'name', 'provinces.name')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -87,7 +89,7 @@ final class ProvinceTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('countries.name', 'like', '%'.$searchTerm.'%');
+                    return $query->where('countries.nice_name', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('name')
                 ->operators(['contains'])

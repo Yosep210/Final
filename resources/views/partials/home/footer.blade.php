@@ -26,20 +26,25 @@
                     </li>
                     <li class="flex items-center gap-3">
                         <i class="fa fa-envelope text-primary-400 shrink-0"></i>
-                        <a href="mailto:admin@jpbuana.com" class="hover:text-white transition-colors">admin@jpbuana.com</a>
+                        <a href="mailto:admin@jpbuana.com"
+                            class="hover:text-white transition-colors">admin@jpbuana.com</a>
                     </li>
                 </ul>
                 <div class="flex items-center gap-2 mt-5">
-                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
+                    <a href="#"
+                        class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
                         <i class="fab fa-facebook-f"></i>
                     </a>
-                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
+                    <a href="#"
+                        class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
                         <i class="fab fa-twitter"></i>
                     </a>
-                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
+                    <a href="#"
+                        class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
                         <i class="fab fa-linkedin"></i>
                     </a>
-                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
+                    <a href="#"
+                        class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
                         <i class="fab fa-youtube"></i>
                     </a>
                 </div>
@@ -74,8 +79,8 @@
                 <h5 class="text-white font-semibold mb-4">Produk Kami</h5>
                 <ul class="space-y-4 text-sm">
                     <li class="flex items-start gap-3">
-                        <div class="shrink-0 w-8 h-8 flex items-center justify-center bg-primary-600/20 rounded-lg">
-                            <i class="fa fa-spa text-primary-400 text-xs"></i>
+                        <div class="shrink-0 w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-lg">
+                            <i class="fa fa-spa text-zinc-500 text-xs"></i>
                         </div>
                         <span class="pt-1">LOVAURA – Face Mist Aura Care</span>
                     </li>
@@ -103,7 +108,8 @@
 
     {{-- Copyright --}}
     <div class="border-t border-zinc-800">
-        <div class="max-w-7xl mx-auto px-6 md:px-12 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-zinc-500">
+        <div
+            class="max-w-7xl mx-auto px-6 md:px-12 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-zinc-500">
             <span>
                 © <a href="{{ route('home') }}" class="text-zinc-400 hover:text-white transition-colors">
                     {{ config('app.name', 'JPBuana') }}

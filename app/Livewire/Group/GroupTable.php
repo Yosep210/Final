@@ -16,9 +16,9 @@ final class GroupTable extends PowerGridComponent
 {
     public string $tableName = 'groupTable';
 
-    public string $sortField = 'created_at';
+    public string $sortField = 'member_networks.created_at';
 
-    public string $sortDirection = 'desc';
+    public string $sortDirection = 'asc';
 
     public function setUp(): array
     {
@@ -32,17 +32,17 @@ final class GroupTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'member' => 'member.name',
-            'username' => 'member.username',
-            'parent' => 'parent.name',
-            'position' => 'member_networks.position',
-            'left_volume' => 'member_networks.left_volume',
-            'right_volume' => 'member_networks.right_volume',
-            'generation' => 'member_networks.generation',
-            'created_at' => 'member_networks.created_at',
+            'member.name' => 'member.name',
+            'member.username' => 'member.username',
+            'parent.name' => 'parent.name',
+            'member_networks.position' => 'member_networks.position',
+            'member_networks.left_volume' => 'member_networks.left_volume',
+            'member_networks.right_volume' => 'member_networks.right_volume',
+            'member_networks.generation' => 'member_networks.generation',
+            'member_networks.created_at' => 'member_networks.created_at',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'member_networks.created_at';
+        $mappedColumn = $allowedSort[$this->sortField] ?? 'member_networks.created_at';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return MemberNetwork::query()
@@ -56,7 +56,9 @@ final class GroupTable extends PowerGridComponent
                 'parent.username as parent_username',
             ])
             ->whereNotNull('member_networks.parent_id')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw("ROW_NUMBER() OVER (ORDER BY $mappedColumn $sortDirection, member_networks.id ASC) AS no")
+            ->orderByRaw("$mappedColumn $sortDirection")
+            ->orderBy('member_networks.id', 'asc');
     }
 
     public function fields(): PowerGridFields
@@ -69,20 +71,22 @@ final class GroupTable extends PowerGridComponent
             ->add('position', fn (MemberNetwork $row) => ucfirst($row->position ?? '-'))
             ->add('left_volume', fn (MemberNetwork $row) => number_format((float) ($row->left_volume ?? 0), 2))
             ->add('right_volume', fn (MemberNetwork $row) => number_format((float) ($row->right_volume ?? 0), 2))
-            ->add('generation', fn (MemberNetwork $row) => (string) ($row->generation ?? 0));
+            ->add('generation', fn (MemberNetwork $row) => (string) ($row->generation ?? 0))
+            ->add('created_at_formatted', fn (MemberNetwork $row) => optional($row->created_at)->format('Y M d H:i'));
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Member', 'member')->sortable(),
-            Column::make('Username', 'username')->sortable(),
-            Column::make('Parent', 'parent')->sortable(),
-            Column::make('Position', 'position')->sortable(),
-            Column::make('Left Volume', 'left_volume')->sortable(),
-            Column::make('Right Volume', 'right_volume')->sortable(),
-            Column::make('Generation', 'generation')->sortable(),
+            Column::make('Member', 'member', 'member.name')->sortable(),
+            Column::make('Username', 'username', 'member.username')->sortable(),
+            Column::make('Parent', 'parent', 'parent.name')->sortable(),
+            Column::make('Position', 'position', 'member_networks.position')->sortable(),
+            Column::make('Left Volume', 'left_volume', 'member_networks.left_volume')->sortable(),
+            Column::make('Right Volume', 'right_volume', 'member_networks.right_volume')->sortable(),
+            Column::make('Generation', 'generation', 'member_networks.generation')->sortable(),
+            Column::make('Created At', 'created_at_formatted', 'member_networks.created_at')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -163,6 +167,7 @@ final class GroupTable extends PowerGridComponent
 
                     return $query->where('member_networks.generation', 'like', '%'.$searchTerm.'%');
                 }),
+            Filter::datepicker('created_at_formatted', 'member_networks.created_at'),
         ];
     }
 

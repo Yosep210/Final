@@ -48,8 +48,10 @@ class MemberNetworkPlacementService
         }
 
         if ($parent) {
-            [$position, $parentId] = $this->resolvePositionForParent($parent, $position);
-            $parentNetwork = MemberNetwork::where('member_id', $parent->id)->first();
+            $placement = $this->resolvePositionForParent($parent, $position);
+            $position = $placement['position'];
+            $parentId = $placement['parent_id'];
+            $parentNetwork = $placement['parent_network'];
             $generation = $parentNetwork?->generation !== null ? $parentNetwork->generation + 1 : 1;
             $path = $parentNetwork?->path ? ($parentNetwork->path.'/'.$member->id) : (string) $member->id;
             $group = $this->resolveGroup($parentNetwork, $sponsorNetwork, $position);
@@ -116,18 +118,41 @@ class MemberNetworkPlacementService
     private function resolvePositionForParent(Member $parent, ?string $position): array
     {
         if ($position && ! $this->positionExistsForParent($parent->id, $position)) {
-            return [$position, $parent->id];
+            return [
+                'position' => $position,
+                'parent_id' => $parent->id,
+                'parent_network' => MemberNetwork::where('member_id', $parent->id)->first(),
+            ];
         }
 
         if (! $this->positionExistsForParent($parent->id, 'left')) {
-            return ['left', $parent->id];
+            return [
+                'position' => 'left',
+                'parent_id' => $parent->id,
+                'parent_network' => MemberNetwork::where('member_id', $parent->id)->first(),
+            ];
         }
 
         if (! $this->positionExistsForParent($parent->id, 'right')) {
-            return ['right', $parent->id];
+            return [
+                'position' => 'right',
+                'parent_id' => $parent->id,
+                'parent_network' => MemberNetwork::where('member_id', $parent->id)->first(),
+            ];
         }
 
-        return $this->findAvailablePositionRecursively($parent->id);
+        $result = $this->findAvailablePositionRecursively($parent->id);
+
+        // Ensure return value is array with required keys
+        if (! is_array($result) || ! isset($result['parent_id'], $result['position'], $result['parent_network'])) {
+            return [
+                'position' => 'left',
+                'parent_id' => $parent->id,
+                'parent_network' => MemberNetwork::where('member_id', $parent->id)->first(),
+            ];
+        }
+
+        return $result;
     }
 
     private function positionExistsForParent(int $parentId, string $position): bool
@@ -159,7 +184,18 @@ class MemberNetworkPlacementService
             ];
         }
 
-        return $this->findAvailablePositionRecursively($sponsor->id);
+        $result = $this->findAvailablePositionRecursively($sponsor->id);
+
+        // Ensure return value is array with required keys
+        if (! is_array($result) || ! isset($result['parent_id'], $result['position'], $result['parent_network'])) {
+            return [
+                'position' => 'left',
+                'parent_id' => $sponsor->id,
+                'parent_network' => MemberNetwork::where('member_id', $sponsor->id)->first(),
+            ];
+        }
+
+        return $result;
     }
 
     private function findAvailablePositionRecursively(int $startParentId): array

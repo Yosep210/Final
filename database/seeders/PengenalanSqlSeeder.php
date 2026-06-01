@@ -201,7 +201,7 @@ class PengenalanSqlSeeder extends Seeder
         $uniqueEmail = "{$localPart}+{$memberId}@{$domain}";
 
         while (isset($seenEmails[$uniqueEmail])) {
-            $uniqueEmail = "{$localPart}+{$memberId}-" . substr((string) $memberId, 0, 3) . "@{$domain}";
+            $uniqueEmail = "{$localPart}+{$memberId}-".substr((string) $memberId, 0, 3)."@{$domain}";
         }
 
         $seenEmails[$uniqueEmail] = true;

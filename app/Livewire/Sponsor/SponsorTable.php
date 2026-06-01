@@ -14,9 +14,9 @@ final class SponsorTable extends PowerGridComponent
 {
     public string $tableName = 'sponsorTable';
 
-    public string $sortField = 'username';
+    public string $sortField = 'members.name';
 
-    public string $sortDirection = 'desc';
+    public string $sortDirection = 'asc';
 
     public function setUp(): array
     {
@@ -30,17 +30,17 @@ final class SponsorTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'username' => 'members.username',
-            'name' => 'members.name',
-            'current_rank' => 'network.current_rank',
-            'member_active' => 'member_active',
-            'member_non_active' => 'member_non_active',
-            'status' => 'members.status',
-            'join_date' => 'members.created_at',
+            'members.name' => 'members.name',
+            'members.username' => 'members.username',
+            'network.current_rank' => 'network.current_rank',
+            'members.status' => 'members.status',
+            'members.created_at' => 'members.created_at',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'members.username';
+        $sortColumn = $allowedSort[$this->sortField] ?? 'members.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        $this->sortField = $sortColumn;
 
         return Member::query()
             ->join('member_networks as network', 'network.sponsored_id', '=', 'members.id')
@@ -61,15 +61,16 @@ final class SponsorTable extends PowerGridComponent
                     ->whereColumn('child_network.sponsored_id', 'members.id')
                     ->where('child_member.status', '!=', 'active');
             }, 'member_non_active')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortColumn.' '.$sortDirection.') AS no')
+            ->orderBy($sortColumn, $sortDirection);
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('username')
             ->add('name')
+            ->add('username')
             ->add('current_rank', fn (Member $member) => $member->network->current_rank ?? 'member')
             ->add('member_active', fn (Member $member) => (string) ($member->member_active ?? 0))
             ->add('member_non_active', fn (Member $member) => (string) ($member->member_non_active ?? 0))
@@ -81,13 +82,13 @@ final class SponsorTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Username', 'username')->sortable(),
-            Column::make('Name', 'name')->sortable(),
-            Column::make('Rank', 'current_rank')->sortable(),
-            Column::make('Member Active', 'member_active')->sortable(),
-            Column::make('Member Non Active', 'member_non_active')->sortable(),
-            Column::make('Status', 'status')->sortable(),
-            Column::make('Join Date', 'join_date_formatted', 'created_at')->sortable(),
+            Column::make('Name', 'name', 'members.name')->sortable(),
+            Column::make('Username', 'username', 'members.username')->sortable(),
+            Column::make('Rank', 'current_rank', 'network.current_rank')->sortable(),
+            Column::make('Member Active', 'member_active', 'member_active')->sortable(),
+            Column::make('Member Non Active', 'member_non_active', 'member_non_active')->sortable(),
+            Column::make('Status', 'status', 'members.status')->sortable(),
+            Column::make('Join Date', 'join_date_formatted', 'members.created_at')->sortable(),
         ];
     }
 

@@ -20,7 +20,7 @@ final class DistrictTable extends PowerGridComponent
 
     public string $tableName = 'districtTable';
 
-    public string $sortField = 'city_name';
+    public string $sortField = 'cities.name';
 
     public string $sortDirection = 'asc';
 
@@ -36,17 +36,19 @@ final class DistrictTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'name' => 'districts.name',
             'city_name' => 'cities.name',
+            'districts.name' => 'districts.name',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'cities.name';
+        $sortColumn = $allowedSort[$this->sortField] ?? 'cities.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        $this->sortField = $sortColumn;
 
         return District::query()
             ->leftJoin('cities', 'districts.city_id', '=', 'cities.id')
             ->select('districts.*', 'cities.name as city_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortColumn.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -70,8 +72,8 @@ final class DistrictTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('City', 'city_name')->sortable(),
-            Column::make('Name', 'name')->sortable(),
+            Column::make('City', 'city_name', 'cities.name')->sortable(),
+            Column::make('Name', 'name', 'districts.name')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }

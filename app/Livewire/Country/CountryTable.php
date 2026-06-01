@@ -20,7 +20,7 @@ final class CountryTable extends PowerGridComponent
 
     public string $tableName = 'countryTable';
 
-    public string $sortField = 'name';
+    public string $sortField = 'countries.nice_name';
 
     public string $sortDirection = 'asc';
 
@@ -36,16 +36,16 @@ final class CountryTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'iso' => 'countries.iso',
-            'name' => 'countries.name',
-            'nice_name' => 'countries.nice_name',
-            'iso3' => 'countries.iso3',
-            'numcode' => 'countries.numcode',
-            'phonecode' => 'countries.phonecode',
-            'status' => 'countries.status',
+            'countries.iso' => 'countries.iso',
+            'countries.nice_name' => 'countries.nice_name',
+            'countries.name' => 'countries.name',
+            'countries.iso3' => 'countries.iso3',
+            'countries.numcode' => 'countries.numcode',
+            'countries.phonecode' => 'countries.phonecode',
+            'countries.status' => 'countries.status',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'countries.name';
+        $sortField = $allowedSort[$this->sortField] ?? 'countries.nice_name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Country::query()
@@ -63,8 +63,8 @@ final class CountryTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('no')
             ->add('iso')
-            ->add('name')
             ->add('nice_name')
+            ->add('name')
             ->add('iso3')
             ->add('numcode')
             ->add('phonecode')
@@ -75,13 +75,13 @@ final class CountryTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('ISO', 'iso')->sortable(),
-            Column::make('Name', 'name')->sortable(),
-            Column::make('Nice Name', 'nice_name')->sortable(),
-            Column::make('ISO3', 'iso3')->sortable(),
-            Column::make('Numcode', 'numcode')->sortable(),
-            Column::make('Phonecode', 'phonecode')->sortable(),
-            Column::make('Status', 'status')->toggleable(),
+            Column::make('ISO', 'iso', 'countries.iso')->sortable(),
+            Column::make('Name', 'nice_name', 'countries.nice_name')->sortable(),
+            Column::make('Formal Name', 'name', 'countries.name')->sortable(),
+            Column::make('ISO3', 'iso3', 'countries.iso3')->sortable(),
+            Column::make('Numcode', 'numcode', 'countries.numcode')->sortable(),
+            Column::make('Phonecode', 'phonecode', 'countries.phonecode')->sortable(),
+            Column::make('Status', 'status', 'countries.status')->toggleable()->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -90,8 +90,8 @@ final class CountryTable extends PowerGridComponent
     {
         return [
             Filter::inputText('iso')->operators(['contains']),
-            Filter::inputText('name')->operators(['contains']),
             Filter::inputText('nice_name')->operators(['contains']),
+            Filter::inputText('name')->operators(['contains']),
             Filter::inputText('iso3')->operators(['contains']),
             Filter::inputText('numcode')->operators(['contains']),
             Filter::inputText('phonecode')->operators(['contains']),

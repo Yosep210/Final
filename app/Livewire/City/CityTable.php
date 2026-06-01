@@ -20,7 +20,7 @@ final class CityTable extends PowerGridComponent
 
     public string $tableName = 'cityTable';
 
-    public string $sortField = 'province_name';
+    public string $sortField = 'provinces.name';
 
     public string $sortDirection = 'asc';
 
@@ -36,24 +36,26 @@ final class CityTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'name' => 'cities.name',
-            'province_name' => 'provinces.name',
-            'type' => 'cities.type',
+            'provinces.name' => 'provinces.name',
+            'cities.name' => 'cities.name',
+            'cities.type' => 'cities.type',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'provinces.name';
+        $sortColumn = $allowedSort[$this->sortField] ?? 'provinces.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        $this->sortField = $sortColumn;
 
         return City::query()
             ->leftJoin('provinces', 'cities.province_id', '=', 'provinces.id')
-            ->select('cities.*', 'cities.name as city_name', 'provinces.name as province_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
+            ->select('cities.*', 'provinces.name as province_name', 'cities.name as city_name', 'cities.type as type')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortColumn.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
     {
         return [
-            'province' => [
+            'provinces' => [
                 'name',
             ],
         ];
@@ -72,9 +74,9 @@ final class CityTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Province', 'province_name')->sortable(),
-            Column::make('Name', 'city_name', 'name')->sortable(),
-            Column::make('Type', 'type')->sortable(),
+            Column::make('Province', 'province_name', 'provinces.name')->sortable(),
+            Column::make('City', 'city_name', 'cities.name')->sortable(),
+            Column::make('Type', 'type', 'cities.type')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -86,34 +88,26 @@ final class CityTable extends PowerGridComponent
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
 
                     return $query->where('provinces.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('name')
+            Filter::inputText('city_name')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
 
                     return $query->where('cities.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::select('type', 'type')
+            Filter::select('type', 'cities.type')
                 ->dataSource([
-                    [
-                        'id' => 'Kota',
-                        'name' => 'Kota',
-                    ],
-                    [
-                        'id' => 'Kabupaten',
-                        'name' => 'Kabupaten',
-                    ],
+                    ['id' => 'Kota', 'name' => 'Kota'],
+                    ['id' => 'Kabupaten', 'name' => 'Kabupaten'],
                 ])
                 ->optionValue('id')
                 ->optionLabel('name'),

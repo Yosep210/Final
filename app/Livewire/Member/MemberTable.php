@@ -23,7 +23,7 @@ final class MemberTable extends PowerGridComponent
 
     public string $tableName = 'memberTable';
 
-    public string $sortField = 'username';
+    public string $sortField = 'members.name';
 
     public string $sortDirection = 'asc';
 
@@ -44,23 +44,25 @@ final class MemberTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'username' => 'members.username',
-            'name' => 'members.name',
-            'rank' => 'network.rank',
-            'contact' => 'members.email',
-            'sponsor' => 'sponsor_member.name',
-            'parent' => 'parent_member.name',
-            'position' => 'network.position',
-            'status' => 'members.status',
-            'datecreated' => 'members.created_at',
-            'last_login' => 'members.last_login_at',
+            'members.name' => 'members.name',
+            'members.username' => 'members.username',
+            'network.rank' => 'network.rank',
+            'members.email' => 'members.email',
+            'sponsor_member.name' => 'sponsor_member.name',
+            'parent_member.name' => 'parent_member.name',
+            'network.position' => 'network.position',
+            'members.status' => 'members.status',
+            'members.created_at' => 'members.created_at',
+            'members.last_login_at' => 'members.last_login_at',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'members.username';
+        $sortColumn = $allowedSort[$this->sortField] ?? 'members.name';
 
         $sortDirection = $this->sortDirection === 'desc'
             ? 'desc'
             : 'asc';
+
+        $this->sortField = $sortColumn;
 
         return Member::query()
             ->leftJoin(
@@ -105,7 +107,7 @@ final class MemberTable extends PowerGridComponent
 
             ->selectRaw("
             ROW_NUMBER() OVER (
-                ORDER BY {$sortField} {$sortDirection}
+                ORDER BY $sortColumn $sortDirection
             ) AS no
         ");
     }
@@ -129,9 +131,9 @@ final class MemberTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('username')
-
             ->add('name')
+
+            ->add('username')
 
             ->add(
                 'rank',
@@ -163,13 +165,13 @@ final class MemberTable extends PowerGridComponent
             ->add('status')
 
             ->add(
-                'datecreated_formatted',
+                'created_at',
                 fn (Member $member) => optional($member->created_at)
                     ->format('d M Y H:i')
             )
 
             ->add(
-                'last_login_formatted',
+                'last_login_at',
                 fn (Member $member) => optional($member->last_login_at)
                     ->format('d M Y H:i')
             );
@@ -179,16 +181,16 @@ final class MemberTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Username', 'username')->sortable(),
-            Column::make('Name', 'name')->sortable(),
-            Column::make('Rank', 'rank')->sortable(),
-            Column::make('Contact', 'contact')->sortable(),
-            Column::make('Sponsor', 'sponsor')->sortable(),
-            Column::make('Upline', 'parent')->sortable(),
-            Column::make('Position', 'position')->sortable(),
-            Column::make('Status', 'status')->sortable(),
-            Column::make('Datecreated', 'datecreated_formatted', 'created_at')->sortable(),
-            Column::make('Last Login', 'last_login_formatted', 'last_login_at')->sortable(),
+            Column::make('Name', 'name', 'members.name')->sortable(),
+            Column::make('Username', 'username', 'members.username')->sortable(),
+            Column::make('Rank', 'rank', 'network.rank')->sortable(),
+            Column::make('Contact', 'contact'),
+            Column::make('Sponsor', 'sponsor', 'sponsor_member.name')->sortable(),
+            Column::make('Upline', 'parent', 'parent_member.name')->sortable(),
+            Column::make('Position', 'position', 'network.position')->sortable(),
+            Column::make('Status', 'status', 'members.status')->sortable(),
+            Column::make('Datecreated', 'created_at', 'members.created_at')->sortable(),
+            Column::make('Last Login', 'last_login_at', 'members.last_login_at')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
