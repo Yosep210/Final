@@ -13,6 +13,7 @@ class ProvinceData extends Data
     public function __construct(
         public readonly int $countryId,
         public readonly string $name,
+        public readonly ?string $code,
     ) {}
 
     /**
@@ -25,6 +26,7 @@ class ProvinceData extends Data
         return new self(
             countryId: $normalized['country_id'],
             name: $normalized['name'],
+            code: $normalized['code'],
         );
     }
 
@@ -42,6 +44,7 @@ class ProvinceData extends Data
         return [
             'country_id' => (int) ($data['country_id'] ?? 0),
             'name' => trim((string) ($data['name'] ?? '')),
+            'code' => isset($data['code']) && $data['code'] !== '' ? strtoupper(trim((string) $data['code'])) : null,
         ];
     }
 }

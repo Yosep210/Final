@@ -103,6 +103,11 @@ return [
     ],
 
     /**
+     * Registration Settings
+     */
+    'registration_requires_pin' => true,
+
+    /**
      * Payout Settings
      */
     'payout' => [

@@ -4,6 +4,9 @@ namespace App\Livewire\Sponsor;
 
 use App\Models\Member;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
+use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
@@ -32,7 +35,7 @@ final class SponsorTable extends PowerGridComponent
         $allowedSort = [
             'members.name' => 'members.name',
             'members.username' => 'members.username',
-            'network.current_rank' => 'network.current_rank',
+            'sponsor_rank' => 'sponsor_net.current_rank',
             'members.status' => 'members.status',
             'members.created_at' => 'members.created_at',
         ];
@@ -43,9 +46,19 @@ final class SponsorTable extends PowerGridComponent
         $this->sortField = $sortColumn;
 
         return Member::query()
-            ->join('member_networks as network', 'network.sponsored_id', '=', 'members.id')
+            ->leftJoin('member_networks as sponsor_net', 'sponsor_net.member_id', '=', 'members.id')
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('member_networks')
+                    ->whereColumn('sponsored_id', 'members.id');
+            })
             ->select([
-                'members.*',
+                'members.id',
+                'members.username',
+                'members.name',
+                'members.status',
+                'members.created_at',
+                'sponsor_net.current_rank as sponsor_rank',
             ])
             ->selectSub(function ($query) {
                 $query->from('member_networks as child_network')
@@ -69,12 +82,12 @@ final class SponsorTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('name')
             ->add('username')
-            ->add('current_rank', fn (Member $member) => $member->network->current_rank ?? 'member')
+            ->add('name')
+            ->add('sponsor_rank', fn (Member $member) => ucfirst($member->sponsor_rank ?? 'member'))
             ->add('member_active', fn (Member $member) => (string) ($member->member_active ?? 0))
             ->add('member_non_active', fn (Member $member) => (string) ($member->member_non_active ?? 0))
-            ->add('status')
+            ->add('status', fn (Member $member) => ucfirst($member->status))
             ->add('join_date_formatted', fn (Member $member) => optional($member->created_at)->format('d M Y H:i'));
     }
 
@@ -82,14 +95,31 @@ final class SponsorTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Name', 'name', 'members.name')->sortable(),
             Column::make('Username', 'username', 'members.username')->sortable(),
-            Column::make('Rank', 'current_rank', 'network.current_rank')->sortable(),
-            Column::make('Member Active', 'member_active', 'member_active')->sortable(),
-            Column::make('Member Non Active', 'member_non_active', 'member_non_active')->sortable(),
+            Column::make('Nama', 'name', 'members.name')->sortable(),
+            Column::make('Rank', 'sponsor_rank', 'sponsor_net.current_rank')->sortable(),
+            Column::make('Total Active', 'member_active', 'member_active')->sortable(),
+            Column::make('Total Non-Active', 'member_non_active', 'member_non_active')->sortable(),
             Column::make('Status', 'status', 'members.status')->sortable(),
-            Column::make('Join Date', 'join_date_formatted', 'members.created_at')->sortable(),
+            Column::make('Date Actived', 'join_date_formatted', 'members.created_at')->sortable(),
+            Column::action('Action'),
         ];
+    }
+
+    public function actions(Member $row): array
+    {
+        return [
+            Button::add('view-gen')
+                ->slot('Gen')
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->dispatch('sponsor:view-gen', ['username' => $row->username]),
+        ];
+    }
+
+    #[On('sponsor:view-gen')]
+    public function viewGen(string $username): void
+    {
+        $this->redirect(route('network.index', ['username' => $username]), navigate: true);
     }
 
     public function filters(): array

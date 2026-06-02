@@ -54,7 +54,7 @@ class StoreMemberRequest extends FormRequest
             ? Rule::unique('members', 'email')->ignore($member)
             : Rule::unique('members', 'email');
 
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', $ignoreUsername],
             'email' => ['required', 'string', 'email', 'max:255', $ignoreEmail],
@@ -62,7 +62,20 @@ class StoreMemberRequest extends FormRequest
             'referral_code' => ['nullable', 'string', 'max:255'],
             'email_verified_at' => ['nullable', 'date'],
             'last_login_at' => ['nullable', 'date'],
+            'sponsor_username' => ['nullable', 'string', 'exists:members,username'],
+            'parent_username' => ['nullable', 'string', 'exists:members,username'],
+            'position' => ['nullable', 'string', 'in:left,right'],
+            'bank_name' => ['nullable', 'string', 'max:100'],
+            'account_number' => ['nullable', 'string', 'max:50'],
+            'account_holder' => ['nullable', 'string', 'max:150'],
         ];
+
+        if (config('mlm.registration_requires_pin') && ! $member) {
+            $rules['pin_serial'] = ['required', 'string', 'exists:pins,serial_number'];
+            $rules['pin_code'] = ['required', 'string'];
+        }
+
+        return $rules;
     }
 
     /**
@@ -79,6 +92,8 @@ class StoreMemberRequest extends FormRequest
             'referral_code' => 'referral code',
             'email_verified_at' => 'email verified at',
             'last_login_at' => 'last login at',
+            'pin_serial' => 'activation pin serial',
+            'pin_code' => 'activation pin code',
         ];
     }
 }

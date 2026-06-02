@@ -8,6 +8,11 @@ return [
             'href' => 'dashboard',
         ],
         [
+            'title' => 'My PINs',
+            'icon' => 'key',
+            'href' => 'my.pin.index',
+        ],
+        [
             'heading' => 'Data Member',
             'icon' => 'users',
             'route' => ['member.*', 'sponsor.*', 'group.*', 'network.*'],
@@ -36,7 +41,7 @@ return [
         [
             'heading' => 'Admin',
             'icon' => 'lock-closed',
-            'route' => ['role.*', 'permission.*'],
+            'route' => ['role.*', 'permission.*', 'pin.*'],
             'sub' => [
                 [
                     'title' => 'Role',
@@ -46,6 +51,11 @@ return [
                 [
                     'title' => 'Permission',
                     'href' => 'permission.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'PIN Management',
+                    'href' => 'pin.index',
                     'role' => 'Admin',
                 ],
             ],
@@ -93,53 +103,6 @@ return [
                     // 'role' => 'Admin',
                 ],
             ],
-            // 'sub' => [
-            //         [
-            //             'title' => 'Area',
-            //             'href' => 'area.index',
-            // 'role' => 'Admin',
-            //         ],
-            //         [
-            //             'title' => 'Bank',
-            //             'href' => 'bank.index',
-            // 'role' => 'Admin',
-            //         ],
-            //         [
-            //             'title' => 'Membership',
-            //             'href' => 'membership.index',
-            // 'role' => 'Admin',
-            //         ],
-            //         [
-            //             'title' => 'Package',
-            //             'href' => 'package.index',
-            // 'role' => 'Admin',
-            //         ],
-            //         [
-            //             'title' => 'Rank',
-            //             'href' => 'rank.index',
-            // 'role' => 'Admin',
-            //         ],
-            //         [
-            //             'title' => 'Product',
-            //             'href' => 'product.index',
-            // 'role' => 'Admin',
-            //         ],
-            //         [
-            //             'title' => 'Product Category',
-            //             'href' => 'product-category.index',
-            // 'role' => 'Admin',
-            //         ],
-            //         [
-            //             'title' => 'Product Variant',
-            //             'href' => 'product-variant.index',
-            // 'role' => 'Admin',
-            //         ],
-            //         [
-            //             'title' => 'Supplier',
-            //             'href' => 'supplier.index',
-            // 'role' => 'Admin',
-            //         ],
-            //     ],
         ],
     ],
 ];

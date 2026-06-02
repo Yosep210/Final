@@ -19,6 +19,11 @@ class MemberData extends Data
         public readonly ?string $referralCode,
         public readonly ?string $emailVerifiedAt,
         public readonly ?string $lastLoginAt,
+        public readonly ?string $sponsorUsername = null,
+        public readonly ?string $parentUsername = null,
+        public readonly ?string $position = null,
+        public readonly ?string $pinSerial = null,
+        public readonly ?string $pinCode = null,
     ) {}
 
     /**
@@ -37,6 +42,11 @@ class MemberData extends Data
             referralCode: $normalized['referralCode'] !== null ? (string) $normalized['referralCode'] : null,
             emailVerifiedAt: $normalized['emailVerifiedAt'] !== null ? (string) $normalized['emailVerifiedAt'] : null,
             lastLoginAt: $normalized['lastLoginAt'] !== null ? (string) $normalized['lastLoginAt'] : null,
+            sponsorUsername: $normalized['sponsorUsername'] !== null ? (string) $normalized['sponsorUsername'] : null,
+            parentUsername: $normalized['parentUsername'] !== null ? (string) $normalized['parentUsername'] : null,
+            position: $normalized['position'] !== null ? (string) $normalized['position'] : null,
+            pinSerial: $normalized['pinSerial'] !== null ? (string) $normalized['pinSerial'] : null,
+            pinCode: $normalized['pinCode'] !== null ? (string) $normalized['pinCode'] : null,
         );
     }
 
@@ -51,6 +61,11 @@ class MemberData extends Data
             referralCode: $member->referral_code !== null ? (string) $member->referral_code : null,
             emailVerifiedAt: $member->email_verified_at?->format('Y-m-d H:i:s'),
             lastLoginAt: $member->last_login_at?->format('Y-m-d H:i:s'),
+            sponsorUsername: $member->network?->sponsor?->username,
+            parentUsername: $member->network?->parent?->username,
+            position: $member->network?->position,
+            pinSerial: $member->activationPin?->serial_number,
+            pinCode: $member->activationPin?->pin_code,
         );
     }
 
@@ -74,6 +89,21 @@ class MemberData extends Data
                 : null,
             'lastLoginAt' => isset($data['last_login_at']) && $data['last_login_at'] !== ''
                 ? trim((string) $data['last_login_at'])
+                : null,
+            'sponsorUsername' => isset($data['sponsor_username']) && $data['sponsor_username'] !== ''
+                ? trim((string) $data['sponsor_username'])
+                : null,
+            'parentUsername' => isset($data['parent_username']) && $data['parent_username'] !== ''
+                ? trim((string) $data['parent_username'])
+                : null,
+            'position' => isset($data['position']) && $data['position'] !== ''
+                ? trim((string) $data['position'])
+                : null,
+            'pinSerial' => isset($data['pin_serial']) && $data['pin_serial'] !== ''
+                ? trim((string) $data['pin_serial'])
+                : null,
+            'pinCode' => isset($data['pin_code']) && $data['pin_code'] !== ''
+                ? trim((string) $data['pin_code'])
                 : null,
         ];
     }

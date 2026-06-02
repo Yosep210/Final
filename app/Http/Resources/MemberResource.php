@@ -25,6 +25,7 @@ class MemberResource extends JsonResource
             'last_login_at' => $this->last_login_at?->toIso8601String(),
             'profile' => MemberProfileResource::make($this->whenLoaded('profile')),
             'network' => MemberNetworkResource::make($this->whenLoaded('network')),
+            'bank' => MemberBankResource::make($this->whenLoaded('bank')),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

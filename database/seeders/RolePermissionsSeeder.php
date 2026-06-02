@@ -14,7 +14,8 @@ class RolePermissionsSeeder extends Seeder
     public function run(): void
     {
         Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Staff', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Member', 'guard_name' => 'web']);
 
         $permissions = [
             'create',

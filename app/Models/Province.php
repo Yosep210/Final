@@ -27,6 +27,7 @@ class Province extends Model implements Auditable
     protected $fillable = [
         'country_id',
         'name',
+        'code',
     ];
 
     /**
@@ -42,6 +43,7 @@ class Province extends Model implements Auditable
             ->logOnly([
                 'country_id',
                 'name',
+                'code',
             ])
             ->logOnlyDirty()
             ->useLogName('province');

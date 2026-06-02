@@ -13,8 +13,11 @@ class MemberRegistered
 
     public Member $member;
 
-    public function __construct(Member $member)
+    public ?array $placementData;
+
+    public function __construct(Member $member, ?array $placementData = null)
     {
         $this->member = $member;
+        $this->placementData = $placementData;
     }
 }

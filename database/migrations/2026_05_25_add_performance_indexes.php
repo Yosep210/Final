@@ -49,30 +49,43 @@ return new class extends Migration
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('member_networks', function ($table) {
-            $table->dropIndexIfExists(['path']);
-            $table->dropIndexIfExists(['generation']);
-            $table->dropIndexIfExists(['rank']);
-            $table->dropIndexIfExists(['parent_id', 'position']);
-            $table->dropIndexIfExists(['group']);
-        });
+        try {
+            Schema::table('member_networks', function ($table) {
+                $table->dropIndex(['path']);
+                $table->dropIndex(['generation']);
+                $table->dropIndex(['rank']);
+                $table->dropIndex(['parent_id', 'position']);
+                $table->dropIndex(['group']);
+            });
+        } catch (Throwable $e) {
+            // Ignore if index doesn't exist
+        }
 
-        Schema::table('member_profile', function ($table) {
-            $table->dropIndexIfExists(['country_id', 'province_id', 'city_id']);
-            $table->dropIndexIfExists(['phone']);
-        });
+        try {
+            Schema::table('member_profile', function ($table) {
+                $table->dropIndex(['country_id', 'province_id', 'city_id']);
+                $table->dropIndex(['phone']);
+            });
+        } catch (Throwable $e) {
+            // Ignore if index doesn't exist
+        }
 
-        Schema::table('model_has_roles', function ($table) {
-            $table->dropIndexIfExists(['model_type', 'model_id']);
-        });
+        try {
+            Schema::table('model_has_roles', function ($table) {
+                $table->dropIndex(['model_type', 'model_id']);
+            });
+        } catch (Throwable $e) {
+            // Ignore if index doesn't exist
+        }
 
-        Schema::table('model_has_permissions', function ($table) {
-            $table->dropIndexIfExists(['model_type', 'model_id']);
-        });
+        try {
+            Schema::table('model_has_permissions', function ($table) {
+                $table->dropIndex(['model_type', 'model_id']);
+            });
+        } catch (Throwable $e) {
+            // Ignore if index doesn't exist
+        }
     }
 };

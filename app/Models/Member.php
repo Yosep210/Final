@@ -58,6 +58,30 @@ class Member extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Member's bank account details
+     */
+    public function bank(): HasOne
+    {
+        return $this->hasOne(MemberBank::class, 'member_id');
+    }
+
+    /**
+     * PINs owned by this member
+     */
+    public function pins()
+    {
+        return $this->hasMany(Pin::class, 'owner_id');
+    }
+
+    /**
+     * PIN used to activate this member
+     */
+    public function activationPin(): HasOne
+    {
+        return $this->hasOne(Pin::class, 'activated_member_id');
+    }
+
+    /**
      * Networks where this member is the sponsor
      */
     public function sponsoredNetworks()

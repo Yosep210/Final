@@ -6,6 +6,9 @@ use App\Actions\Member\CreateMemberAction;
 use App\Actions\Member\DeleteMemberAction;
 use App\Actions\Member\GetMemberAction;
 use App\Actions\Member\UpdateMemberAction;
+use App\Actions\MemberBank\CreateMemberBankAction;
+use App\Actions\MemberBank\UpdateMemberBankAction;
+use App\Data\MemberBankData;
 use App\Data\MemberData;
 use App\Events\MemberPromoted;
 use App\Http\Controllers\Controller;
@@ -34,9 +37,20 @@ class MemberController extends Controller
     {
         $this->authorize('create', Member::class);
 
-        $member = CreateMemberAction::run(MemberData::fromArray($request->validated()));
+        $validated = $request->validated();
+        $member = CreateMemberAction::run(MemberData::fromArray($validated));
 
-        return MemberResource::make($member)
+        if (! empty($validated['bank_name']) && ! empty($validated['account_number']) && ! empty($validated['account_holder'])) {
+            $bankData = MemberBankData::fromArray([
+                'member_id' => $member->id,
+                'bank_name' => $validated['bank_name'],
+                'account_number' => $validated['account_number'],
+                'account_holder' => $validated['account_holder'],
+            ]);
+            CreateMemberBankAction::run($bankData);
+        }
+
+        return MemberResource::make($member->load('profile', 'network', 'bank'))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -45,16 +59,31 @@ class MemberController extends Controller
     {
         $this->authorize('view', $member);
 
-        return MemberResource::make($member->load('profile', 'network'))->response();
+        return MemberResource::make($member->load('profile', 'network', 'bank'))->response();
     }
 
     public function update(UpdateMemberRequest $request, Member $member): JsonResponse
     {
         $this->authorize('update', $member);
 
-        $member = UpdateMemberAction::run($member, MemberData::fromArray($request->validated()));
+        $validated = $request->validated();
+        $member = UpdateMemberAction::run($member, MemberData::fromArray($validated));
 
-        return MemberResource::make($member)->response();
+        if (! empty($validated['bank_name']) && ! empty($validated['account_number']) && ! empty($validated['account_holder'])) {
+            $bankData = MemberBankData::fromArray([
+                'member_id' => $member->id,
+                'bank_name' => $validated['bank_name'],
+                'account_number' => $validated['account_number'],
+                'account_holder' => $validated['account_holder'],
+            ]);
+            if ($member->bank) {
+                UpdateMemberBankAction::run($member->bank, $bankData);
+            } else {
+                CreateMemberBankAction::run($bankData);
+            }
+        }
+
+        return MemberResource::make($member->load('profile', 'network', 'bank'))->response();
     }
 
     public function destroy(Member $member): Response

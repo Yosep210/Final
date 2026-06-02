@@ -41,6 +41,11 @@
                             placeholder="{{ __('Optional') }}" />
                         <flux:input :label="__('Parent Name')" type="text" :value="$parentName" readonly />
 
+                        @if (!$editingMemberId && config('mlm.registration_requires_pin'))
+                            <flux:input wire:model="form.pin_serial" :label="__('Activation PIN Serial')" placeholder="SR-XXXX-XXXX" />
+                            <flux:input wire:model="form.pin_code" :label="__('Activation PIN Code')" placeholder="CODE-XXXX" />
+                        @endif
+
                         <flux:input wire:model="form.username" :label="__('Username')" placeholder="johndoe" />
                         <flux:input wire:model="form.name" :label="__('Name')" placeholder="John Doe" />
                         <flux:input wire:model="form.email" type="email" :label="__('Email')"
@@ -74,6 +79,16 @@
 
                         <flux:input wire:model="profile.id_card_number" type="number" :label="__('KTP')" />
                         <flux:input wire:model="profile.npwp_number" type="number" :label="__('NPWP')" />
+                    </div>
+
+                    <!-- Bank Account Info -->
+                    <div class="pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                        <flux:heading size="md" class="mb-3">{{ __('Bank Account Details') }}</flux:heading>
+                        <div class="grid gap-4 md:grid-cols-3">
+                            <flux:input wire:model="bank.bank_name" :label="__('Bank Name')" placeholder="BCA / MANDIRI" />
+                            <flux:input wire:model="bank.account_number" :label="__('Account Number')" placeholder="1234567890" />
+                            <flux:input wire:model="bank.account_holder" :label="__('Account Holder')" placeholder="John Doe" />
+                        </div>
                     </div>
 
                     <div class="flex gap-2">

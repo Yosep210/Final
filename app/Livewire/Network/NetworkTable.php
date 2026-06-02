@@ -68,16 +68,15 @@ final class NetworkTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('member', fn (MemberNetwork $row) => $row->member_name)
-            ->add('username', fn (MemberNetwork $row) => $row->member_username)
-            ->add('sponsor', fn (MemberNetwork $row) => $row->sponsor_name ?? '-')
-            ->add('parent', fn (MemberNetwork $row) => $row->parent_name ?? '-')
-            ->add('position', fn (MemberNetwork $row) => ucfirst($row->position ?? '-'))
+            ->add('member', fn (MemberNetwork $row) => strtoupper($row->member_username).' - '.$row->member_name)
+            ->add('sponsor', fn (MemberNetwork $row) => $row->sponsor_username ? strtoupper($row->sponsor_username).' - '.$row->sponsor_name : '-')
+            ->add('parent', fn (MemberNetwork $row) => $row->parent_username ? strtoupper($row->parent_username).' - '.$row->parent_name : '-')
+            ->add('position', fn (MemberNetwork $row) => $row->position ? 'Group-'.($row->position === 'left' ? '1' : '2') : '-')
             ->add('left_volume', fn (MemberNetwork $row) => number_format((float) ($row->left_volume ?? 0), 0))
             ->add('right_volume', fn (MemberNetwork $row) => number_format((float) ($row->right_volume ?? 0), 0))
             ->add('total_volume', fn (MemberNetwork $row) => number_format((float) ($row->total_volume ?? 0), 0))
             ->add('rank', fn (MemberNetwork $row) => ucfirst($row->current_rank ?? 'member'))
-            ->add('generation', fn (MemberNetwork $row) => (string) ($row->generation ?? 0));
+            ->add('generation', fn (MemberNetwork $row) => 'Gen-'.($row->generation ?? 0));
     }
 
     public function columns(): array
@@ -85,13 +84,12 @@ final class NetworkTable extends PowerGridComponent
         return [
             Column::make('#', 'no'),
             Column::make('Member', 'member')->sortable(),
-            Column::make('Username', 'username')->sortable(),
             Column::make('Sponsor', 'sponsor')->sortable(),
             Column::make('Parent', 'parent')->sortable(),
-            Column::make('Position', 'position')->sortable(),
-            Column::make('Left Volume', 'left_volume')->sortable(),
-            Column::make('Right Volume', 'right_volume')->sortable(),
-            Column::make('Total Volume', 'total_volume')->sortable(),
+            Column::make('Group', 'position')->sortable(),
+            Column::make('Left Omzet', 'left_volume')->sortable(),
+            Column::make('Right Omzet', 'right_volume')->sortable(),
+            Column::make('Total Omzet', 'total_volume')->sortable(),
             Column::make('Rank', 'rank')->sortable(),
             Column::make('Generation', 'generation')->sortable(),
             Column::action('Action')->fixedOnResponsive(),

@@ -21,14 +21,20 @@ class UpdateMemberHierarchyListener
             return;
         }
 
-        if (isset($event->payload['rank'])) {
+        $changed = false;
+
+        if (isset($event->payload['rank']) && $network->current_rank !== $event->payload['rank']) {
             $network->current_rank = $event->payload['rank'];
+            $changed = true;
         }
 
-        if (isset($event->payload['generation'])) {
+        if (isset($event->payload['generation']) && $network->generation !== $event->payload['generation']) {
             $network->generation = $event->payload['generation'];
+            $changed = true;
         }
 
-        $network->save();
+        if ($changed) {
+            $network->save();
+        }
     }
 }

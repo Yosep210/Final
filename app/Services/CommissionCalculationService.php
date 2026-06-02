@@ -137,6 +137,7 @@ class CommissionCalculationService
                         if ($commission) {
                             $results['success']++;
                             $results['total_commission'] += $commission->net_commission;
+                            $this->createOrUpdatePayout($member, $year, $month);
                         } else {
                             $results['skipped']++;
                         }

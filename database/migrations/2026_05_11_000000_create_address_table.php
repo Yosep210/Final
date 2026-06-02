@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('nice_name');
             $table->string('iso3', 3)->nullable()->unique();
             $table->smallInteger('numcode')->nullable()->unique();
-            $table->integer('phonecode')->unique();
+            $table->integer('phonecode');
             $table->boolean('status')->default(true);
             $table->timestamps();
         });
@@ -27,6 +27,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
             $table->string('name');
+            $table->string('code', 10)->nullable()->unique();
             $table->timestamps();
         });
 

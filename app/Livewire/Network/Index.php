@@ -25,11 +25,11 @@ class Index extends Component
 
     public array $treeCounts = [];
 
-    public function mount(): void
+    public function mount(?string $username = null): void
     {
         $this->authorize('viewAny', Member::class);
 
-        $this->loadTree();
+        $this->loadTree($username);
     }
 
     #[On('network:view')]
@@ -48,7 +48,7 @@ class Index extends Component
         $this->selectedNetwork = null;
     }
 
-    public function loadTree(): void
+    public function loadTree(?string $username = null): void
     {
         $query = MemberNetwork::query()
             ->with(['member', 'sponsor', 'parent'])
@@ -59,13 +59,20 @@ class Index extends Component
 
         $this->networkNodes = $query;
 
-        $this->rootNode = $this->resolveRootNode($this->networkNodes);
+        $this->rootNode = $this->resolveRootNode($this->networkNodes, $username);
 
         $this->treeCounts = $this->buildTreeCounts();
     }
 
-    private function resolveRootNode(Collection $nodes): ?MemberNetwork
+    private function resolveRootNode(Collection $nodes, ?string $username = null): ?MemberNetwork
     {
+        if ($username) {
+            $targetNode = $nodes->first(fn ($n) => strtolower($n->member->username ?? '') === strtolower($username));
+            if ($targetNode) {
+                return $targetNode;
+            }
+        }
+
         $authMemberId = auth()->id();
 
         if ($authMemberId) {

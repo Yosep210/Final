@@ -21,7 +21,7 @@ class VillagesSeeder extends Seeder
         ini_set('memory_limit', '512M');
         set_time_limit(0);
         $countryPath = database_path('data/countries.json');
-        $provincePath = database_path('data/provinces.json');
+        $provincePath = database_path('data/provincies.json');
         $postalCodePath = database_path('data/postal_codes.csv');
 
         if (File::exists($countryPath) && File::exists($provincePath)) {
@@ -120,6 +120,7 @@ class VillagesSeeder extends Seeder
                         [
                             'country_id' => $country->id,
                             'name' => str((string) data_get($province, 'name', ''))->squish()->value(),
+                            'code' => data_get($province, 'id'),
                         ]
                     );
                 }

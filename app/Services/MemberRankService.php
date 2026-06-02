@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\MemberDemoted;
 use App\Events\MemberPromoted;
+use App\Events\MemberVolumeUpdated;
 use App\Models\Member;
 use App\Models\MemberNetwork;
 use Illuminate\Support\Facades\DB;
@@ -156,6 +157,12 @@ class MemberRankService
                 break;
             }
 
+            $previousVolume = [
+                'left' => (float) ($parent->left_volume ?? 0),
+                'right' => (float) ($parent->right_volume ?? 0),
+                'total' => (float) ($parent->total_volume ?? 0),
+            ];
+
             if ($current->position === 'left') {
                 $parent->left_volume = ($parent->left_volume ?? 0) + $amount;
             } else {
@@ -164,6 +171,17 @@ class MemberRankService
 
             $parent->total_volume = ($parent->total_volume ?? 0) + $amount;
             $parent->save();
+
+            $currentVolume = [
+                'left' => (float) $parent->left_volume,
+                'right' => (float) $parent->right_volume,
+                'total' => (float) $parent->total_volume,
+            ];
+
+            // Trigger commission calculation by dispatching the volume updated event
+            if ($parent->member) {
+                event(new MemberVolumeUpdated($parent->member, $previousVolume, $currentVolume));
+            }
 
             $current = $parent;
         }

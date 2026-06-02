@@ -37,15 +37,31 @@ class CreateMemberNetworkListener implements ShouldQueue
                 return;
             }
 
+            $placementData = $event->placementData ?? [];
+            $sponsorId = null;
+            $parentId = null;
+            $position = $placementData['position'] ?? null;
+
+            if (! empty($placementData['sponsor_username'])) {
+                $sponsorId = Member::where('username', $placementData['sponsor_username'])->value('id');
+            }
+            if (! empty($placementData['parent_username'])) {
+                $parentId = Member::where('username', $placementData['parent_username'])->value('id');
+            }
+
             $networkData = $this->placementService->resolvePlacement(
                 $member,
                 null,
-                null,
-                null,
-                null,
+                $sponsorId,
+                $parentId,
+                $position,
             );
 
-            CreateMemberNetworkAction::run($networkData);
+            $networkModel = CreateMemberNetworkAction::run($networkData);
+
+            // Propagate volume (e.g. default 100 PV) up the ancestor chain
+            $regVolume = (float) config('mlm.commission.minimum_volume', 100);
+            $this->rankService->propagateVolume($networkModel, $regVolume, $networkData['position'] ?? 'left');
 
             $sponsor = $networkData['sponsored_id'] ? Member::find($networkData['sponsored_id']) : null;
             $this->placementService->updateSponsorRank($sponsor);

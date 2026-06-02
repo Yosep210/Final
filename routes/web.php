@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Member\Index as MemberIndex;
+use App\Livewire\Pin\MemberIndex as PinMemberIndex;
 use App\Models\Member;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,8 @@ Route::view('opportunity', 'opportunity')->name('opportunity');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+
+    Route::livewire('my-pins', PinMemberIndex::class)->name('my.pin.index');
 
     Route::livewire('member', MemberIndex::class)
         ->middleware('can:viewAny,'.Member::class)

@@ -6,10 +6,14 @@ use App\Actions\Member\CreateMemberAction;
 use App\Actions\Member\Profile\CreateProfileAction;
 use App\Actions\Member\Profile\UpdateProfileAction;
 use App\Actions\Member\UpdateMemberAction;
+use App\Actions\MemberBank\CreateMemberBankAction;
+use App\Actions\MemberBank\UpdateMemberBankAction;
+use App\Data\MemberBankData;
 use App\Data\MemberData;
 use App\Data\MemberProfileData;
 use App\Http\Requests\Member\Profile\StoreProfileRequest;
 use App\Http\Requests\Member\StoreMemberRequest;
+use App\Http\Requests\MemberBank\StoreMemberBankRequest;
 use App\Models\Country;
 use App\Models\Member;
 use App\Models\MemberNetwork;
@@ -50,6 +54,11 @@ class Index extends Component
      */
     public array $network = [];
 
+    /**
+     * @var array<string, mixed>
+     */
+    public array $bank = [];
+
     public ?string $phoneCode = null;
 
     public string $phoneNumber = '';
@@ -84,7 +93,7 @@ class Index extends Component
     #[On('member:edit')]
     public function edit(int $memberId): void
     {
-        $member = Member::query()->with(['profile', 'network.sponsor', 'network.parent'])->findOrFail($memberId);
+        $member = Member::query()->with(['profile', 'network.sponsor', 'network.parent', 'bank'])->findOrFail($memberId);
         $this->authorize('update', $member);
 
         $this->editingMemberId = $member->id;
@@ -98,10 +107,13 @@ class Index extends Component
             'referral_code' => $member->referral_code,
             'email_verified_at' => optional($member->email_verified_at)->format('Y-m-d\TH:i'),
             'last_login_at' => optional($member->last_login_at)->format('Y-m-d\TH:i'),
+            'pin_serial' => '',
+            'pin_code' => '',
         ];
 
         $this->fillProfileForm($member);
         $this->fillNetworkForm($member);
+        $this->fillBankForm($member);
 
         $this->resetValidation();
         $this->showModal = true;
@@ -152,6 +164,7 @@ class Index extends Component
             }
 
             $this->syncNetwork($member, $validated);
+            $this->syncBank($member, $validated);
             Flux::toast(variant: 'success', text: 'Member updated successfully.');
         } else {
             $created = CreateMemberAction::run($memberData);
@@ -164,6 +177,7 @@ class Index extends Component
             }
 
             $this->syncNetwork($created, $validated);
+            $this->syncBank($created, $validated);
             $this->sendPasswordSetupLink($created);
 
             Flux::toast(variant: 'success', text: 'Member created successfully.');
@@ -232,6 +246,8 @@ class Index extends Component
             'profile.*' => ['nullable'],
             'network' => ['array'],
             'network.*' => ['nullable'],
+            'bank' => ['array'],
+            'bank.*' => ['nullable'],
         ];
 
         foreach (StoreMemberRequest::memberRules($member) as $key => $ruleSet) {
@@ -248,6 +264,18 @@ class Index extends Component
         $rules['network.sponsored_id'] = ['nullable', 'integer', Rule::exists('members', 'id')];
         $rules['network.parent_id'] = ['nullable', 'integer', Rule::exists('members', 'id')];
         $rules['network.position'] = ['nullable', 'in:left,right'];
+
+        // Bank Account conditional validation rules
+        if ($this->hasBankInput($this->bank)) {
+            foreach (StoreMemberBankRequest::bankRules() as $key => $ruleSet) {
+                $rules["bank.$key"] = $ruleSet;
+            }
+        } else {
+            $rules['bank.bank_name'] = ['nullable', 'string', 'max:100'];
+            $rules['bank.account_number'] = ['nullable', 'string', 'max:50'];
+            $rules['bank.account_holder'] = ['nullable', 'string', 'max:150'];
+        }
+
         $rules['network.rank'] = ['nullable', 'integer'];
         $rules['network.group'] = ['nullable', 'integer'];
         $rules['sponsorUsername'] = ['nullable', 'string', Rule::exists('members', 'username')];
@@ -278,6 +306,10 @@ class Index extends Component
         $attributes['parentUsername'] = 'Parent Username';
         $attributes['form.password'] = 'password';
         $attributes['form.password_confirmation'] = 'password confirmation';
+
+        foreach (StoreMemberBankRequest::attributeLabels() as $key => $value) {
+            $attributes["bank.$key"] = $value;
+        }
 
         return $attributes;
     }
@@ -505,6 +537,54 @@ class Index extends Component
         return $phone;
     }
 
+    private function fillBankForm(Member $member): void
+    {
+        $bank = $member->bank;
+
+        if (! $bank) {
+            return;
+        }
+
+        $this->bank = [
+            'member_id' => $member->id,
+            'bank_name' => $bank->bank_name,
+            'account_number' => $bank->account_number,
+            'account_holder' => $bank->account_holder,
+        ];
+    }
+
+    private function hasBankInput(array $bank): bool
+    {
+        foreach ($bank as $key => $value) {
+            if ($key === 'member_id') {
+                continue;
+            }
+
+            if ($value !== null && $value !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function syncBank(Member $member, array $validated): void
+    {
+        if (! $this->hasBankInput($validated['bank'] ?? [])) {
+            return;
+        }
+
+        $bankArr = $validated['bank'];
+        $bankArr['member_id'] = $member->id;
+        $bankData = MemberBankData::fromArray($bankArr);
+
+        if ($member->bank) {
+            UpdateMemberBankAction::run($member->bank, $bankData);
+        } else {
+            CreateMemberBankAction::run($bankData);
+        }
+    }
+
     private function resetForm(): void
     {
         $this->form = [
@@ -517,6 +597,8 @@ class Index extends Component
             'referral_code' => '',
             'email_verified_at' => '',
             'last_login_at' => '',
+            'pin_serial' => '',
+            'pin_code' => '',
         ];
 
         $defaultCountryId = $this->resolveDefaultCountryId();
@@ -553,5 +635,12 @@ class Index extends Component
         $this->sponsorName = null;
         $this->parentUsername = '';
         $this->parentName = null;
+
+        $this->bank = [
+            'member_id' => null,
+            'bank_name' => '',
+            'account_number' => '',
+            'account_holder' => '',
+        ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Member;
+use Database\Seeders\Concerns\HasSourceConnection;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -9,9 +11,12 @@ use Illuminate\Support\Facades\Hash;
 
 class PengenalanSqlSeeder extends Seeder
 {
+    use HasSourceConnection;
+
     public function run(): void
     {
         $this->configureSourceConnection();
+        $memberRoleId = DB::table('roles')->where('name', 'Member')->value('id');
         $seenEmails = [];
         $seenIdCards = [];
         $seenNpwp = [];
@@ -106,32 +111,46 @@ class PengenalanSqlSeeder extends Seeder
                     'deleted_at' => null,
                 ]
             );
+
+            // Seed Member Bank Details if they exist
+            if (! empty($source->bill) && ! empty($source->bill_name)) {
+                $bankName = '';
+                if (! empty($source->bank)) {
+                    $bankName = DB::connection('latihan')
+                        ->table('jpb_banks')
+                        ->where('id', $source->bank)
+                        ->value('nama') ?: '';
+                }
+
+                if (empty($bankName)) {
+                    $bankName = 'UNKNOWN';
+                }
+
+                DB::table('member_banks')->updateOrInsert(
+                    ['member_id' => $memberId],
+                    [
+                        'member_id' => $memberId,
+                        'bank_name' => $bankName,
+                        'account_number' => $source->bill,
+                        'account_holder' => $source->bill_name,
+                        'created_at' => $createdAt,
+                        'updated_at' => $updatedAt,
+                        'deleted_at' => null,
+                    ]
+                );
+            }
+
+            if ($memberRoleId) {
+                DB::table('model_has_roles')->updateOrInsert(
+                    [
+                        'role_id' => $memberRoleId,
+                        'model_type' => Member::class,
+                        'model_id' => $memberId,
+                    ]
+                );
+            }
         }
 
-    }
-
-    private function configureSourceConnection(): void
-    {
-        config([
-            'database.connections.latihan' => [
-                'driver' => 'mysql',
-                'host' => env('DB_HOST', '127.0.0.1'),
-                'port' => env('DB_PORT', '3306'),
-                'database' => 'latihan',
-                'username' => env('DB_USERNAME', 'root'),
-                'password' => env('DB_PASSWORD', ''),
-                'unix_socket' => env('DB_SOCKET', ''),
-                'charset' => 'utf8mb4',
-                'collation' => 'utf8mb4_unicode_ci',
-                'prefix' => '',
-                'prefix_indexes' => true,
-                'strict' => false,
-                'engine' => null,
-                'options' => extension_loaded('pdo_mysql') ? array_filter([
-                    \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4',
-                ]) : [],
-            ],
-        ]);
     }
 
     private function normalizeGender(?string $value): ?string
