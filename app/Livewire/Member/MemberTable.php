@@ -23,7 +23,7 @@ final class MemberTable extends PowerGridComponent
 
     public string $tableName = 'memberTable';
 
-    public string $sortField = 'members.name';
+    public string $sortField = 'members.created_at';
 
     public string $sortDirection = 'asc';
 
@@ -46,7 +46,7 @@ final class MemberTable extends PowerGridComponent
         $allowedSort = [
             'members.name' => 'members.name',
             'members.username' => 'members.username',
-            'network.rank' => 'network.rank',
+            'network.current_rank' => 'network.current_rank',
             'members.email' => 'members.email',
             'sponsor_member.name' => 'sponsor_member.name',
             'parent_member.name' => 'parent_member.name',
@@ -56,7 +56,7 @@ final class MemberTable extends PowerGridComponent
             'members.last_login_at' => 'members.last_login_at',
         ];
 
-        $sortColumn = $allowedSort[$this->sortField] ?? 'members.name';
+        $sortColumn = $allowedSort[$this->sortField] ?? 'members.created_at';
 
         $sortDirection = $this->sortDirection === 'desc'
             ? 'desc'
@@ -72,6 +72,9 @@ final class MemberTable extends PowerGridComponent
                 'members.id'
             )
 
+            ->whereDoesntHave('roles', function ($query) {
+                $query->whereIn('name', ['Admin', 'Staff']);
+            })
             ->leftJoin(
                 'member_profile as profile',
                 'profile.member_id',
@@ -96,7 +99,7 @@ final class MemberTable extends PowerGridComponent
             ->select([
                 'members.*',
 
-                'network.rank as network_rank',
+                'network.current_rank as network_rank',
                 'network.position as network_position',
 
                 'profile.phone as profile_phone',
@@ -122,7 +125,7 @@ final class MemberTable extends PowerGridComponent
                 'sponsored_id',
                 'parent_id',
                 'position',
-                'rank',
+                'current_rank',
             ],
         ];
     }
@@ -131,20 +134,20 @@ final class MemberTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('name')
-
             ->add('username')
+
+            ->add('name')
 
             ->add(
                 'rank',
-                fn (Member $member) => $member->network_rank
+                fn (Member $member) => ucfirst($member->network_rank ?: 'member')
             )
 
             ->add('contact', function (Member $member) {
                 $email = $member->email ?: '-';
                 $phone = $member->profile_phone ?: '-';
 
-                return $email.' / '.$phone;
+                return '<div>'.e($email).'</div><div class="text-zinc-500 text-xs">'.e($phone).'</div>';
             })
 
             ->add(
@@ -159,10 +162,13 @@ final class MemberTable extends PowerGridComponent
 
             ->add(
                 'position',
-                fn (Member $member) => $member->network_position
+                fn (Member $member) => ucfirst($member->network_position ?: 'left')
             )
 
-            ->add('status')
+            ->add(
+                'status',
+                fn (Member $member) => ucfirst($member->status ?: 'active')
+            )
 
             ->add(
                 'created_at',
@@ -181,9 +187,9 @@ final class MemberTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Name', 'name', 'members.name')->sortable(),
             Column::make('Username', 'username', 'members.username')->sortable(),
-            Column::make('Rank', 'rank', 'network.rank')->sortable(),
+            Column::make('Name', 'name', 'members.name')->sortable(),
+            Column::make('Rank', 'rank', 'network.current_rank')->sortable(),
             Column::make('Contact', 'contact'),
             Column::make('Sponsor', 'sponsor', 'sponsor_member.name')->sortable(),
             Column::make('Upline', 'parent', 'parent_member.name')->sortable(),
@@ -198,17 +204,6 @@ final class MemberTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::inputText('name')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('members.name', 'like', '%'.$searchTerm.'%');
-                }),
             Filter::inputText('username')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
@@ -220,7 +215,7 @@ final class MemberTable extends PowerGridComponent
 
                     return $query->where('members.username', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('rank')
+            Filter::inputText('name')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
@@ -229,8 +224,15 @@ final class MemberTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('network.rank', 'like', '%'.$searchTerm.'%');
+                    return $query->where('members.name', 'like', '%'.$searchTerm.'%');
                 }),
+            Filter::select('rank', 'network.current_rank')
+                ->dataSource(collect([
+                    ['id' => 'star', 'name' => 'Star'],
+                    ['id' => 'member', 'name' => 'Member'],
+                ]))
+                ->optionValue('id')
+                ->optionLabel('name'),
             Filter::inputText('email')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
@@ -275,7 +277,7 @@ final class MemberTable extends PowerGridComponent
 
                     return $query->where('parent_member.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::select('position')
+            Filter::select('position', 'network.position')
                 ->dataSource(collect([
                     ['id' => 'Left', 'name' => 'Left'],
                     ['id' => 'Right', 'name' => 'Right'],

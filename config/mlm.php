@@ -23,9 +23,7 @@ return [
     'commission' => [
         'rates' => [
             'member' => 3,        // 3% commission
-            'bronze' => 5,        // 5% commission
-            'silver' => 7,        // 7% commission
-            'gold' => 10,         // 10% commission
+            'star' => 10,         // 10% commission
         ],
         'tax_rate' => 15,        // 15% tax on gross commission
         'minimum_volume' => 100, // Minimum matched volume to qualify for commission
@@ -41,20 +39,10 @@ return [
             'left_volume' => 0,
             'right_volume' => 0,
         ],
-        'bronze' => [
+        'star' => [
             'personal_recruits' => 1,
             'left_volume' => 0,
             'right_volume' => 0,
-        ],
-        'silver' => [
-            'personal_recruits' => 2,
-            'left_volume' => 500,
-            'right_volume' => 500,
-        ],
-        'gold' => [
-            'personal_recruits' => 4,
-            'left_volume' => 2000,
-            'right_volume' => 2000,
         ],
     ],
 

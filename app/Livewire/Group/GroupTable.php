@@ -32,8 +32,8 @@ final class GroupTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
-            'member.name' => 'member.name',
             'member.username' => 'member.username',
+            'member.name' => 'member.name',
             'parent.name' => 'parent.name',
             'member_networks.position' => 'member_networks.position',
             'member_networks.left_volume' => 'member_networks.left_volume',
@@ -48,6 +48,9 @@ final class GroupTable extends PowerGridComponent
         return MemberNetwork::query()
             ->leftJoin('members as member', 'member_networks.member_id', '=', 'member.id')
             ->leftJoin('members as parent', 'member_networks.parent_id', '=', 'parent.id')
+            ->whereDoesntHave('member.roles', function ($query) {
+                $query->whereIn('name', ['Admin', 'Staff']);
+            })
             ->select([
                 'member_networks.*',
                 'member.name as member_name',
@@ -65,8 +68,8 @@ final class GroupTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('member', fn (MemberNetwork $row) => $row->member_name)
             ->add('username', fn (MemberNetwork $row) => $row->member_username)
+            ->add('member', fn (MemberNetwork $row) => $row->member_name)
             ->add('parent', fn (MemberNetwork $row) => $row->parent_name ?? '-')
             ->add('position', fn (MemberNetwork $row) => ucfirst($row->position ?? '-'))
             ->add('left_volume', fn (MemberNetwork $row) => number_format((float) ($row->left_volume ?? 0), 2))
@@ -79,8 +82,8 @@ final class GroupTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Member', 'member', 'member.name')->sortable(),
             Column::make('Username', 'username', 'member.username')->sortable(),
+            Column::make('Member', 'member', 'member.name')->sortable(),
             Column::make('Parent', 'parent', 'parent.name')->sortable(),
             Column::make('Position', 'position', 'member_networks.position')->sortable(),
             Column::make('Left Volume', 'left_volume', 'member_networks.left_volume')->sortable(),
@@ -94,17 +97,6 @@ final class GroupTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::inputText('member')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('member.name', 'like', '%'.$searchTerm.'%');
-                }),
             Filter::inputText('username')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
@@ -115,6 +107,17 @@ final class GroupTable extends PowerGridComponent
                     }
 
                     return $query->where('member.username', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('member')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('member.name', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('parent')
                 ->operators(['contains'])
@@ -127,7 +130,7 @@ final class GroupTable extends PowerGridComponent
 
                     return $query->where('parent.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::select('position')
+            Filter::select('position', 'member_networks.position')
                 ->dataSource(collect([
                     ['id' => 'left', 'name' => 'Left'],
                     ['id' => 'right', 'name' => 'Right'],

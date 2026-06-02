@@ -70,7 +70,7 @@ class MemberRankService
         $ranks = config('mlm.ranks', []);
 
         // Check from highest to lowest rank
-        $rankHierarchy = ['gold', 'silver', 'bronze', 'member'];
+        $rankHierarchy = ['star', 'member'];
 
         foreach ($rankHierarchy as $rankName) {
             if (! isset($ranks[$rankName])) {
@@ -102,7 +102,7 @@ class MemberRankService
      */
     private function isPromotion(?string $oldRank, string $newRank): bool
     {
-        $hierarchy = ['member' => 0, 'bronze' => 1, 'silver' => 2, 'gold' => 3];
+        $hierarchy = ['member' => 0, 'star' => 1];
 
         return ($hierarchy[$newRank] ?? -1) > ($hierarchy[$oldRank] ?? -1);
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Network;
+namespace App\Livewire\Generation;
 
 use App\Models\MemberNetwork;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,13 +12,13 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class NetworkTable extends PowerGridComponent
+final class GenTable extends PowerGridComponent
 {
-    public string $tableName = 'networkTable';
+    public string $tableName = 'genTable';
 
-    public string $sortField = 'created_at';
+    public string $sortField = 'member_networks.generation';
 
-    public string $sortDirection = 'desc';
+    public string $sortDirection = 'asc';
 
     public function setUp(): array
     {
@@ -35,31 +35,26 @@ final class NetworkTable extends PowerGridComponent
             'member' => 'member.name',
             'username' => 'member.username',
             'sponsor' => 'sponsor.name',
-            'parent' => 'parent.name',
-            'position' => 'member_networks.position',
-            'left_volume' => 'member_networks.left_volume',
-            'right_volume' => 'member_networks.right_volume',
-            'total_volume' => 'member_networks.total_volume',
-            'rank' => 'member_networks.current_rank',
             'generation' => 'member_networks.generation',
-            'created_at' => 'member_networks.created_at',
+            'total_volume' => 'member_networks.total_volume',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'member_networks.created_at';
+        $sortField = $allowedSort[$this->sortField] ?? 'member_networks.generation';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return MemberNetwork::query()
             ->leftJoin('members as member', 'member_networks.member_id', '=', 'member.id')
             ->leftJoin('members as sponsor', 'member_networks.sponsored_id', '=', 'sponsor.id')
             ->leftJoin('members as parent', 'member_networks.parent_id', '=', 'parent.id')
+            ->whereDoesntHave('member.roles', function ($query) {
+                $query->whereIn('name', ['Admin', 'Staff']);
+            })
             ->select([
                 'member_networks.*',
                 'member.name as member_name',
                 'member.username as member_username',
                 'sponsor.name as sponsor_name',
                 'sponsor.username as sponsor_username',
-                'parent.name as parent_name',
-                'parent.username as parent_username',
             ])
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
@@ -68,15 +63,10 @@ final class NetworkTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('member', fn (MemberNetwork $row) => strtoupper($row->member_username).' - '.$row->member_name)
-            ->add('sponsor', fn (MemberNetwork $row) => $row->sponsor_username ? strtoupper($row->sponsor_username).' - '.$row->sponsor_name : '-')
-            ->add('parent', fn (MemberNetwork $row) => $row->parent_username ? strtoupper($row->parent_username).' - '.$row->parent_name : '-')
-            ->add('position', fn (MemberNetwork $row) => $row->position ? 'Group-'.($row->position === 'left' ? '1' : '2') : '-')
-            ->add('left_volume', fn (MemberNetwork $row) => number_format((float) ($row->left_volume ?? 0), 0))
-            ->add('right_volume', fn (MemberNetwork $row) => number_format((float) ($row->right_volume ?? 0), 0))
-            ->add('total_volume', fn (MemberNetwork $row) => number_format((float) ($row->total_volume ?? 0), 0))
-            ->add('rank', fn (MemberNetwork $row) => ucfirst($row->current_rank ?? 'member'))
-            ->add('generation', fn (MemberNetwork $row) => 'Gen-'.($row->generation ?? 0));
+            ->add('member', fn (MemberNetwork $row) => '<div><strong>'.e(strtoupper($row->member_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
+            ->add('sponsor', fn (MemberNetwork $row) => $row->sponsor_username ? '<div><strong>'.e(strtoupper($row->sponsor_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->sponsor_name).'</div>' : '-')
+            ->add('generation', fn (MemberNetwork $row) => 'Gen-'.($row->generation ?? 0))
+            ->add('total_volume', fn (MemberNetwork $row) => number_format((float) ($row->total_volume ?? 0), 0));
     }
 
     public function columns(): array
@@ -85,13 +75,8 @@ final class NetworkTable extends PowerGridComponent
             Column::make('#', 'no'),
             Column::make('Member', 'member')->sortable(),
             Column::make('Sponsor', 'sponsor')->sortable(),
-            Column::make('Parent', 'parent')->sortable(),
-            Column::make('Group', 'position')->sortable(),
-            Column::make('Left Omzet', 'left_volume')->sortable(),
-            Column::make('Right Omzet', 'right_volume')->sortable(),
-            Column::make('Total Omzet', 'total_volume')->sortable(),
-            Column::make('Rank', 'rank')->sortable(),
             Column::make('Generation', 'generation')->sortable(),
+            Column::make('Total Omzet', 'total_volume')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -132,7 +117,7 @@ final class NetworkTable extends PowerGridComponent
 
                     return $query->where('sponsor.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('parent')
+            Filter::inputText('generation')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
@@ -141,36 +126,7 @@ final class NetworkTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('parent.name', 'like', '%'.$searchTerm.'%');
-                }),
-            Filter::select('position')
-                ->dataSource(collect([
-                    ['id' => 'left', 'name' => 'Left'],
-                    ['id' => 'right', 'name' => 'Right'],
-                ]))
-                ->optionValue('id')
-                ->optionLabel('name'),
-            Filter::inputText('left_volume')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('member_networks.left_volume', 'like', '%'.$searchTerm.'%');
-                }),
-            Filter::inputText('right_volume')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('member_networks.right_volume', 'like', '%'.$searchTerm.'%');
+                    return $query->where('member_networks.generation', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('total_volume')
                 ->operators(['contains'])
@@ -183,28 +139,6 @@ final class NetworkTable extends PowerGridComponent
 
                     return $query->where('member_networks.total_volume', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('rank')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('member_networks.current_rank', 'like', '%'.$searchTerm.'%');
-                }),
-            Filter::inputText('generation')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('member_networks.generation', 'like', '%'.$searchTerm.'%');
-                }),
         ];
     }
 
@@ -214,13 +148,13 @@ final class NetworkTable extends PowerGridComponent
             Button::add('view')
                 ->slot('View')
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('network:view', ['rowId' => $row->id]),
+                ->dispatch('generation:view', ['rowId' => $row->id]),
         ];
     }
 
-    #[On('network:view')]
+    #[On('generation:view')]
     public function refreshTable(): void
     {
-        $this->dispatch('pg:eventRefresh-networkTable');
+        $this->dispatch('pg:eventRefresh-genTable');
     }
 }

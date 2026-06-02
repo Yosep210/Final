@@ -15,7 +15,7 @@ return [
         [
             'heading' => 'Data Member',
             'icon' => 'users',
-            'route' => ['member.*', 'sponsor.*', 'group.*', 'network.*'],
+            'route' => ['member.*', 'sponsor.*', 'group.*', 'network.*', 'generation.*'],
             'sub' => [
                 [
                     'title' => 'Member List',
@@ -32,8 +32,45 @@ return [
                     'role' => 'Admin',
                 ],
                 [
+                    'title' => 'Gen List',
+                    'href' => 'generation.index',
+                    'role' => 'Admin',
+                ],
+                [
                     'title' => 'Jaringan Binary',
                     'href' => 'network.index',
+                    'role' => 'Admin',
+                ],
+            ],
+        ],
+        [
+            'heading' => 'Commision',
+            'icon' => 'currency-dollar',
+            'route' => ['commission.*', 'wallet.*', 'auto.ro.*', 'withdraw.*'],
+            'sub' => [
+                [
+                    'title' => 'Bonues Detail',
+                    'href' => 'commission.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Statement Commission',
+                    'href' => 'commission.statement',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'eWallet',
+                    'href' => 'wallet.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Auto RO',
+                    'href' => 'auto.ro.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Withdraw',
+                    'href' => 'withdraw.index',
                     'role' => 'Admin',
                 ],
             ],
@@ -89,18 +126,6 @@ return [
                     'title' => 'Village',
                     'href' => 'village.index',
                     'role' => 'Admin',
-                ],
-            ],
-        ],
-        [
-            'heading' => 'Master Data',
-            'icon' => 'circle-stack',
-            'route' => ['area.*', 'bank.*', 'membership.*', 'package.*', 'rank.*', 'product.*', 'product-category.*', 'product-variant.*', 'supplier.*'],
-            'sub' => [
-                [
-                    'title' => 'Transaction List',
-                    'href' => 'dashboard',
-                    // 'role' => 'Admin',
                 ],
             ],
         ],

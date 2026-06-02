@@ -17,9 +17,9 @@ final class SponsorTable extends PowerGridComponent
 {
     public string $tableName = 'sponsorTable';
 
-    public string $sortField = 'members.name';
+    public string $sortField = 'sponsor_net.current_rank';
 
-    public string $sortDirection = 'asc';
+    public string $sortDirection = 'desc';
 
     public function setUp(): array
     {
@@ -40,7 +40,7 @@ final class SponsorTable extends PowerGridComponent
             'members.created_at' => 'members.created_at',
         ];
 
-        $sortColumn = $allowedSort[$this->sortField] ?? 'members.name';
+        $sortColumn = $allowedSort[$this->sortField] ?? 'sponsor_net.current_rank';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         $this->sortField = $sortColumn;
@@ -51,6 +51,9 @@ final class SponsorTable extends PowerGridComponent
                 $query->select(DB::raw(1))
                     ->from('member_networks')
                     ->whereColumn('sponsored_id', 'members.id');
+            })
+            ->whereDoesntHave('roles', function ($query) {
+                $query->whereIn('name', ['Admin', 'Staff']);
             })
             ->select([
                 'members.id',
@@ -147,17 +150,13 @@ final class SponsorTable extends PowerGridComponent
 
                     return $query->where('members.username', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('rank')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('network.current_rank', 'like', '%'.$searchTerm.'%');
-                }),
+            Filter::select('sponsor_rank', 'sponsor_net.current_rank')
+                ->dataSource(collect([
+                    ['id' => 'star', 'name' => 'Star'],
+                    ['id' => 'member', 'name' => 'Member'],
+                ]))
+                ->optionValue('id')
+                ->optionLabel('name'),
             Filter::inputText('member_active')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
