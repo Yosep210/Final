@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Actions\Member\Network\CreateMemberNetworkAction;
 use App\Events\MemberRegistered;
 use App\Models\Member;
+use App\Services\CommissionCalculationService;
 use App\Services\MemberNetworkPlacementService;
 use App\Services\MemberRankService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -22,7 +23,8 @@ class CreateMemberNetworkListener implements ShouldQueue
 
     public function __construct(
         private MemberNetworkPlacementService $placementService,
-        private MemberRankService $rankService
+        private MemberRankService $rankService,
+        private CommissionCalculationService $commissionService
     ) {}
 
     /**
@@ -68,6 +70,13 @@ class CreateMemberNetworkListener implements ShouldQueue
 
             // Evaluate/assign rank for the new member and optionally for ancestors
             $this->rankService->evaluateAndAssign($member);
+
+            // Calculate Sponsor, Unilevel, and Generation bonuses for the new registration
+            if ($sponsor) {
+                $this->commissionService->calculateSponsorBonus($member, $sponsor);
+            }
+            $this->commissionService->calculateUnilevelBonuses($member);
+            $this->commissionService->calculateGenerationBonuses($member);
 
             Log::info('Member network created successfully', [
                 'member_id' => $member->id,

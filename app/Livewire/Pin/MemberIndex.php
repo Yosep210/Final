@@ -113,7 +113,7 @@ class MemberIndex extends Component
             return;
         }
 
-        TransferPinsAction::run(auth()->id(), $this->recipientId, $this->selectedPinSerials);
+        TransferPinsAction::run($this->selectedPinSerials, auth()->id(), $this->recipientId);
 
         $this->showTransferModal = false;
         Flux::toast(variant: 'success', text: 'Successfully transferred '.count($this->selectedPinSerials).' PINs to '.$this->recipientUsername);

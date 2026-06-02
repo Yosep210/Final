@@ -119,6 +119,8 @@ class Profile extends Component
             'npwp_number',
         ]);
 
+        $profileData = array_map(fn ($value) => $value === '' ? null : $value, $profileData);
+
         $member->profile()->updateOrCreate(
             ['member_id' => $member->id],
             $profileData,

@@ -38,6 +38,7 @@ class CommissionSystemSeeder extends Seeder
                 1 => 'sponsor',
                 2 => 'pairing',
                 3 => 'unilevel',
+                4 => 'generation',
                 default => 'other',
             };
 

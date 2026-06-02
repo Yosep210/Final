@@ -25,7 +25,11 @@ return [
             'member' => 3,        // 3% commission
             'star' => 10,         // 10% commission
         ],
-        'tax_rate' => 15,        // 15% tax on gross commission
+        'pairing_caps' => [
+            'member' => 1000000,  // Max Rp 1.000.000 monthly pairing commission
+            'star' => 5000000,    // Max Rp 5.000.000 monthly pairing commission
+        ],
+        'tax_rate' => 2.5,        // 2.5% tax on gross commission
         'minimum_volume' => 100, // Minimum matched volume to qualify for commission
     ],
 
@@ -136,5 +140,13 @@ return [
         'log_all_transactions' => true,
         'log_commissions' => true,
         'retention_days' => 2555, // 7 years for compliance
+    ],
+
+    /**
+     * Auto Repeat Order (Auto-RO) Settings
+     */
+    'auto_ro' => [
+        'package_price_threshold' => 1000000.00, // Threshold to trigger auto-purchase (e.g. Rp 1.000.000)
+        'default_package_sku' => 'RO-PACKAGE',   // Default SKU of the package to auto-purchase
     ],
 ];

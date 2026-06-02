@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Member;
+use App\Models\Pin;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Role;
@@ -21,6 +22,15 @@ function actingAsAdmin(): Member
 
 function memberPayload(array $overrides = []): array
 {
+    $pin = Pin::firstOrCreate(
+        ['serial_number' => 'SERIAL123'],
+        [
+            'pin_code' => 'CODE123',
+            'status' => 'unused',
+        ]
+    );
+    $pin->update(['status' => 'unused']);
+
     return array_merge([
         'name' => 'John Doe',
         'username' => 'johndoe',
@@ -31,6 +41,8 @@ function memberPayload(array $overrides = []): array
         'referral_code' => 'REF001',
         'email_verified_at' => null,
         'last_login_at' => null,
+        'pin_serial' => 'SERIAL123',
+        'pin_code' => 'CODE123',
     ], $overrides);
 }
 

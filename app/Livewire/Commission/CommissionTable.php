@@ -52,6 +52,7 @@ final class CommissionTable extends PowerGridComponent
                     'sponsor' => 'bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20',
                     'pairing' => 'bg-blue-50 text-blue-700 ring-blue-600/10 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20',
                     'unilevel' => 'bg-amber-50 text-amber-700 ring-amber-600/10 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20',
+                    'generation' => 'bg-purple-50 text-purple-700 ring-purple-600/10 dark:bg-purple-500/10 dark:text-purple-400 dark:ring-purple-500/20',
                     default => 'bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20',
                 };
 
@@ -106,6 +107,7 @@ final class CommissionTable extends PowerGridComponent
                     ['id' => 'sponsor', 'name' => 'Sponsor'],
                     ['id' => 'pairing', 'name' => 'Pairing'],
                     ['id' => 'unilevel', 'name' => 'Unilevel'],
+                    ['id' => 'generation', 'name' => 'Generation'],
                 ]))
                 ->optionValue('id')
                 ->optionLabel('name'),

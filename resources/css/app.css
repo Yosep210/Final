@@ -79,3 +79,29 @@ table td {
 table th>div {
     justify-content: center;
 }
+
+@media (min-width: 1024px) {
+    ui-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        height: 100dvh !important;
+        z-index: 20 !important;
+        overflow-y: hidden !important;
+    }
+
+    html[dir="rtl"] ui-sidebar {
+        left: auto !important;
+        right: 0 !important;
+    }
+
+    *:has(> ui-sidebar:not([data-flux-sidebar-collapsed-desktop])) {
+        grid-template-columns: 16rem minmax(0, 1fr) min-content !important;
+    }
+
+    *:has(> ui-sidebar[data-flux-sidebar-collapsed-desktop]) {
+        grid-template-columns: 3.5rem minmax(0, 1fr) min-content !important;
+    }
+}
+
