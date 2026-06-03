@@ -26,7 +26,8 @@ struktur.text
 *.md
 *.sql
 test_member_creation.php
-public/assets/img
-database/data
-database/seeders
-database/factories
+/public/assets/img
+/database/data
+/database/seeders
+/database/factories
+/scratch

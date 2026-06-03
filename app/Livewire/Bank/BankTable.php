@@ -70,11 +70,11 @@ final class BankTable extends PowerGridComponent
             ->add('logo_html', function (Bank $row) {
                 $logoPath = null;
 
-                if (!empty($row->logo)) {
+                if (! empty($row->logo)) {
                     // Normalize the path from the database
                     $logoPath = str_replace('dhaassets/backend/img/bank/', 'assets/img/bank/', $row->logo);
-                    if (!str_contains($logoPath, '/')) {
-                        $logoPath = 'assets/img/bank/' . $logoPath;
+                    if (! str_contains($logoPath, '/')) {
+                        $logoPath = 'assets/img/bank/'.$logoPath;
                     }
                 } else {
                     // Fallback based on name match
@@ -87,7 +87,8 @@ final class BankTable extends PowerGridComponent
 
                 if ($logoPath) {
                     $url = asset(ltrim($logoPath, '/'));
-                    return '<img src="' . $url . '" alt="' . e($row->name) . '" class="h-8 max-w-[80px] object-contain mx-auto" />';
+
+                    return '<img src="'.$url.'" alt="'.e($row->name).'" class="h-8 max-w-[80px] object-contain mx-auto" />';
                 }
 
                 return '<span class="text-zinc-400 text-xs">-</span>';
