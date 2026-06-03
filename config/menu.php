@@ -76,9 +76,9 @@ return [
             ],
         ],
         [
-            'heading' => 'Admin',
+            'heading' => 'Master Data',
             'icon' => 'lock-closed',
-            'route' => ['role.*', 'permission.*', 'pin.*'],
+            'route' => ['role.*', 'permission.*', 'pin.*', 'country.*', 'province.*', 'city.*', 'district.*', 'village.*'],
             'sub' => [
                 [
                     'title' => 'Role',
@@ -95,13 +95,6 @@ return [
                     'href' => 'pin.index',
                     'role' => 'Admin',
                 ],
-            ],
-        ],
-        [
-            'heading' => 'Data Address',
-            'icon' => 'users',
-            'route' => ['country.*', 'province.*', 'city.*', 'district.*', 'village.*'],
-            'sub' => [
                 [
                     'title' => 'Country',
                     'href' => 'country.index',
@@ -125,6 +118,11 @@ return [
                 [
                     'title' => 'Village',
                     'href' => 'village.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Bank',
+                    'href' => 'bank.index',
                     'role' => 'Admin',
                 ],
             ],

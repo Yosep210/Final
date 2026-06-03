@@ -34,7 +34,7 @@ try {
 
     $outRecords = $db->table('jpb_auto_ro_out')->get();
     echo "\n=== Auto-RO Out Table (Count: ".$outRecords->count().") ===\n";
-    foreach ($outRecords->limit(5)->get() as $out) {
+    foreach ($outRecords->take(5) as $out) {
         echo "- ID: {$out->id}, Member ID: {$out->id_member}, Amount: {$out->amount}, Status: {$out->status}, Date: {$out->datecreated}\n";
     }
 

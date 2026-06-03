@@ -105,3 +105,6 @@ table th>div {
     }
 }
 
+[data-flux-sidebar-group] div.absolute {
+    display: none !important;
+}

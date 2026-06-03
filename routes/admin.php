@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\AutoRo\Index as AutoRoIndex;
+use App\Livewire\Bank\Index as BankIndex;
 use App\Livewire\City\Index as CityIndex;
 use App\Livewire\Commission\Index as CommissionIndex;
 use App\Livewire\Commission\Statement as CommissionStatement;
@@ -26,6 +27,8 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->group(function () {
     Route::livewire('city', CityIndex::class)->name('city.index');
 
     Route::livewire('country', CountryIndex::class)->name('country.index');
+
+    Route::livewire('bank', BankIndex::class)->name('bank.index');
 
     Route::livewire('district', DistrictIndex::class)->name('district.index');
 
