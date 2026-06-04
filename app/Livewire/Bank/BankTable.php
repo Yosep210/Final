@@ -20,7 +20,7 @@ final class BankTable extends PowerGridComponent
 
     public string $tableName = 'bankTable';
 
-    public string $sortField = 'banks.name';
+    public string $sortField = 'banks.code';
 
     public string $sortDirection = 'asc';
 
@@ -44,7 +44,7 @@ final class BankTable extends PowerGridComponent
             'banks.linkitacode' => 'banks.linkitacode',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'banks.name';
+        $sortField = $allowedSort[$this->sortField] ?? 'banks.code';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Bank::query()

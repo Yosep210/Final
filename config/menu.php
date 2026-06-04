@@ -76,9 +76,36 @@ return [
             ],
         ],
         [
+            'heading' => 'Data Produk Order',
+            'icon' => 'shopping-bag',
+            'route' => ['pin.*', 'product.order.*'],
+            'sub' => [
+                [
+                    'title' => 'Kirim Produk',
+                    'href' => 'pin.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Stock Produk Member',
+                    'href' => 'pin.stock.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Riwayat PIN',
+                    'href' => 'pin.history.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Orderan ke Perusahaan',
+                    'href' => 'product.order.index',
+                    'role' => 'Admin',
+                ],
+            ],
+        ],
+        [
             'heading' => 'Master Data',
             'icon' => 'lock-closed',
-            'route' => ['role.*', 'permission.*', 'pin.*', 'country.*', 'province.*', 'city.*', 'district.*', 'village.*'],
+            'route' => ['role.*', 'permission.*', 'country.*', 'province.*', 'city.*', 'district.*', 'village.*', 'bank.*'],
             'sub' => [
                 [
                     'title' => 'Role',
@@ -88,11 +115,6 @@ return [
                 [
                     'title' => 'Permission',
                     'href' => 'permission.index',
-                    'role' => 'Admin',
-                ],
-                [
-                    'title' => 'PIN Management',
-                    'href' => 'pin.index',
                     'role' => 'Admin',
                 ],
                 [

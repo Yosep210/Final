@@ -28,6 +28,4 @@ struktur.text
 test_member_creation.php
 /public/assets/img
 /database/data
-/database/seeders
-/database/factories
 /scratch

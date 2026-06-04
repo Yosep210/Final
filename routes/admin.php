@@ -12,6 +12,9 @@ use App\Livewire\Group\Index as GroupIndex;
 use App\Livewire\Network\Index as NetworkIndex;
 use App\Livewire\Permission\Index as PermissionIndex;
 use App\Livewire\Pin\AdminIndex as PinAdminIndex;
+use App\Livewire\Pin\HistoryList as PinHistoryList;
+use App\Livewire\Pin\MemberStock as PinMemberStock;
+use App\Livewire\ProductOrder\Index as ProductOrderIndex;
 use App\Livewire\Province\Index as ProvinceIndex;
 use App\Livewire\Role\Index as RoleIndex;
 use App\Livewire\Sponsor\Index as SponsorIndex;
@@ -23,6 +26,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified', 'role:Admin'])->group(function () {
 
     Route::livewire('pin', PinAdminIndex::class)->name('pin.index');
+    Route::livewire('pin/stock', PinMemberStock::class)->name('pin.stock.index');
+    Route::livewire('pin/history', PinHistoryList::class)->name('pin.history.index');
 
     Route::livewire('city', CityIndex::class)->name('city.index');
 
@@ -53,4 +58,5 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->group(function () {
     Route::livewire('wallet', WalletIndex::class)->name('wallet.index');
     Route::livewire('auto-ro', AutoRoIndex::class)->name('auto.ro.index');
     Route::livewire('withdraw', WithdrawIndex::class)->name('withdraw.index');
+    Route::livewire('product-order', ProductOrderIndex::class)->name('product.order.index');
 });
