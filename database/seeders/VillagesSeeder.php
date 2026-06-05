@@ -93,6 +93,8 @@ class VillagesSeeder extends Seeder
                             'numcode' => $numcode,
                             'phonecode' => (int) $normalizedPhoneCode,
                             'status' => true,
+                            'created_at' => now(),
+                            'updated_at' => now(),
                         ]
                     );
                 }
@@ -121,6 +123,8 @@ class VillagesSeeder extends Seeder
                             'country_id' => $country->id,
                             'name' => str((string) data_get($province, 'name', ''))->squish()->value(),
                             'code' => data_get($province, 'id'),
+                            'created_at' => now(),
+                            'updated_at' => now(),
                         ]
                     );
                 }
@@ -155,6 +159,8 @@ class VillagesSeeder extends Seeder
                                 'province_id' => $prov->id,
                                 'name' => $cityName,
                                 'type' => $type,
+                                'created_at' => now(),
+                                'updated_at' => now(),
                             ]);
 
                             // Fetch Districts
@@ -165,6 +171,8 @@ class VillagesSeeder extends Seeder
                                     DB::table('districts')->updateOrInsert(['id' => $distData['id']], [
                                         'city_id' => $cityData['id'],
                                         'name' => str((string) $distData['name'])->squish()->upper()->value(),
+                                        'created_at' => now(),
+                                        'updated_at' => now(),
                                     ]);
 
                                     // Fetch Villages
@@ -182,6 +190,8 @@ class VillagesSeeder extends Seeder
                                                 'district_id' => $distData['id'],
                                                 'name' => str((string) $villData['name'])->squish()->upper()->value(),
                                                 'postal_code' => $postal,
+                                                'created_at' => now(),
+                                                'updated_at' => now(),
                                             ]);
                                         }
                                     }

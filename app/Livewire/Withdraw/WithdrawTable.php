@@ -71,10 +71,10 @@ final class WithdrawTable extends PowerGridComponent
 
                 return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.$statusText.'</span>';
             })
-            ->add('created_at_formatted', fn (Withdrawal $row) => optional($row->created_at)->format('d M Y H:i'))
+            ->add('created_at_formatted', fn (Withdrawal $row) => $row->created_at?->locale('id')?->isoFormat('DD MMM YY HH:mm'))
             ->add('confirm_info', function (Withdrawal $row) {
                 if ($row->confirmed_at) {
-                    return '<div>'.e(optional($row->confirmed_at)->format('d M Y H:i')).'</div><div class="text-xs text-zinc-500">By '.e($row->confirmed_by ?: 'System').'</div>';
+                    return '<div>'.e($row->confirmed_at?->locale('id')?->isoFormat('DD MMM YY HH:mm')).'</div><div class="text-xs text-zinc-500">By '.e($row->confirmed_by ?: 'System').'</div>';
                 }
 
                 return '-';

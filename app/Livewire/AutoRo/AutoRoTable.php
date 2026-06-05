@@ -4,6 +4,8 @@ namespace App\Livewire\AutoRo;
 
 use App\Models\AutoRoLog;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
@@ -14,7 +16,7 @@ final class AutoRoTable extends PowerGridComponent
 {
     public string $tableName = 'autoRoTable';
 
-    public string $sortField = 'auto_ro_logs.created_at';
+    public string $sortField = 'total_amount';
 
     public string $sortDirection = 'desc';
 
@@ -29,59 +31,61 @@ final class AutoRoTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
+        $allowedSort = [
+            'member.username' => 'member.username',
+            'member.name' => 'member.name',
+            'total_amount' => 'total_amount',
+        ];
+
+        $sortColumn = $allowedSort[$this->sortField] ?? 'total_amount';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        $windowOrderMap = [
+            'total_amount' => 'SUM(auto_ro_logs.amount)',
+        ];
+
+        $windowOrder = $windowOrderMap[$sortColumn] ?? $sortColumn;
+
         return AutoRoLog::query()
             ->join('members as member', 'auto_ro_logs.member_id', '=', 'member.id')
             ->whereDoesntHave('member.roles', function ($query) {
                 $query->whereIn('name', ['Admin', 'Staff']);
             })
             ->select([
-                'auto_ro_logs.*',
+                'auto_ro_logs.member_id',
                 'member.name as member_name',
                 'member.username as member_username',
+                DB::raw('SUM(auto_ro_logs.amount) as total_amount'),
             ])
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY auto_ro_logs.created_at desc) AS no');
+            ->groupBy('auto_ro_logs.member_id', 'member.name', 'member.username')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
+            ->orderBy($sortColumn, $sortDirection);
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('member', fn (AutoRoLog $row) => '<div><strong>'.e(strtoupper($row->member_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
-            ->add('source', fn (AutoRoLog $row) => ucfirst($row->source ?? '-'))
-            ->add('nominal_formatted', fn (AutoRoLog $row) => number_format((float) ($row->nominal ?? 0), 0))
-            ->add('percent_formatted', fn (AutoRoLog $row) => number_format((float) ($row->percent ?? 0), 0).'%')
-            ->add('amount_formatted', fn (AutoRoLog $row) => number_format((float) ($row->amount ?? 0), 0))
-            ->add('status_formatted', function (AutoRoLog $row) {
-                $class = $row->status === 1
-                    ? 'bg-green-50 text-green-700 ring-green-600/10 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20'
-                    : 'bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20';
-                $statusText = $row->status === 1 ? 'Active' : 'Processed';
-
-                return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.$statusText.'</span>';
-            })
-            ->add('description', fn (AutoRoLog $row) => $row->description ?: '-')
-            ->add('created_at_formatted', fn (AutoRoLog $row) => optional($row->created_at)->format('d M Y H:i'));
+            ->add('username', fn (AutoRoLog $row) => strtoupper($row->member_username))
+            ->add('name', fn (AutoRoLog $row) => $row->member_name)
+            ->add('total_amount_formatted', fn (AutoRoLog $row) => number_format((float) ($row->total_amount ?? 0), 0));
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Member', 'member'),
-            Column::make('Source', 'source'),
-            Column::make('Nominal (Rp)', 'nominal_formatted', 'nominal')->sortable(),
-            Column::make('Percent', 'percent_formatted', 'percent')->sortable(),
-            Column::make('Auto RO Amount (Rp)', 'amount_formatted', 'amount')->sortable(),
-            Column::make('Status', 'status_formatted', 'status')->sortable(),
-            Column::make('Description', 'description'),
-            Column::make('Date', 'created_at_formatted'),
+            Column::make('Username', 'username', 'member.username')->sortable(),
+            Column::make('Nama', 'name', 'member.name')->sortable(),
+            Column::make('Jumlah (Rp)', 'total_amount_formatted', 'total_amount')->sortable(),
+            Column::action('Action'),
         ];
     }
 
     public function filters(): array
     {
         return [
-            Filter::inputText('member')
+            Filter::inputText('username')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
@@ -89,9 +93,28 @@ final class AutoRoTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('member.name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('member.username', 'like', '%'.$searchTerm.'%');
+                    return $query->where('member.username', 'like', '%'.$searchTerm.'%');
                 }),
+            Filter::inputText('name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('member.name', 'like', '%'.$searchTerm.'%');
+                }),
+        ];
+    }
+
+    public function actions(AutoRoLog $row): array
+    {
+        return [
+            Button::add('view-detail')
+                ->slot('Detail')
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->dispatch('auto-ro:view-detail', ['memberId' => $row->member_id]),
         ];
     }
 }

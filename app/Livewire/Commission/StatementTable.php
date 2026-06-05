@@ -65,7 +65,7 @@ final class StatementTable extends PowerGridComponent
                 return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.ucfirst($row->status).'</span>';
             })
             ->add('transaction_ref', fn (CommissionPayout $row) => $row->transaction_ref ?: '-')
-            ->add('payout_date_formatted', fn (CommissionPayout $row) => $row->payout_date ? optional($row->payout_date)->format('d M Y H:i') : '-');
+            ->add('payout_date_formatted', fn (CommissionPayout $row) => $row->payout_date?->locale('id')?->isoFormat('DD MMM YY HH:mm') ?: '-');
     }
 
     public function columns(): array

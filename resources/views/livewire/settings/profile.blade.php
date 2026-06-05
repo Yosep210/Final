@@ -38,35 +38,35 @@
 
                 <flux:input wire:model="birth_date" type="date" :label="__('Birth Date')" />
 
-                <flux:select wire:model="country_id" :label="__('Country')">
+                <flux:select wire:model.live="country_id" :label="__('Country')" wire:key="settings-country-select-{{ $country_id ?? 'none' }}">
                     <flux:select.option value="">{{ __('Select a country') }}</flux:select.option>
                     @foreach($countries as $id => $country)
                     <flux:select.option :value="$id">{{ $country }}</flux:select.option>
                     @endforeach
                 </flux:select>
 
-                <flux:select wire:model="province_id" :label="__('Province')">
+                <flux:select wire:model.live="province_id" :label="__('Province')" wire:key="settings-province-select-{{ $country_id ?? 'none' }}-{{ $province_id ?? 'none' }}">
                     <flux:select.option value="">{{ __('Select a province') }}</flux:select.option>
                     @foreach($provinces as $id => $province)
                     <flux:select.option :value="$id">{{ $province }}</flux:select.option>
                     @endforeach
                 </flux:select>
 
-                <flux:select wire:model="city_id" :label="__('City')">
+                <flux:select wire:model.live="city_id" :label="__('City')" wire:key="settings-city-select-{{ $province_id ?? 'none' }}-{{ $city_id ?? 'none' }}">
                     <flux:select.option value="">{{ __('Select a city') }}</flux:select.option>
                     @foreach($cities as $id => $city)
                     <flux:select.option :value="$id">{{ $city }}</flux:select.option>
                     @endforeach
                 </flux:select>
 
-                <flux:select wire:model="district_id" :label="__('District')">
+                <flux:select wire:model.live="district_id" :label="__('District')" wire:key="settings-district-select-{{ $city_id ?? 'none' }}-{{ $district_id ?? 'none' }}">
                     <flux:select.option value="">{{ __('Select a district') }}</flux:select.option>
                     @foreach($districts as $id => $district)
                     <flux:select.option :value="$id">{{ $district }}</flux:select.option>
                     @endforeach
                 </flux:select>
 
-                <flux:select wire:model="village_id" :label="__('Village')">
+                <flux:select wire:model.live="village_id" :label="__('Village')" wire:key="settings-village-select-{{ $district_id ?? 'none' }}-{{ $village_id ?? 'none' }}">
                     <flux:select.option value="">{{ __('Select a village') }}</flux:select.option>
                     @foreach($villages as $id => $village)
                     <flux:select.option :value="$id">{{ $village }}</flux:select.option>

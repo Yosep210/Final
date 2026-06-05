@@ -17,7 +17,7 @@ final class SponsorTable extends PowerGridComponent
 {
     public string $tableName = 'sponsorTable';
 
-    public string $sortField = 'sponsor_net.current_rank';
+    public string $sortField = 'total_sponsored';
 
     public string $sortDirection = 'desc';
 
@@ -38,12 +38,23 @@ final class SponsorTable extends PowerGridComponent
             'sponsor_rank' => 'sponsor_net.current_rank',
             'members.status' => 'members.status',
             'members.created_at' => 'members.created_at',
+            'member_active' => 'member_active',
+            'member_non_active' => 'member_non_active',
+            'total_sponsored' => 'total_sponsored',
         ];
 
-        $sortColumn = $allowedSort[$this->sortField] ?? 'sponsor_net.current_rank';
+        $sortColumn = $allowedSort[$this->sortField] ?? 'total_sponsored';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         $this->sortField = $sortColumn;
+
+        $windowOrderMap = [
+            'total_sponsored' => '(select count(*) from member_networks as child_network where child_network.sponsored_id = members.id)',
+            'member_active' => "(select count(*) from member_networks as child_network inner join members as child_member on child_member.id = child_network.member_id where child_network.sponsored_id = members.id and child_member.status = 'active')",
+            'member_non_active' => "(select count(*) from member_networks as child_network inner join members as child_member on child_member.id = child_network.member_id where child_network.sponsored_id = members.id and child_member.status != 'active')",
+        ];
+
+        $windowOrder = $windowOrderMap[$sortColumn] ?? $sortColumn;
 
         return Member::query()
             ->leftJoin('member_networks as sponsor_net', 'sponsor_net.member_id', '=', 'members.id')
@@ -77,7 +88,12 @@ final class SponsorTable extends PowerGridComponent
                     ->whereColumn('child_network.sponsored_id', 'members.id')
                     ->where('child_member.status', '!=', 'active');
             }, 'member_non_active')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortColumn.' '.$sortDirection.') AS no')
+            ->selectSub(function ($query) {
+                $query->from('member_networks as child_network')
+                    ->selectRaw('count(*)')
+                    ->whereColumn('child_network.sponsored_id', 'members.id');
+            }, 'total_sponsored')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
             ->orderBy($sortColumn, $sortDirection);
     }
 
@@ -87,11 +103,36 @@ final class SponsorTable extends PowerGridComponent
             ->add('no')
             ->add('username')
             ->add('name')
-            ->add('sponsor_rank', fn (Member $member) => ucfirst($member->sponsor_rank ?? 'member'))
+            ->add(
+                'sponsor_rank',
+                function (Member $member) {
+                    $rank = strtolower($member->sponsor_rank ?: 'member');
+                    $class = match ($rank) {
+                        'member' => 'bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20',
+                        'star' => 'bg-blue-50 text-blue-700 ring-blue-600/10 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20',
+                        default => 'bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20',
+                    };
+
+                    return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.ucfirst($rank).'</span>';
+                }
+            )
             ->add('member_active', fn (Member $member) => (string) ($member->member_active ?? 0))
             ->add('member_non_active', fn (Member $member) => (string) ($member->member_non_active ?? 0))
-            ->add('status', fn (Member $member) => ucfirst($member->status))
-            ->add('join_date_formatted', fn (Member $member) => optional($member->created_at)->format('d M Y H:i'));
+            ->add(
+                'status',
+                function (Member $member) {
+                    $status = strtolower($member->status ?: 'active');
+                    $class = match ($status) {
+                        'active' => 'bg-green-50 text-green-700 ring-green-600/10 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20',
+                        'suspended' => 'bg-yellow-50 text-yellow-700 ring-yellow-600/10 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20',
+                        'inactive' => 'bg-red-50 text-red-700 ring-red-600/10 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20',
+                        default => 'bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20',
+                    };
+
+                    return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.ucfirst($status).'</span>';
+                }
+            )
+            ->add('join_date_formatted', fn (Member $member) => $member->created_at?->locale('id')?->isoFormat('DD MMM YY HH:mm'));
     }
 
     public function columns(): array

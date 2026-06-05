@@ -75,7 +75,7 @@ final class GroupTable extends PowerGridComponent
             ->add('left_volume', fn (MemberNetwork $row) => number_format((float) ($row->left_volume ?? 0), 2))
             ->add('right_volume', fn (MemberNetwork $row) => number_format((float) ($row->right_volume ?? 0), 2))
             ->add('generation', fn (MemberNetwork $row) => (string) ($row->generation ?? 0))
-            ->add('created_at_formatted', fn (MemberNetwork $row) => optional($row->created_at)->format('Y M d H:i'));
+            ->add('created_at_formatted', fn (MemberNetwork $row) => $row->created_at?->locale('id')?->isoFormat('DD MMM YY HH:mm'));
     }
 
     public function columns(): array

@@ -4,6 +4,8 @@ namespace App\Livewire\Commission;
 
 use App\Models\CommissionLog;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
@@ -14,7 +16,7 @@ final class CommissionTable extends PowerGridComponent
 {
     public string $tableName = 'commissionTable';
 
-    public string $sortField = 'commission_logs.created_at';
+    public string $sortField = 'total_gross_commission';
 
     public string $sortDirection = 'desc';
 
@@ -29,69 +31,61 @@ final class CommissionTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
+        $allowedSort = [
+            'member.username' => 'member.username',
+            'member.name' => 'member.name',
+            'total_gross_commission' => 'total_gross_commission',
+        ];
+
+        $sortColumn = $allowedSort[$this->sortField] ?? 'total_gross_commission';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        $windowOrderMap = [
+            'total_gross_commission' => 'SUM(commission_logs.gross_commission)',
+        ];
+
+        $windowOrder = $windowOrderMap[$sortColumn] ?? $sortColumn;
+
         return CommissionLog::query()
             ->join('members as member', 'commission_logs.member_id', '=', 'member.id')
             ->whereDoesntHave('member.roles', function ($query) {
                 $query->whereIn('name', ['Admin', 'Staff']);
             })
             ->select([
-                'commission_logs.*',
+                'commission_logs.member_id',
                 'member.name as member_name',
                 'member.username as member_username',
+                DB::raw('SUM(commission_logs.gross_commission) as total_gross_commission'),
             ])
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY commission_logs.created_at desc) AS no');
+            ->groupBy('commission_logs.member_id', 'member.name', 'member.username')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
+            ->orderBy($sortColumn, $sortDirection);
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('member', fn (CommissionLog $row) => '<div><strong>'.e(strtoupper($row->member_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
-            ->add('type_formatted', function (CommissionLog $row) {
-                $class = match ($row->type) {
-                    'sponsor' => 'bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20',
-                    'pairing' => 'bg-blue-50 text-blue-700 ring-blue-600/10 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20',
-                    'unilevel' => 'bg-amber-50 text-amber-700 ring-amber-600/10 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20',
-                    'generation' => 'bg-purple-50 text-purple-700 ring-purple-600/10 dark:bg-purple-500/10 dark:text-purple-400 dark:ring-purple-500/20',
-                    default => 'bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20',
-                };
-
-                return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.ucfirst($row->type).'</span>';
-            })
-            ->add('source', fn (CommissionLog $row) => $row->source ?: '-')
-            ->add('gross_commission_formatted', fn (CommissionLog $row) => number_format((float) ($row->gross_commission ?? 0), 0))
-            ->add('tax_amount_formatted', fn (CommissionLog $row) => number_format((float) ($row->tax_amount ?? 0), 0))
-            ->add('net_commission_formatted', fn (CommissionLog $row) => number_format((float) ($row->net_commission ?? 0), 0))
-            ->add('status_formatted', function (CommissionLog $row) {
-                $statusText = $row->is_paid ? 'Paid' : 'Unpaid';
-                $class = $row->is_paid
-                    ? 'bg-green-50 text-green-700 ring-green-600/10 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20'
-                    : 'bg-rose-50 text-rose-700 ring-rose-600/10 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/20';
-
-                return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.$statusText.'</span>';
-            })
-            ->add('created_at_formatted', fn (CommissionLog $row) => optional($row->created_at)->format('d M Y H:i'));
+            ->add('username', fn (CommissionLog $row) => $row->member_username)
+            ->add('name', fn (CommissionLog $row) => $row->member_name)
+            ->add('gross_commission_formatted', fn (CommissionLog $row) => number_format((float) ($row->total_gross_commission ?? 0), 0));
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Member', 'member'),
-            Column::make('Type', 'type_formatted', 'type')->sortable(),
-            Column::make('Source ID', 'source'),
-            Column::make('Gross (Rp)', 'gross_commission_formatted', 'gross_commission')->sortable(),
-            Column::make('Tax (Rp)', 'tax_amount_formatted', 'tax_amount')->sortable(),
-            Column::make('Net (Rp)', 'net_commission_formatted', 'net_commission')->sortable(),
-            Column::make('Status', 'status_formatted', 'is_paid')->sortable(),
-            Column::make('Date Created', 'created_at_formatted'),
+            Column::make('Username', 'username', 'member.username')->sortable(),
+            Column::make('Nama', 'name', 'member.name')->sortable(),
+            Column::make('Jumlah (Rp)', 'gross_commission_formatted', 'total_gross_commission')->sortable(),
+            Column::action('Action'),
         ];
     }
 
     public function filters(): array
     {
         return [
-            Filter::inputText('member')
+            Filter::inputText('username')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
@@ -99,25 +93,28 @@ final class CommissionTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('member.name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('member.username', 'like', '%'.$searchTerm.'%');
+                    return $query->where('member.username', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::select('type', 'commission_logs.type')
-                ->dataSource(collect([
-                    ['id' => 'sponsor', 'name' => 'Sponsor'],
-                    ['id' => 'pairing', 'name' => 'Pairing'],
-                    ['id' => 'unilevel', 'name' => 'Unilevel'],
-                    ['id' => 'generation', 'name' => 'Generation'],
-                ]))
-                ->optionValue('id')
-                ->optionLabel('name'),
-            Filter::select('status', 'commission_logs.is_paid')
-                ->dataSource(collect([
-                    ['id' => 1, 'name' => 'Paid'],
-                    ['id' => 0, 'name' => 'Unpaid'],
-                ]))
-                ->optionValue('id')
-                ->optionLabel('name'),
+            Filter::inputText('name')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->where('member.name', 'like', '%'.$searchTerm.'%');
+                }),
+        ];
+    }
+
+    public function actions(CommissionLog $row): array
+    {
+        return [
+            Button::add('view-detail')
+                ->slot('Detail')
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->dispatch('commission:view-detail', ['memberId' => $row->member_id]),
         ];
     }
 }

@@ -25,7 +25,7 @@ final class MemberTable extends PowerGridComponent
 
     public string $sortField = 'members.created_at';
 
-    public string $sortDirection = 'asc';
+    public string $sortDirection = 'desc';
 
     public bool $canManageMembers = false;
 
@@ -135,51 +135,59 @@ final class MemberTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('no')
             ->add('username')
-
             ->add('name')
-
             ->add(
                 'rank',
-                fn (Member $member) => ucfirst($member->network_rank ?: 'member')
-            )
+                function (Member $member) {
+                    $rank = strtolower($member->network_rank ?: 'member');
+                    $class = match ($rank) {
+                        'member' => 'bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20',
+                        'star' => 'bg-blue-50 text-blue-700 ring-blue-600/10 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20',
+                        default => 'bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20',
+                    };
 
+                    return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.ucfirst($rank).'</span>';
+                }
+            )
             ->add('contact', function (Member $member) {
                 $email = $member->email ?: '-';
                 $phone = $member->profile_phone ?: '-';
 
                 return '<div>'.e($email).'</div><div class="text-zinc-500 text-xs">'.e($phone).'</div>';
             })
-
             ->add(
                 'sponsor',
                 fn (Member $member) => $member->sponsor_name
             )
-
             ->add(
                 'parent',
                 fn (Member $member) => $member->parent_name
             )
-
             ->add(
                 'position',
                 fn (Member $member) => ucfirst($member->network_position ?: 'left')
             )
-
             ->add(
                 'status',
-                fn (Member $member) => ucfirst($member->status ?: 'active')
-            )
+                function (Member $member) {
+                    $status = strtolower($member->status ?: 'active');
+                    $class = match ($status) {
+                        'active' => 'bg-green-50 text-green-700 ring-green-600/10 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20',
+                        'suspended' => 'bg-yellow-50 text-yellow-700 ring-yellow-600/10 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20',
+                        'inactive' => 'bg-red-50 text-red-700 ring-red-600/10 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20',
+                        default => 'bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20',
+                    };
 
-            ->add(
-                'created_at',
-                fn (Member $member) => optional($member->created_at)
-                    ->format('d M Y H:i')
+                    return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.ucfirst($status).'</span>';
+                }
             )
-
             ->add(
-                'last_login_at',
-                fn (Member $member) => optional($member->last_login_at)
-                    ->format('d M Y H:i')
+                'created_at_formatted',
+                fn (Member $member) => $member->created_at?->locale('id')?->isoFormat('DD MMM YY HH:mm'),
+            )
+            ->add(
+                'last_login_at_formatted',
+                fn (Member $member) => $member->last_login_at?->locale('id')?->isoFormat('DD MMM YY HH:mm')
             );
     }
 
@@ -195,8 +203,8 @@ final class MemberTable extends PowerGridComponent
             Column::make('Upline', 'parent', 'parent_member.name')->sortable(),
             Column::make('Position', 'position', 'network.position')->sortable(),
             Column::make('Status', 'status', 'members.status')->sortable(),
-            Column::make('Datecreated', 'created_at', 'members.created_at')->sortable(),
-            Column::make('Last Login', 'last_login_at', 'members.last_login_at')->sortable(),
+            Column::make('Datecreated', 'created_at_formatted', 'members.created_at')->sortable(),
+            Column::make('Last Login', 'last_login_at_formatted', 'members.last_login_at')->sortable(),
             Column::action('Action')->fixedOnResponsive(),
         ];
     }
@@ -292,7 +300,7 @@ final class MemberTable extends PowerGridComponent
                 ]))
                 ->optionValue('id')
                 ->optionLabel('name'),
-            Filter::datepicker('created_at', 'members.created_at'),
+            Filter::datepicker('created_at_formatted', 'members.created_at'),
         ];
     }
 

@@ -15,7 +15,8 @@
         <div
             class="flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-zinc-800/50 px-3 py-1.5 backdrop-blur-md shadow-sm">
             <flux:icon name="calendar" class="size-4 text-zinc-500" />
-            <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">{{ now()->format('l, d M Y') }}</span>
+            <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">{{
+                now()->locale('id')->isoFormat('dddd, DD MMM YYYY') }}</span>
         </div>
     </div>
 

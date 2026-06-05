@@ -34,3 +34,14 @@ it('renders the member management page for admins', function () {
         ->assertOk()
         ->assertSee('Member');
 });
+
+it('renders the member management page with members present', function () {
+    Member::factory()->active()->create([
+        'last_login_at' => null,
+    ]);
+
+    $this->actingAs(createAdminMember())
+        ->get(route('member.index'))
+        ->assertOk()
+        ->assertSee('Member');
+});

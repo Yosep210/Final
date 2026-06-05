@@ -136,7 +136,7 @@ final class ProductOrderTable extends PowerGridComponent
 
                 return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.$statusText.'</span>';
             })
-            ->add('created_at_formatted', fn (ProductOrder $row) => optional($row->created_at)->format('d M Y H:i'));
+            ->add('created_at_formatted', fn (ProductOrder $row) => $row->created_at?->locale('id')?->isoFormat('DD MMM YY HH:mm'));
     }
 
     public function columns(): array

@@ -54,7 +54,7 @@ final class PermissionTable extends PowerGridComponent
             ->add('no')
             ->add('name')
             ->add('guard_name')
-            ->add('created_at_formatted', fn (Permission $model) => optional($model->created_at)->format('d M Y H:i'));
+            ->add('created_at_formatted', fn (Permission $model) => $model->created_at?->locale('id')?->isoFormat('DD MMM YY HH:mm'));
     }
 
     public function columns(): array
