@@ -1,7 +1,7 @@
 <x-layouts::home :title="__('Contact')">
 
     @include('partials.home.heading', [
-    'title' => __('Contact'),
+    'title' => __('Hubungi Kami'),
     'imgbg' => asset('assets/img/carousel-2.webp')
     ])
 
@@ -111,8 +111,8 @@
                 </div>
 
                 {{-- Map --}}
-                <div class="w-full lg:w-1/2 min-h-[450px]">
-                    <iframe class="w-full h-full min-h-[450px] rounded-[2.5rem] shadow-2xl border-0"
+                <div class="w-full lg:w-1/2 min-h-112.5">
+                    <iframe class="w-full h-full min-h-112.5 rounded-[2.5rem] shadow-2xl border-0"
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.591424568914!2d106.70130067489937!3d-6.185396860604089!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f900297dcee5%3A0xb1775a08592146f3!2sPT.%20Jagad%20Pesona%20Buana!5e0!3m2!1sid!2sid!4v1772474918787!5m2!1sid!2sid"
                         allowfullscreen="" aria-hidden="false" tabindex="0" loading="lazy"></iframe>
                 </div>

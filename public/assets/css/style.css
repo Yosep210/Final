@@ -572,3 +572,107 @@
 .footer .copyright a:hover {
     color: var(--primary);
 }
+
+/* ==========================================================================
+   Product Landing Page styles (JP Buana /product)
+   ========================================================================== */
+
+/* Section dividers — alternate bg rhythm */
+.section-alt {
+    background-color: var(--light);
+}
+
+/* Product landing page image sizing */
+.product-landing-thumb {
+    max-height: 420px;
+    object-fit: cover;
+}
+
+/* Product page — anchor targets */
+#produk-workshop,
+#produk-minicon,
+#produk-pesona-aura {
+    scroll-margin-top: 5.5rem;
+}
+
+@media (max-width: 991.98px) {
+    .product-landing-thumb {
+        max-height: 320px;
+    }
+}
+
+.product-landing-copy h2 {
+    font-weight: 700;
+}
+
+.product-landing-list li {
+    line-height: 1.55;
+}
+
+/* Product page — thumb carousels (Workshop & Pesona) */
+.product-landing-slider-wrap .product-thumb-slider {
+    position: relative;
+}
+
+.product-landing-slider-wrap .product-thumb-slider .owl-stage-outer {
+    height: 320px;
+}
+
+.product-landing-slider-wrap .product-landing-slider-img {
+    display: block;
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+}
+
+@media (min-width: 992px) {
+    .product-landing-slider-wrap .product-thumb-slider .owl-stage-outer {
+        height: 420px;
+    }
+
+    .product-landing-slider-wrap .product-landing-slider-img {
+        height: 420px;
+    }
+}
+
+.product-landing-slider-wrap .product-thumb-slider .owl-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 12px;
+    margin: 0;
+    z-index: 2;
+}
+
+.product-landing-slider-wrap .product-thumb-slider .owl-dot span {
+    width: 9px !important;
+    height: 9px !important;
+    margin: 3px 5px !important;
+    background: rgba(255, 255, 255, 0.55) !important;
+}
+
+.product-landing-slider-wrap .product-thumb-slider .owl-dot.active span {
+    background: var(--primary) !important;
+}
+
+/* Workshop only — flyers ~3:4; show full image */
+.product-landing-slider-wrap--workshop {
+    background: var(--light);
+}
+
+.product-landing-slider-wrap--workshop .product-thumb-slider .owl-stage-outer {
+    height: auto !important;
+}
+
+.product-landing-slider-wrap--workshop .product-landing-slider-img {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+}
+
+.product-landing-slider-wrap--workshop .product-thumb-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

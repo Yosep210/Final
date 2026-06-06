@@ -5,21 +5,21 @@
         <div class="owl-carousel header-carousel relative w-full overflow-hidden"
             style="height: clamp(420px, 56vw, 780px);">
             @include('partials.home.hero-slide', [
-                'img' => asset('assets/img/carousel-1.webp'),
-                'alt' => 'Build Your Healthy Life',
-                'position' => 'center center',
+            'img' => asset('assets/img/carousel-1.webp'),
+            'alt' => 'Build Your Healthy Life',
+            'position' => 'center center',
             ])
 
             @include('partials.home.hero-slide', [
-                'img' => asset('assets/img/carousel-2.webp'),
-                'alt' => 'Build Your Healthy Life',
-                'position' => 'center top',
+            'img' => asset('assets/img/carousel-2.webp'),
+            'alt' => 'Build Your Healthy Life',
+            'position' => 'center top',
             ])
 
             @include('partials.home.hero-slide', [
-                'img' => asset('assets/img/carousel-3.webp'),
-                'alt' => 'Build Your Healthy Life',
-                'position' => 'center center',
+            'img' => asset('assets/img/carousel-3.webp'),
+            'alt' => 'Build Your Healthy Life',
+            'position' => 'center center',
             ])
         </div>
     </div>
@@ -156,17 +156,13 @@
             <div class="flex flex-col lg:flex-row items-stretch gap-8 justify-center">
 
                 <div class="w-full lg:w-1/3 flex flex-col wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="h-full flex flex-col rounded-[2.5rem] overflow-hidden shadow-lg
-                                bg-neutral-50 dark:bg-neutral-800/30 border-2 border-neutral-200
-                                dark:border-neutral-700 group">
-                        <div class="flex items-center justify-center bg-neutral-100 dark:bg-neutral-700/50
-                                    group-hover:bg-primary-50 transition-colors" style="height: 220px;">
-                            <div class="text-center p-3">
-                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">
-                                    Workshop
-                                    Kelas & Sertifikasi
-                                </span>
-                            </div>
+                    <div
+                        class="h-full flex flex-col group rounded-[2.5rem] overflow-hidden shadow-2xl
+                                                    bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700">
+                        <div class="overflow-hidden flex items-center justify-center bg-neutral-50"
+                            style="height: 220px;">
+                            <img class="min-h-full transition-transform duration-700 group-hover:scale-110"
+                                src="{{ asset('assets/img/FLYER-KUANTUMOASE.png') }}" alt="Minicon">
                         </div>
                         <div class="service-icon">
                             <i class="fa fa-graduation-cap fa-3x"></i>
@@ -211,16 +207,13 @@
                 </div>
 
                 <div class="w-full lg:w-1/3 flex flex-col wow fadeInUp" data-wow-delay="0.5s">
-                    <div class="h-full flex flex-col rounded-[2.5rem] overflow-hidden shadow-lg
-                                bg-neutral-50 dark:bg-neutral-800/30 border-2 border-neutral-200
-                                dark:border-neutral-700 group">
-                        <div class="flex items-center justify-center bg-neutral-100 dark:bg-neutral-700/50
-                                    group-hover:bg-primary-50 transition-colors" style="height: 220px;">
-                            <div class="text-center p-3">
-                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">
-                                    Pesona Aura
-                                </span>
-                            </div>
+                    <div
+                        class="h-full flex flex-col group rounded-[2.5rem] overflow-hidden shadow-2xl
+                                                    bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700">
+                        <div class="overflow-hidden flex items-center justify-center bg-neutral-50"
+                            style="height: 220px;">
+                            <img class="min-h-full transition-transform duration-700 group-hover:scale-110"
+                                src="{{ asset('assets/img/14.png') }}" alt="Minicon">
                         </div>
                         <div class="service-icon">
                             <i class="fa fa-gem fa-3x"></i>

@@ -1,7 +1,7 @@
 <x-layouts::home :title="__('Edukasi')">
 
     @include('partials.home.heading', [
-    'title' => __('Edukasi'),
+    'title' => __('Edukasi & Pelatihan'),
     'imgbg' => asset('assets/img/carousel-3.webp')
     ])
 

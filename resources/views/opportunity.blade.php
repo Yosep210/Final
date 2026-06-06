@@ -1,7 +1,7 @@
 <x-layouts::home :title="__('Opportunity')">
 
     @include('partials.home.heading', [
-    'title' => __('Opportunity'),
+    'title' => __('Model Bisnis'),
     'imgbg' => asset('assets/img/carousel-2.webp')
     ])
 

@@ -7,7 +7,7 @@
 <script src="{{ asset('assets/js/owl.carousel.min.js.download') }}"></script>
 <script src="{{ asset('assets/js/isotope.pkgd.min.js.download') }}"></script>
 <script src="{{ asset('assets/js/lightbox.min.js.download') }}"></script>
-<script src="{{ asset('assets/js/main.js.download') }}"></script>
+<script src="{{ asset('assets/js/main.js') }}"></script>
 
 <div id="lightboxOverlay" class="lightboxOverlay" style="display: none;"></div>
 <div id="lightbox" class="lightbox" style="display: none;">

@@ -11,7 +11,7 @@
         </div>
 
         <div class="flex items-center gap-6">
-            <div class="flex items-center gap-2 border-r border-zinc-200 dark:border-zinc-700 pr-6">
+            <div class="flex items-center gap-2 border-zinc-200 dark:border-zinc-700 pr-6">
                 <flux:icon.phone class="size-4 shrink-0" />
                 <a href="tel:+6281234567890" class="font-medium hover:text-primary-600 transition-colors">+62
                     8123-4567-890</a>
