@@ -1,4 +1,9 @@
 <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
+    <div class="items-center gap-2 mb-2 hidden lg:flex">
+        <flux:icon name="calendar" class="size-4 text-zinc-500" />
+        <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">{{
+            now()->locale('id')->isoFormat('dddd, DD MMM YYYY') }}</span>
+    </div>
     <!-- Header Greeting -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -162,7 +167,8 @@
                             <div>
                                 <div class="text-sm font-bold text-zinc-900 dark:text-white">{{
                                     strtoupper($rc['username'] ?? '') }}</div>
-                                <div class="text-xs text-zinc-500">{{ ucfirst($rc['type'] ?? '-') }} • {{ $rc['created_at'] }}
+                                <div class="text-xs text-zinc-500">{{ ucfirst($rc['type'] ?? '-') }} • {{
+                                    $rc['created_at'] }}
                                 </div>
                             </div>
                         </div>
@@ -270,7 +276,8 @@
                         <div>
                             <div class="text-sm font-bold text-zinc-900 dark:text-white">{{ $txn['description'] ?:
                                 ucfirst($txn['category'] ?? '-') }}</div>
-                            <div class="text-xs text-zinc-500">{{ ucfirst($txn['category'] ?? '-') }} • {{ $txn['created_at']
+                            <div class="text-xs text-zinc-500">{{ ucfirst($txn['category'] ?? '-') }} • {{
+                                $txn['created_at']
                                 }}</div>
                         </div>
                     </div>
