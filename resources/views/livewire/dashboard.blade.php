@@ -12,12 +12,6 @@
                 summary.') }}
             </flux:text>
         </div>
-        <div
-            class="flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-zinc-800/50 px-3 py-1.5 backdrop-blur-md shadow-sm">
-            <flux:icon name="calendar" class="size-4 text-zinc-500" />
-            <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">{{
-                now()->locale('id')->isoFormat('dddd, DD MMM YYYY') }}</span>
-        </div>
     </div>
 
     @if ($isAdmin)
@@ -126,18 +120,18 @@
                         <div class="flex items-center gap-3">
                             <div
                                 class="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 font-extrabold text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ strtoupper(substr($rm['name'], 0, 2)) }}
+                                {{ strtoupper(substr($rm['name'] ?? '', 0, 2)) }}
                             </div>
                             <div>
                                 <div class="text-sm font-bold text-zinc-900 dark:text-white">{{
-                                    strtoupper($rm['username']) }}</div>
+                                    strtoupper($rm['username'] ?? '') }}</div>
                                 <div class="text-xs text-zinc-500">{{ $rm['name'] }}</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
                             <span
                                 class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {{ $rm['status'] === 'active' ? 'bg-green-50 text-green-700 ring-green-600/10 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20' : 'bg-rose-50 text-rose-700 ring-rose-600/10 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/20' }}">
-                                {{ ucfirst($rm['status']) }}
+                                {{ ucfirst($rm['status'] ?? '-') }}
                             </span>
                         </div>
                     </li>
@@ -163,12 +157,12 @@
                         <div class="flex items-center gap-3">
                             <span
                                 class="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold ring-1 ring-inset {{ $rc['type'] === 'sponsor' ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/10' : ($rc['type'] === 'pairing' ? 'bg-blue-50 text-blue-700 ring-blue-600/10' : 'bg-amber-50 text-amber-700 ring-amber-600/10') }}">
-                                {{ ucfirst(substr($rc['type'], 0, 2)) }}
+                                {{ ucfirst(substr($rc['type'] ?? '', 0, 2)) }}
                             </span>
                             <div>
                                 <div class="text-sm font-bold text-zinc-900 dark:text-white">{{
-                                    strtoupper($rc['username']) }}</div>
-                                <div class="text-xs text-zinc-500">{{ ucfirst($rc['type']) }} • {{ $rc['created_at'] }}
+                                    strtoupper($rc['username'] ?? '') }}</div>
+                                <div class="text-xs text-zinc-500">{{ ucfirst($rc['type'] ?? '-') }} • {{ $rc['created_at'] }}
                                 </div>
                             </div>
                         </div>
@@ -275,8 +269,8 @@
                         </span>
                         <div>
                             <div class="text-sm font-bold text-zinc-900 dark:text-white">{{ $txn['description'] ?:
-                                ucfirst($txn['category']) }}</div>
-                            <div class="text-xs text-zinc-500">{{ ucfirst($txn['category']) }} • {{ $txn['created_at']
+                                ucfirst($txn['category'] ?? '-') }}</div>
+                            <div class="text-xs text-zinc-500">{{ ucfirst($txn['category'] ?? '-') }} • {{ $txn['created_at']
                                 }}</div>
                         </div>
                     </div>

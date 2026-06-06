@@ -68,7 +68,7 @@ final class AutoRoTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('username', fn (AutoRoLog $row) => strtoupper($row->member_username))
+            ->add('username', fn (AutoRoLog $row) => strtoupper($row->member_username ?? ''))
             ->add('name', fn (AutoRoLog $row) => $row->member_name)
             ->add('total_amount_formatted', fn (AutoRoLog $row) => number_format((float) ($row->total_amount ?? 0), 0));
     }

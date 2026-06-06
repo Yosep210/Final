@@ -70,7 +70,7 @@ final class GroupTable extends PowerGridComponent
             ->add('no')
             ->add('username', fn (MemberNetwork $row) => $row->member_username)
             ->add('member', fn (MemberNetwork $row) => $row->member_name)
-            ->add('parent', fn (MemberNetwork $row) => $row->parent_username ? '<div><strong>'.e(strtoupper($row->parent_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->parent_name).'</div>' : '-')
+            ->add('parent', fn (MemberNetwork $row) => $row->parent_username ? '<div><strong>'.e(strtoupper($row->parent_username ?? '')).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->parent_name).'</div>' : '-')
             ->add('position', fn (MemberNetwork $row) => ucfirst($row->position ?? '-'))
             ->add('left_volume', fn (MemberNetwork $row) => number_format((float) ($row->left_volume ?? 0), 2))
             ->add('right_volume', fn (MemberNetwork $row) => number_format((float) ($row->right_volume ?? 0), 2))

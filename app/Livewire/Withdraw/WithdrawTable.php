@@ -71,7 +71,7 @@ final class WithdrawTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('member', fn (Withdrawal $row) => '<div><strong>'.e(strtoupper($row->member_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
+            ->add('member', fn (Withdrawal $row) => '<div><strong>'.e(strtoupper($row->member_username ?? '')).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
             ->add('type_formatted', function (Withdrawal $row) {
                 $type = strtolower($row->type ?: '');
                 if ($type === 'ewallet') {
@@ -90,8 +90,8 @@ final class WithdrawTable extends PowerGridComponent
 
                 return '<span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset '.$class.'">'.$text.'</span>';
             })
-            ->add('bank_formatted', fn (Withdrawal $row) => e(strtoupper($row->bank_code ? $row->bank_code.' - '.$row->bank_name : $row->bank_name)))
-            ->add('rekening_formatted', fn (Withdrawal $row) => '<div><strong>No.Rek  : '.e($row->account_number).'</strong></div><div class="text-zinc-500 text-xs">An. Rek : '.e(strtoupper($row->account_holder)).'</div>')
+            ->add('bank_formatted', fn (Withdrawal $row) => e(strtoupper($row->bank_code ? $row->bank_code.' - '.$row->bank_name : ($row->bank_name ?? ''))))
+            ->add('rekening_formatted', fn (Withdrawal $row) => '<div><strong>No.Rek  : '.e($row->account_number).'</strong></div><div class="text-zinc-500 text-xs">An. Rek : '.e(strtoupper($row->account_holder ?? '')).'</div>')
             ->add('nominal_formatted', fn (Withdrawal $row) => number_format((float) ($row->nominal_receipt ?? 0), 0))
             ->add('status_formatted', function (Withdrawal $row) {
                 $class = match ((int) $row->status) {

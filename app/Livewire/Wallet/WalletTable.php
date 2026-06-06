@@ -71,7 +71,7 @@ final class WalletTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('username', fn (EwalletLog $row) => strtoupper($row->member_username))
+            ->add('username', fn (EwalletLog $row) => strtoupper($row->member_username ?? ''))
             ->add('name', fn (EwalletLog $row) => $row->member_name)
             ->add('wd_status_formatted', function (EwalletLog $row) {
                 $status = (int) $row->member_wd_status;

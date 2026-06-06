@@ -42,19 +42,19 @@
                 <div class="space-y-4 rounded-lg bg-zinc-50 p-4 dark:bg-zinc-800/50">
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <div class="text-zinc-500">{{ __('Username') }}:</div>
-                        <div class="font-semibold text-zinc-900 dark:text-white">{{ strtoupper($selectedWithdraw->member?->username) }}</div>
+                        <div class="font-semibold text-zinc-900 dark:text-white">{{ strtoupper($selectedWithdraw->member?->username ?? '') }}</div>
                         
                         <div class="text-zinc-500">{{ __('Name') }}:</div>
                         <div class="font-semibold text-zinc-900 dark:text-white">{{ $selectedWithdraw->member?->name }}</div>
                         
                         <div class="text-zinc-500">{{ __('Bank') }}:</div>
-                        <div class="font-semibold text-zinc-900 dark:text-white">{{ strtoupper($selectedWithdraw->bank_name) }}</div>
+                        <div class="font-semibold text-zinc-900 dark:text-white">{{ strtoupper($selectedWithdraw->bank_name ?? '') }}</div>
                         
                         <div class="text-zinc-500">{{ __('Account Number') }}:</div>
                         <div class="font-semibold text-zinc-900 dark:text-white">{{ $selectedWithdraw->account_number }}</div>
                         
                         <div class="text-zinc-500">{{ __('Account Holder') }}:</div>
-                        <div class="font-semibold text-zinc-900 dark:text-white">{{ strtoupper($selectedWithdraw->account_holder) }}</div>
+                        <div class="font-semibold text-zinc-900 dark:text-white">{{ strtoupper($selectedWithdraw->account_holder ?? '') }}</div>
                         
                         <div class="col-span-2 border-t border-zinc-200 my-2 dark:border-zinc-700"></div>
 

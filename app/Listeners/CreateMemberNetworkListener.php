@@ -63,7 +63,7 @@ class CreateMemberNetworkListener implements ShouldQueue
 
             // Propagate volume (e.g. default 100 PV) up the ancestor chain
             $regVolume = (float) config('mlm.commission.minimum_volume', 100);
-            $this->rankService->propagateVolume($networkModel, $regVolume, $networkData['position'] ?? 'left');
+            $this->rankService->propagateVolume($networkModel, $regVolume);
 
             $sponsor = $networkData['sponsored_id'] ? Member::find($networkData['sponsored_id']) : null;
             $this->placementService->updateSponsorRank($sponsor);

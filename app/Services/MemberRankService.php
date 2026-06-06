@@ -146,7 +146,7 @@ class MemberRankService
     /**
      * Quick helper to update volumes up the ancestor chain.
      */
-    public function propagateVolume(MemberNetwork $network, float $amount, string $side): void
+    public function propagateVolume(MemberNetwork $network, float $amount): void
     {
         $current = $network;
 

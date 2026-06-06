@@ -68,7 +68,7 @@ final class CommissionTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('username', fn (CommissionLog $row) => strtoupper($row->member_username))
+            ->add('username', fn (CommissionLog $row) => strtoupper($row->member_username ?? ''))
             ->add('name', fn (CommissionLog $row) => $row->member_name)
             ->add('gross_commission_formatted', fn (CommissionLog $row) => number_format((float) ($row->total_gross_commission ?? 0), 0));
     }

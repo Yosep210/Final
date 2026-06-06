@@ -31,7 +31,7 @@
                     @forelse ($members as $index => $member)
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                             <td class="p-4 align-middle text-zinc-500 dark:text-zinc-400 font-mono">{{ $members->firstItem() + $index }}</td>
-                            <td class="p-4 align-middle font-mono font-bold text-zinc-900 dark:text-white">{{ strtoupper($member->username) }}</td>
+                            <td class="p-4 align-middle font-mono font-bold text-zinc-900 dark:text-white">{{ strtoupper($member->username ?? '') }}</td>
                             <td class="p-4 align-middle text-zinc-900 dark:text-white">{{ $member->name }}</td>
                             <td class="p-4 align-middle text-center font-semibold text-zinc-900 dark:text-white">{{ number_format($member->total_pins) }}</td>
                             <td class="p-4 align-middle text-center text-emerald-600 dark:text-emerald-400 font-semibold">{{ number_format($member->active_pins) }}</td>

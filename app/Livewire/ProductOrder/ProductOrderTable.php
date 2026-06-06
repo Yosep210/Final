@@ -54,7 +54,8 @@ final class ProductOrderTable extends PowerGridComponent
                 'member.name as member_name',
                 'member.username as member_username',
             ])
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no')
+            ->orderBy($sortField, $sortDirection);
     }
 
     public function fields(): PowerGridFields
@@ -62,7 +63,7 @@ final class ProductOrderTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('no')
             ->add('invoice', fn (ProductOrder $row) => '<strong>'.e($row->invoice).'</strong>')
-            ->add('member', fn (ProductOrder $row) => '<div><strong>'.e(strtoupper($row->member_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
+            ->add('member', fn (ProductOrder $row) => '<div><strong>'.e(strtoupper($row->member_username ?? '')).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
             ->add('type_badge', function (ProductOrder $row) {
                 $type = $row->type_order ?: 'unknown';
                 $class = match ($type) {

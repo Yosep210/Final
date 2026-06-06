@@ -157,8 +157,8 @@ final class MemberTable extends PowerGridComponent
 
                 return '<div>'.e($email).'</div><div class="text-zinc-500 text-xs">'.e($phone).'</div>';
             })
-            ->add('sponsor', fn (Member $member) => '<div><strong>'.e(strtoupper($member->sponsor_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($member->sponsor_name).'</div>')
-            ->add('parent', fn (Member $member) => '<div><strong>'.e(strtoupper($member->parent_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($member->parent_name).'</div>')
+            ->add('sponsor', fn (Member $member) => '<div><strong>'.e(strtoupper($member->sponsor_username ?? '')).'</strong></div><div class="text-zinc-500 text-xs">'.e($member->sponsor_name).'</div>')
+            ->add('parent', fn (Member $member) => '<div><strong>'.e(strtoupper($member->parent_username ?? '')).'</strong></div><div class="text-zinc-500 text-xs">'.e($member->parent_name).'</div>')
             ->add(
                 'position',
                 fn (Member $member) => ucfirst($member->network_position ?: 'left')
@@ -245,8 +245,10 @@ final class MemberTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('members.email', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('profile.phone', 'like', '%'.$searchTerm.'%');
+                    return $query->where(function ($subQuery) use ($searchTerm) {
+                        $subQuery->where('members.email', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('profile.phone', 'like', '%'.$searchTerm.'%');
+                    });
                 }),
             Filter::inputText('sponsor')
                 ->operators(['contains'])
@@ -257,8 +259,10 @@ final class MemberTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('sponsor_member.name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('sponsor_member.username', 'like', '%'.$searchTerm.'%');
+                    return $query->where(function ($subQuery) use ($searchTerm) {
+                        $subQuery->where('sponsor_member.name', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('sponsor_member.username', 'like', '%'.$searchTerm.'%');
+                    });
                 }),
             Filter::inputText('parent')
                 ->operators(['contains'])
@@ -269,8 +273,10 @@ final class MemberTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('parent_member.name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('parent_member.username', 'like', '%'.$searchTerm.'%');
+                    return $query->where(function ($subQuery) use ($searchTerm) {
+                        $subQuery->where('parent_member.name', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('parent_member.username', 'like', '%'.$searchTerm.'%');
+                    });
                 }),
             Filter::select('position', 'network.position')
                 ->dataSource(collect([

@@ -49,7 +49,7 @@ final class StatementTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('member', fn (CommissionPayout $row) => '<div><strong>'.e(strtoupper($row->member_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
+            ->add('member', fn (CommissionPayout $row) => '<div><strong>'.e(strtoupper($row->member_username ?? '')).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
             ->add('period', fn (CommissionPayout $row) => Carbon::create($row->payout_year, $row->payout_month, 1)->format('F Y'))
             ->add('total_amount_formatted', fn (CommissionPayout $row) => number_format((float) ($row->total_amount ?? 0), 0))
             ->add('amount_paid_formatted', fn (CommissionPayout $row) => number_format((float) ($row->amount_paid ?? 0), 0))
@@ -94,8 +94,10 @@ final class StatementTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('member.name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('member.username', 'like', '%'.$searchTerm.'%');
+                    return $query->where(function ($subQuery) use ($searchTerm) {
+                        $subQuery->where('member.name', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('member.username', 'like', '%'.$searchTerm.'%');
+                    });
                 }),
             Filter::select('status', 'commission_payouts.status')
                 ->dataSource(collect([

@@ -74,7 +74,7 @@ final class WithdrawTotalTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('datewd_formatted', fn ($row) => Carbon::parse($row->datewd)->locale('id')?->isoFormat('DD MMM YY'))
+            ->add('datewd_formatted', fn ($row) => $row->datewd ? Carbon::parse($row->datewd)->locale('id')?->isoFormat('DD MMM YY') : '-')
             ->add('trx_formatted', fn ($row) => number_format((float) ($row->trx ?? 0), 0))
             ->add('keterangan', function ($row) {
                 $nominal = number_format((float) ($row->total_nominal ?? 0), 0);

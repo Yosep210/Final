@@ -48,7 +48,7 @@
                                 </td>
                                 <td class="py-2.5 px-3">
                                     @php
-                                        $type = strtoupper($log->type);
+                                        $type = strtoupper($log->type ?? '');
                                         $typeClass = $type === 'IN'
                                             ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20'
                                             : 'bg-rose-50 text-rose-700 ring-rose-600/10 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/20';

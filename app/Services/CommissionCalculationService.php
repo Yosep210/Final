@@ -334,6 +334,10 @@ class CommissionCalculationService
      */
     public function calculateUnilevelBonuses(Member $newMember): void
     {
+        if (! config('mlm.unilevel.enabled', false)) {
+            return;
+        }
+
         try {
             $current = $newMember->network;
             $level = 1;
@@ -386,6 +390,10 @@ class CommissionCalculationService
      */
     public function calculateGenerationBonuses(Member $newMember): void
     {
+        if (! config('mlm.generation_bonus.enabled', false)) {
+            return;
+        }
+
         try {
             $current = $newMember->network;
             $level = 1;
@@ -439,6 +447,9 @@ class CommissionCalculationService
     public function checkForAutoRepeatOrder(int $memberId): void
     {
         DB::transaction(function () use ($memberId) {
+            // Lock the member to prevent race conditions on balance checking & deductions
+            Member::where('id', $memberId)->lockForUpdate()->first();
+
             // Get total Auto-RO balance (Sum of amount)
             $balance = (float) AutoRoLog::where('member_id', $memberId)->sum('amount');
             $threshold = (float) config('mlm.auto_ro.package_price_threshold', 1000000.00);

@@ -46,7 +46,7 @@
                             <td class="p-4 align-middle text-zinc-900 dark:text-white">
                                 @if ($pin->owner)
                                     <div class="font-medium">{{ $pin->owner->name }}</div>
-                                    <div class="text-xs text-zinc-500 font-mono">{{ strtoupper($pin->owner->username) }}</div>
+                                    <div class="text-xs text-zinc-500 font-mono">{{ strtoupper($pin->owner->username ?? '') }}</div>
                                 @else
                                     <span class="text-zinc-400 dark:text-zinc-500">{{ __('System / Company') }}</span>
                                 @endif
@@ -54,7 +54,7 @@
                             <td class="p-4 align-middle text-zinc-900 dark:text-white">
                                 @if ($pin->activatedMember)
                                     <div class="font-medium">{{ $pin->activatedMember->name }}</div>
-                                    <div class="text-xs text-zinc-500 font-mono">{{ strtoupper($pin->activatedMember->username) }}</div>
+                                    <div class="text-xs text-zinc-500 font-mono">{{ strtoupper($pin->activatedMember->username ?? '') }}</div>
                                 @else
                                     <span class="text-zinc-400 dark:text-zinc-500">-</span>
                                 @endif

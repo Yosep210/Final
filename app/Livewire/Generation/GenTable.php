@@ -91,8 +91,8 @@ final class GenTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('member', fn (MemberNetwork $row) => '<div><strong>'.e(strtoupper($row->member_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
-            ->add('sponsor', fn (MemberNetwork $row) => $row->sponsor_username ? '<div><strong>'.e(strtoupper($row->sponsor_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->sponsor_name).'</div>' : '-')
+            ->add('member', fn (MemberNetwork $row) => '<div><strong>'.e(strtoupper($row->member_username ?? '')).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->member_name).'</div>')
+            ->add('sponsor', fn (MemberNetwork $row) => $row->sponsor_username ? '<div><strong>'.e(strtoupper($row->sponsor_username ?? '')).'</strong></div><div class="text-zinc-500 text-xs">'.e($row->sponsor_name).'</div>' : '-')
             ->add('generation', fn (MemberNetwork $row) => 'Gen-'.($row->generation ?? 0))
             ->add('total_volume', fn (MemberNetwork $row) => number_format((float) ($row->total_volume ?? 0), 0));
     }
