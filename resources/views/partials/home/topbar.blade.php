@@ -8,11 +8,6 @@
                 <flux:icon.map-pin class="size-4 shrink-0" />
                 <span>Green Lake City, Rukan Crown Block E no 21, Cipondoh - Tangerang</span>
             </div>
-            <div class="flex items-center gap-2">
-                <flux:icon.envelope class="size-4 shrink-0" />
-                <a href="mailto:admin@jpbuana.com"
-                    class="hover:text-primary-600 transition-colors">admin@jpbuana.com</a>
-            </div>
         </div>
 
         <div class="flex items-center gap-6">
@@ -20,16 +15,6 @@
                 <flux:icon.phone class="size-4 shrink-0" />
                 <a href="tel:+6281234567890" class="font-medium hover:text-primary-600 transition-colors">+62
                     8123-4567-890</a>
-            </div>
-            <div class="flex items-center gap-2">
-                <flux:button href="#" variant="ghost" size="sm" class="p-1.5!"><i class="fab fa-facebook-f text-xs"></i>
-                </flux:button>
-                <flux:button href="#" variant="ghost" size="sm" class="p-1.5!"><i class="fab fa-twitter text-xs"></i>
-                </flux:button>
-                <flux:button href="#" variant="ghost" size="sm" class="p-1.5!"><i class="fab fa-linkedin text-xs"></i>
-                </flux:button>
-                <flux:button href="#" variant="ghost" size="sm" class="p-1.5!"><i class="fab fa-instagram text-xs"></i>
-                </flux:button>
             </div>
         </div>
 

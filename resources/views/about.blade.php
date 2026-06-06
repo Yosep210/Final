@@ -1,8 +1,8 @@
 <x-layouts::home :title="__('About')">
 
     @include('partials.home.heading', [
-    'title' => __('About'),
-    'imgbg' => asset('assets/img/carousel-1.png')
+    'title' => __('Tentang Kami'),
+    'imgbg' => asset('assets/img/carousel-1.webp')
     ])
 
     {{-- ===== TENTANG KAMI ===== --}}
@@ -14,7 +14,7 @@
                 <div class="w-full lg:w-1/2 wow fadeIn" data-wow-delay="0.2s">
                     <div class="relative w-full" style="min-height: 400px;">
                         <img class="absolute inset-0 w-full h-full object-cover rounded-[2.5rem] shadow-2xl"
-                            src="{{ asset('assets/img/about.png') }}" alt="Tentang Jagad Pesona Buana">
+                            src="{{ asset('assets/img/about.webp') }}" alt="Tentang Jagad Pesona Buana">
                     </div>
                 </div>
 
@@ -36,16 +36,6 @@
                             digital, Jagad Pesona Buana membangun ekosistem bisnis yang tidak hanya berorientasi
                             pada penjualan, tetapi juga pada pertumbuhan pribadi dan komunitas.
                         </p>
-                        <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
-                            <flux:button href="{{ route('about') }}" variant="primary"
-                                class="rounded-full !px-10 !py-3 font-semibold shadow-lg">
-                                Kenali Kami
-                            </flux:button>
-                            <flux:button href="{{ route('opportunity') }}" variant="ghost"
-                                class="rounded-full !px-10 !py-3 border-2 border-primary-600 text-primary-600 hover:bg-primary-50 transition-all">
-                                Gabung Bersama Kami
-                            </flux:button>
-                        </div>
                     </div>
                 </div>
 
@@ -69,9 +59,11 @@
                                 shadow-neutral-200/50 dark:shadow-none hover:shadow-2xl hover:-translate-y-3
                                 transition-all duration-500 group border border-neutral-100 dark:border-neutral-700">
                         <div class="flex items-center gap-5 mb-6">
-                            <div class="shrink-0 w-16 h-16 flex items-center justify-center bg-primary-50
+                            <div
+                                class="shrink-0 w-16 h-16 flex items-center justify-center bg-primary-50
                                         dark:bg-neutral-700 rounded-2xl group-hover:bg-primary-600 transition-all duration-500">
-                                <i class="fa fa-eye text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
+                                <i
+                                    class="fa fa-eye text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
                             </div>
                             <h3 class="text-2xl font-bold">Visi Perusahaan</h3>
                         </div>
@@ -88,9 +80,11 @@
                                 shadow-neutral-200/50 dark:shadow-none hover:shadow-2xl hover:-translate-y-3
                                 transition-all duration-500 group border border-neutral-100 dark:border-neutral-700">
                         <div class="flex items-center gap-5 mb-6">
-                            <div class="shrink-0 w-16 h-16 flex items-center justify-center bg-primary-50
+                            <div
+                                class="shrink-0 w-16 h-16 flex items-center justify-center bg-primary-50
                                         dark:bg-neutral-700 rounded-2xl group-hover:bg-primary-600 transition-all duration-500">
-                                <i class="fa fa-bullseye text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
+                                <i
+                                    class="fa fa-bullseye text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
                             </div>
                             <h3 class="text-2xl font-bold">Misi Perusahaan</h3>
                         </div>

@@ -2,7 +2,7 @@
 
     @include('partials.home.heading', [
     'title' => __('Contact'),
-    'imgbg' => asset('assets/img/carousel-2.png')
+    'imgbg' => asset('assets/img/carousel-2.webp')
     ])
 
     {{-- Kontak Info Start --}}

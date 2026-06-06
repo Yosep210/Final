@@ -2,7 +2,7 @@
 
     @include('partials.home.heading', [
     'title' => __('Edukasi'),
-    'imgbg' => asset('assets/img/carousel-3.png')
+    'imgbg' => asset('assets/img/carousel-3.webp')
     ])
 
     {{-- ===== INTRO EDUKASI ===== --}}
@@ -14,7 +14,7 @@
                 <div class="w-full lg:w-1/2 wow fadeIn" data-wow-delay="0.1s">
                     <div class="relative w-full rounded-3xl overflow-hidden shadow-xl" style="min-height: 400px;">
                         <img class="absolute inset-0 w-full h-full object-cover"
-                            src="{{ asset('assets/img/training.png') }}" alt="Edukasi dan Pengembangan">
+                            src="{{ asset('assets/img/training.webp') }}" alt="Edukasi dan Pengembangan">
                     </div>
                 </div>
 
@@ -57,7 +57,8 @@
                 'delay' => '0.1s',
                 'icon' => 'fa-brain',
                 'title' => 'Motivasi & Kesadaran Diri',
-                'desc' => 'Pelatihan pengembangan mental dan emosional untuk fondasi bisnis yang kuat dan kehidupan yang lebih bermakna.',
+                'desc' => 'Pelatihan pengembangan mental dan emosional untuk fondasi bisnis yang kuat dan kehidupan yang
+                lebih bermakna.',
                 ],
                 [
                 'delay' => '0.3s',
@@ -82,9 +83,11 @@
                     <div class="bg-white dark:bg-neutral-800 rounded-3xl text-center p-8 h-full shadow-lg
                                 border border-neutral-100 dark:border-neutral-700 hover:-translate-y-2
                                 hover:shadow-xl transition-all duration-300 group">
-                        <div class="w-16 h-16 bg-primary-50 dark:bg-neutral-700 rounded-2xl flex items-center
+                        <div
+                            class="w-16 h-16 bg-primary-50 dark:bg-neutral-700 rounded-2xl flex items-center
                                     justify-center mx-auto mb-6 group-hover:bg-primary-600 transition-all duration-300">
-                            <i class="fa {{ $item['icon'] }} text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
+                            <i
+                                class="fa {{ $item['icon'] }} text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
                         </div>
                         <h5 class="mb-3 font-bold text-neutral-900 dark:text-white">{{ $item['title'] }}</h5>
                         <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">

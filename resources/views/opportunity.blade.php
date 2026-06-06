@@ -2,7 +2,7 @@
 
     @include('partials.home.heading', [
     'title' => __('Opportunity'),
-    'imgbg' => asset('assets/img/carousel-2.png')
+    'imgbg' => asset('assets/img/carousel-2.webp')
     ])
 
     <div class="w-full bg-neutral-50 dark:bg-neutral-900 overflow-hidden py-24">
@@ -34,7 +34,7 @@
                         </p>
                         <div class="flex justify-center lg:justify-start">
                             <flux:button href="{{ route('edukasi') }}" variant="primary"
-                                class="rounded-full !px-12 !py-4 shadow-lg">
+                                class="rounded-full px-12! py-4! shadow-lg">
                                 Lihat Program Edukasi
                                 <i class="fa fa-arrow-right ml-2 text-xs"></i>
                             </flux:button>
@@ -44,10 +44,9 @@
 
                 {{-- Gambar --}}
                 <div class="w-full lg:w-1/2 wow fadeIn" data-wow-delay="0.5s">
-                    <div class="relative w-full rounded-[2.5rem] overflow-hidden shadow-2xl"
-                        style="min-height: 400px;">
+                    <div class="relative w-full rounded-[2.5rem] overflow-hidden shadow-2xl" style="min-height: 400px;">
                         <img class="absolute inset-0 w-full h-full object-cover"
-                            src="{{ asset('assets/img/feature.png') }}" alt="Model Bisnis Hybrid">
+                            src="{{ asset('assets/img/feature.webp') }}" alt="Model Bisnis Hybrid">
                     </div>
                 </div>
 

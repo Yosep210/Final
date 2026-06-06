@@ -4,103 +4,23 @@
     <div class="w-full wow fadeIn" data-wow-delay="0.1s">
         <div class="owl-carousel header-carousel relative w-full overflow-hidden"
             style="height: clamp(420px, 56vw, 780px);">
+            @include('partials.home.hero-slide', [
+                'img' => asset('assets/img/carousel-1.webp'),
+                'alt' => 'Build Your Healthy Life',
+                'position' => 'center center',
+            ])
 
-            {{-- Slide 1 - landscape 16:9, focal point tengah --}}
-            <div class="owl-carousel-item" data-dot="<img src='{{ asset('assets/img/carousel-1.png') }}'>">
-                <img src="{{ asset('assets/img/carousel-1.png') }}" alt="Build Your Healthy Life"
-                    style="object-position: center center;">
-                <div class="owl-carousel-inner">
-                    <div class="max-w-7xl mx-auto w-full px-6 md:px-12">
-                        <div class="max-w-2xl text-center md:text-left">
-                            <h1 class="text-white animated slideInDown font-extrabold mb-4 tracking-tight"
-                                style="font-size: clamp(2rem, 7vw, 4.5rem); line-height: 1.1;">
-                                Build Your <span class="text-primary-400">Healthy</span>
-                                <br class="hidden md:block"> and Wealthy Life
-                            </h1>
-                            <p class="text-white/90 mb-8 animated slideInUp"
-                                style="font-size: clamp(0.9rem, 2vw, 1.15rem); line-height: 1.7;">
-                                Jagad Pesona Buana adalah perusahaan penjualan langsung berbasis
-                                gaya hidup sehat, kesadaran diri, dan kemakmuran global.
-                            </p>
-                            <div class="animated slideInUp flex flex-wrap gap-3 justify-center md:justify-start">
-                                <flux:button href="{{ route('about') }}" variant="primary"
-                                    class="rounded-full px-10! py-4! shadow-xl shadow-primary-500/30 font-semibold">
-                                    Kenali Kami
-                                </flux:button>
-                                <flux:button href="{{ route('opportunity') }}"
-                                    class="rounded-full px-10! py-4! backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
-                                    Gabung Bersama Kami
-                                </flux:button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @include('partials.home.hero-slide', [
+                'img' => asset('assets/img/carousel-2.webp'),
+                'alt' => 'Build Your Healthy Life',
+                'position' => 'center top',
+            ])
 
-            {{-- Slide 2 - portrait/square, focal point atas agar meja & tangan terlihat --}}
-            <div class="owl-carousel-item" data-dot="<img src='{{ asset('assets/img/carousel-2.png') }}'>">
-                <img src="{{ asset('assets/img/carousel-2.png') }}" alt="Solusi Bisnis Masa Depan"
-                    style="object-position: center top;">
-                <div class="owl-carousel-inner">
-                    <div class="max-w-7xl mx-auto w-full px-6 md:px-12">
-                        <div class="max-w-2xl text-center md:text-left">
-                            <h1 class="text-white animated slideInDown font-extrabold mb-4 tracking-tight"
-                                style="font-size: clamp(2rem, 7vw, 4.5rem); line-height: 1.1;">
-                                Solusi Bisnis <br class="hidden md:block">
-                                <span class="text-primary-400">Masa Depan</span>
-                            </h1>
-                            <p class="text-white/90 mb-8 animated slideInUp"
-                                style="font-size: clamp(0.9rem, 2vw, 1.15rem); line-height: 1.7;">
-                                Menggabungkan produk berkualitas tinggi dengan sistem edukasi bisnis
-                                modern untuk pertumbuhan Anda.
-                            </p>
-                            <div class="animated slideInUp flex flex-wrap gap-3 justify-center md:justify-start">
-                                <flux:button href="{{ route('about') }}" variant="primary"
-                                    class="rounded-full px-10! py-4! shadow-xl shadow-primary-500/30 font-semibold">
-                                    Kenali Kami
-                                </flux:button>
-                                <flux:button href="{{ route('opportunity') }}"
-                                    class="rounded-full px-10! py-4! backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
-                                    Gabung Bersama Kami
-                                </flux:button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Slide 3 - landscape, focal point tengah --}}
-            <div class="owl-carousel-item" data-dot="<img src='{{ asset('assets/img/carousel-3.png') }}'>">
-                <img src="{{ asset('assets/img/carousel-3.png') }}" alt="Komunitas Penuh Pesona"
-                    style="object-position: center center;">
-                <div class="owl-carousel-inner">
-                    <div class="max-w-7xl mx-auto w-full px-6 md:px-12">
-                        <div class="max-w-2xl text-center md:text-left">
-                            <h1 class="text-white animated slideInDown font-extrabold mb-4 tracking-tight"
-                                style="font-size: clamp(2rem, 7vw, 4.5rem); line-height: 1.1;">
-                                Komunitas <br class="hidden md:block">
-                                <span class="text-primary-400">Penuh Pesona</span>
-                            </h1>
-                            <p class="text-white/90 mb-8 animated slideInUp"
-                                style="font-size: clamp(0.9rem, 2vw, 1.15rem); line-height: 1.7;">
-                                Bergabunglah dengan ribuan orang yang telah memilih jalan hidup
-                                lebih sehat dan mandiri secara finansial.
-                            </p>
-                            <div class="animated slideInUp flex flex-wrap gap-3 justify-center md:justify-start">
-                                <flux:button href="{{ route('about') }}" variant="primary"
-                                    class="rounded-full px-10! py-4! shadow-xl shadow-primary-500/30 font-semibold">
-                                    Kenali Kami
-                                </flux:button>
-                                <flux:button href="{{ route('opportunity') }}"
-                                    class="rounded-full px-10! py-4! backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20 transition-all font-semibold">
-                                    Gabung Bersama Kami
-                                </flux:button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            @include('partials.home.hero-slide', [
+                'img' => asset('assets/img/carousel-3.webp'),
+                'alt' => 'Build Your Healthy Life',
+                'position' => 'center center',
+            ])
         </div>
     </div>
 
@@ -114,7 +34,7 @@
                         <div class="absolute -inset-4 bg-primary-100/50 dark:bg-primary-900/20 rounded-3xl -rotate-3
                                     transition-all duration-500 group-hover:rotate-0 group-hover:scale-105"></div>
                         <img class="relative w-full h-full object-cover rounded-3xl"
-                            src="{{ asset('assets/img/about.png') }}" alt="Tentang Jagad Pesona Buana" loading="lazy"
+                            src="{{ asset('assets/img/about.webp') }}" alt="Tentang Jagad Pesona Buana" loading="lazy"
                             style="min-height: 400px;">
                     </div>
                 </div>
@@ -125,27 +45,17 @@
                         <h1 class="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Jagad Pesona Buana</h1>
                         <p class="text-lg text-neutral-600 dark:text-neutral-400 mb-6 leading-relaxed">
                             Jagad Pesona Buana merupakan perusahaan penjualan langsung yang berfokus pada pengembangan
-                            gaya hidup sehat dan sejahtera. Kami hadir untuk menjawab kebutuhan masyarakat modern akan
-                            produk perawatan diri dan peluang usaha fleksibel.
+                            gaya hidup sehat dan
+                            sejahtera. Kami hadir untuk menjawab kebutuhan masyarakat modern akan produk perawatan diri,
+                            kesehatan, serta peluang
+                            usaha yang dapat dijalankan secara fleksibel dan berkelanjungan.
+                            </br>
+                            </br>
+                            Dengan pendekatan yang menggabungkan nilai kemanusiaan, edukasi, dan teknologi digital,
+                            Jagad Pesona Buana membangun
+                            ekosistem bisnis yang tidak hanya berorientasi pada penjualan, tetapi juga pada pertumbuhan
+                            pribadi dan komunitas.
                         </p>
-                        <div class="space-y-4 mb-8">
-                            <div class="flex items-start gap-3">
-                                <div
-                                    class="shrink-0 w-9 h-9 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600">
-                                    <i class="fa fa-heart"></i>
-                                </div>
-                                <p class="text-neutral-500 text-sm pt-2">Fokus pada kesehatan dan kesejahteraan
-                                    holistik.</p>
-                            </div>
-                            <div class="flex items-start gap-3">
-                                <div
-                                    class="shrink-0 w-9 h-9 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600">
-                                    <i class="fa fa-users"></i>
-                                </div>
-                                <p class="text-neutral-500 text-sm pt-2">Membangun komunitas yang edukatif dan
-                                    produktif.</p>
-                            </div>
-                        </div>
                         <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
                             <flux:button href="{{ route('about') }}" variant="primary"
                                 class="rounded-full px-10! py-3! font-semibold shadow-lg">
@@ -208,21 +118,27 @@
                         <ul class="space-y-3 text-neutral-500 dark:text-neutral-400 mb-6">
                             <li class="flex items-start gap-3">
                                 <i class="fa fa-check-circle text-primary-500 mt-1 shrink-0"></i>
-                                <span>Produk perawatan &amp; kesehatan berkualitas</span>
+                                <span>Menyediakan produk perawatan diri dan kesehatan yang berkualitas</span>
                             </li>
                             <li class="flex items-start gap-3">
                                 <i class="fa fa-check-circle text-primary-500 mt-1 shrink-0"></i>
-                                <span>Sistem bisnis etis &amp; berkelanjutan</span>
+                                <span>Membangun sistem bisnis penjualan langsung yang etis, transparan, dan
+                                    berkelanjutan</span>
                             </li>
                             <li class="flex items-start gap-3">
                                 <i class="fa fa-check-circle text-primary-500 mt-1 shrink-0"></i>
-                                <span>Edukasi pengembangan potensi manusia</span>
+                                <span>Memberikan edukasi motivasi, kesadaran diri, dan pengembangan potensi
+                                    manusia</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa fa-check-circle text-primary-500 mt-1 shrink-0"></i>
+                                <span>Mengembangkan jaringan distribusi berbasis teknologi digital</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa fa-check-circle text-primary-500 mt-1 shrink-0"></i>
+                                <span>Menciptakan peluang usaha yang relevan dengan perkembangan zaman</span>
                             </li>
                         </ul>
-                        <flux:button variant="primary" href="{{ route('opportunity') }}"
-                            class="rounded-full px-10! py-3! font-semibold shadow-lg">
-                            Selengkapnya <i class="fa fa-arrow-right ml-2 text-xs"></i>
-                        </flux:button>
                     </div>
                 </div>
 
@@ -246,15 +162,20 @@
                         <div class="flex items-center justify-center bg-neutral-100 dark:bg-neutral-700/50
                                     group-hover:bg-primary-50 transition-colors" style="height: 220px;">
                             <div class="text-center p-3">
-                                <i
-                                    class="fa fa-leaf text-5xl text-neutral-300 group-hover:text-primary-500 transition-colors mb-3 block"></i>
-                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">Segera
-                                    Hadir</span>
+                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">
+                                    Workshop
+                                    Kelas & Sertifikasi
+                                </span>
                             </div>
                         </div>
+                        <div class="service-icon">
+                            <i class="fa fa-graduation-cap fa-3x"></i>
+                        </div>
                         <div class="p-8 flex-1 flex flex-col">
-                            <h4 class="text-xl font-bold mb-2">Kesehatan</h4>
-                            <p class="text-neutral-400 text-sm">Nutrisi pendukung tubuh yang optimal.</p>
+                            <h4 class="text-xl font-bold mb-2">Kelas & Sertifikasi</h4>
+                            <p class="text-neutral-400 text-sm">Kuantum Oase, B4 Formats, dan Communion Symbol dalam
+                                workshop Menciptakan Realita Impian. Pelatihan praktisi energi
+                                dengan jalur sertifikasi internasional.</p>
                         </div>
                     </div>
                 </div>
@@ -264,15 +185,21 @@
                                 bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700">
                         <div class="overflow-hidden flex items-center justify-center bg-neutral-50"
                             style="height: 220px;">
-                            <img class="max-h-full transition-transform duration-700 group-hover:scale-110"
-                                src="{{ asset('assets/img/lovaura.png') }}" alt="LOVAURA Face Mist">
+                            <img class="min-h-full transition-transform duration-700 group-hover:scale-110"
+                                src="{{ asset('assets/img/2.png') }}" alt="Minicon">
+                        </div>
+                        <div class="service-icon">
+                            <i class="fa fa-car fa-3x"></i>
                         </div>
                         <div class="p-10 pt-6 flex-1 flex flex-col">
-                            <h4 class="text-3xl font-bold mb-1">LOVAURA</h4>
-                            <p class="text-primary-600 font-bold mb-4 tracking-widest text-xs uppercase">Face Mist Aura
-                                Care</p>
+                            <h4 class="text-3xl font-bold mb-1">Minicon</h4>
+                            <p class="text-primary-600 font-bold mb-4 tracking-widest text-xs uppercase">
+                                Car Voltage Stabilizer
+                            </p>
                             <p class="text-neutral-500 leading-relaxed mb-6 flex-1">
-                                Diciptakan untuk mendukung perawatan kulit dan keseimbangan energi harian Anda.
+                                Stabilizer voltase untuk kelistrikan kendaraan yang stabil, efisiensi BBM, dan
+                                kenyamanan berkendara. Panduan pemasangan
+                                dan testimoni pengguna.
                             </p>
                             <div>
                                 <flux:button href="{{ route('product') }}" variant="primary" class="rounded-full px-8!">
@@ -290,15 +217,19 @@
                         <div class="flex items-center justify-center bg-neutral-100 dark:bg-neutral-700/50
                                     group-hover:bg-primary-50 transition-colors" style="height: 220px;">
                             <div class="text-center p-3">
-                                <i
-                                    class="fa fa-coffee text-5xl text-neutral-300 group-hover:text-primary-500 transition-colors mb-3 block"></i>
-                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">Segera
-                                    Hadir</span>
+                                <span class="text-xs font-bold text-neutral-400 tracking-widest uppercase">
+                                    Pesona Aura
+                                </span>
                             </div>
                         </div>
+                        <div class="service-icon">
+                            <i class="fa fa-gem fa-3x"></i>
+                        </div>
                         <div class="p-8 flex-1 flex flex-col">
-                            <h4 class="text-xl font-bold mb-2">Minuman</h4>
-                            <p class="text-neutral-400 text-sm">Varian kopi dan teh fungsional.</p>
+                            <h4 class="text-xl font-bold mb-2">Gelang & Topi Bio-Energi</h4>
+                            <p class="text-neutral-400 text-sm">Gelang dan topi dengan infrared serta negative ion untuk
+                                kenyamanan tubuh. Wearable wellness mendukung fokus dan
+                                keseimbangan energi.</p>
                         </div>
                     </div>
                 </div>
@@ -336,7 +267,7 @@
                 <div class="w-full lg:w-1/2 wow fadeIn" data-wow-delay="0.5s">
                     <div class="relative w-full rounded-3xl overflow-hidden shadow-xl" style="min-height: 380px;">
                         <img class="absolute inset-0 w-full h-full object-cover"
-                            src="{{ asset('assets/img/feature.png') }}" alt="Model Bisnis Hybrid">
+                            src="{{ asset('assets/img/feature.webp') }}" alt="Model Bisnis Hybrid">
                     </div>
                 </div>
 
@@ -356,20 +287,20 @@
                     serta digital marketing.
                 </p>
                 <flux:button href="{{ route('edukasi') }}" variant="primary" class="rounded-full px-8!">
-                    Pelajari Kurikulum Kami <i class="fa fa-arrow-right ml-2"></i>
+                    Pelajari Lebih Lanjut <i class="fa fa-arrow-right ml-2"></i>
                 </flux:button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach ([
-                ['delay' => '0.1s', 'icon' => 'fa-brain', 'title' => 'Motivasi', 'desc' => 'Pengembangan mental dan
-                emosional untuk fondasi bisnis yang kuat.'],
-                ['delay' => '0.3s', 'icon' => 'fa-bolt', 'title' => 'Terapi Energi', 'desc' => 'Keseimbangan fisik dan
-                mental untuk performa maksimal dalam kehidupan sehari-hari.'],
-                ['delay' => '0.5s', 'icon' => 'fa-handshake', 'title' => 'Direct Selling', 'desc' => 'Keterampilan
-                penjualan langsung yang etis, modern, dan profesional.'],
+                ['delay' => '0.1s', 'icon' => 'fa-brain', 'title' => 'Motivasi & Kesadaran Diri', 'desc' => 'Pelatihan
+                pengembangan mental dan emosional untuk fondasi bisnis yang kuat.'],
+                ['delay' => '0.3s', 'icon' => 'fa-bolt', 'title' => 'Terapi Energi', 'desc' => 'Edukasi terapi energi
+                untuk keseimbangan fisik dan mental dalam kehidupan sehari-hari.'],
+                ['delay' => '0.5s', 'icon' => 'fa-handshake', 'title' => 'Direct Selling Profesional', 'desc' =>
+                'Pengetahuan dan keterampilan penjualan langsung yang etis dan profesional.'],
                 ['delay' => '0.7s', 'icon' => 'fa-laptop', 'title' => 'Digital Marketing', 'desc' => 'Strategi pemasaran
-                digital untuk mengembangkan jaringan bisnis global.'],
+                digital untuk mengembangkan jaringan bisnis secara modern.'],
                 ] as $item)
                 <div class="wow fadeIn" data-wow-delay="{{ $item['delay'] }}">
                     <div class="bg-white dark:bg-neutral-800 rounded-3xl p-6 text-center shadow-sm border
@@ -377,8 +308,7 @@
                                 duration-300 group h-full">
                         <div class="w-16 h-16 flex items-center justify-center bg-neutral-100 dark:bg-neutral-700
                                     group-hover:bg-primary-600 rounded-2xl mx-auto mb-4 transition-all duration-300">
-                            <i
-                                class="fa {{ $item['icon'] }} text-2xl text-primary-600 group-hover:text-white transition-colors"></i>
+                            <i class="fa {{ $item['icon'] }} text-white"></i>
                         </div>
                         <h5 class="text-base font-bold mb-3">{{ $item['title'] }}</h5>
                         <p class="text-neutral-500 text-sm leading-relaxed">{{ $item['desc'] }}</p>

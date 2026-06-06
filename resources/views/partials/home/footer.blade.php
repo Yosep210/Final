@@ -1,4 +1,4 @@
-<footer class="bg-zinc-900 text-zinc-400 mt-5 pt-5 wow fadeIn px-4" data-wow-delay="0.1s">
+<footer class="bg-zinc-900 text-zinc-400 wow fadeIn px-4" data-wow-delay="0.1s">
     <div class="max-w-7xl mx-auto px-6 md:px-12 py-12">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
 
@@ -30,24 +30,6 @@
                             class="hover:text-white transition-colors">admin@jpbuana.com</a>
                     </li>
                 </ul>
-                <div class="flex items-center gap-2 mt-5">
-                    <a href="#"
-                        class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#"
-                        class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#"
-                        class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
-                        <i class="fab fa-linkedin"></i>
-                    </a>
-                    <a href="#"
-                        class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-primary-600 text-zinc-400 hover:text-white transition-all text-xs">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                </div>
             </div>
 
             {{-- Tautan Cepat --}}
@@ -80,25 +62,21 @@
                 <ul class="space-y-4 text-sm">
                     <li class="flex items-start gap-3">
                         <div class="shrink-0 w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-lg">
-                            <i class="fa fa-spa text-zinc-500 text-xs"></i>
+                            <i class="fa fa-graduation-cap text-white"></i>
                         </div>
-                        <span class="pt-1">LOVAURA – Face Mist Aura Care</span>
+                        <span class="pt-1">Workshop</span>
                     </li>
                     <li class="flex items-start gap-3">
                         <div class="shrink-0 w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-lg">
-                            <i class="fa fa-leaf text-zinc-500 text-xs"></i>
+                            <i class="fa fa-car text-white"></i>
                         </div>
-                        <span class="pt-1">Produk Kesehatan
-                            <span class="block text-xs text-zinc-600 mt-0.5">Segera Hadir</span>
-                        </span>
+                        <span class="pt-1">Minicon</span>
                     </li>
                     <li class="flex items-start gap-3">
                         <div class="shrink-0 w-8 h-8 flex items-center justify-center bg-zinc-800 rounded-lg">
-                            <i class="fa fa-coffee text-zinc-500 text-xs"></i>
+                            <i class="fa fa-gem text-white"></i>
                         </div>
-                        <span class="pt-1">Minuman Kesehatan
-                            <span class="block text-xs text-zinc-600 mt-0.5">Segera Hadir</span>
-                        </span>
+                        <span class="pt-1">Pesona Aura</span>
                     </li>
                 </ul>
             </div>
