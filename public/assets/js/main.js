@@ -32,6 +32,7 @@
         }
     });
     $(".back-to-top").click(function () {
+        $(this).fadeOut("slow");
         $("html, body").animate({ scrollTop: 0 }, 1500, "easeInOutExpo");
         return false;
     });

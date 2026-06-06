@@ -98,8 +98,8 @@
     </div>
 
     {{-- Back to Top --}}
-    <a href="#"
-        class="fixed bottom-6 right-6 z-50 w-11 h-11 flex items-center justify-center rounded-full bg-primary-600 text-white shadow-lg hover:bg-primary-700 hover:scale-110 transition-all duration-300"
+    <a href="#" class="fixed bottom-6 right-6 z-50 w-11 h-11 flex items-center justify-center rounded-full 
+        bg-primary-600 text-white shadow-lg hover:bg-primary-700 hover:scale-110 transition-all duration-300"
         aria-label="Kembali ke atas">
         <i class="fa fa-arrow-up text-sm"></i>
     </a>
