@@ -18,9 +18,12 @@ class Index extends Component
 
     public ?MemberNetwork $selectedNetwork = null;
 
-    public function mount(): void
+    public ?string $username = null;
+
+    public function mount(?string $username = null): void
     {
         $this->authorize('viewAny', Member::class);
+        $this->username = $username;
     }
 
     #[On('generation:view')]

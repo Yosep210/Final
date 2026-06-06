@@ -24,6 +24,8 @@ class Member extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'status',
+        'wd_status',
+        'wd_min',
         'referral_code',
         'email_verified_at',
         'last_login_at',

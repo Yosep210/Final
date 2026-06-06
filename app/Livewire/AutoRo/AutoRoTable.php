@@ -20,6 +20,8 @@ final class AutoRoTable extends PowerGridComponent
 
     public string $sortDirection = 'desc';
 
+    public string $primaryKey = 'member_id';
+
     public function setUp(): array
     {
         return [
@@ -104,6 +106,26 @@ final class AutoRoTable extends PowerGridComponent
                     }
 
                     return $query->where('member.name', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('total_amount_formatted')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    $normalizedSearch = preg_replace('/[^0-9]/', '', $searchTerm);
+                    if ($normalizedSearch === '') {
+                        return $query;
+                    }
+
+                    return $query->whereIn('auto_ro_logs.member_id', function ($subQuery) use ($normalizedSearch) {
+                        $subQuery->select('auto_ro_logs.member_id')
+                            ->from('auto_ro_logs')
+                            ->groupBy('auto_ro_logs.member_id')
+                            ->havingRaw('CAST(SUM(auto_ro_logs.amount) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
+                    });
                 }),
         ];
     }

@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Generation;
 
+use App\Models\Member;
 use App\Models\MemberNetwork;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -19,6 +21,8 @@ final class GenTable extends PowerGridComponent
     public string $sortField = 'member_networks.generation';
 
     public string $sortDirection = 'asc';
+
+    public ?string $username = null;
 
     public function setUp(): array
     {
@@ -42,12 +46,36 @@ final class GenTable extends PowerGridComponent
         $sortField = $allowedSort[$this->sortField] ?? 'member_networks.generation';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
+        $downlineIds = [];
+        if ($this->username) {
+            $targetMember = Member::where('username', $this->username)->first();
+            if ($targetMember) {
+                $results = DB::select('
+                    WITH RECURSIVE sponsor_tree AS (
+                        SELECT member_id
+                        FROM member_networks
+                        WHERE sponsored_id = :sponsor_id
+                        UNION ALL
+                        SELECT mn.member_id
+                        FROM member_networks mn
+                        INNER JOIN sponsor_tree st ON mn.sponsored_id = st.member_id
+                    )
+                    SELECT member_id FROM sponsor_tree
+                ', ['sponsor_id' => $targetMember->id]);
+
+                $downlineIds = collect($results)->pluck('member_id')->all();
+            }
+        }
+
         return MemberNetwork::query()
             ->leftJoin('members as member', 'member_networks.member_id', '=', 'member.id')
             ->leftJoin('members as sponsor', 'member_networks.sponsored_id', '=', 'sponsor.id')
             ->leftJoin('members as parent', 'member_networks.parent_id', '=', 'parent.id')
             ->whereDoesntHave('member.roles', function ($query) {
                 $query->whereIn('name', ['Admin', 'Staff']);
+            })
+            ->when($this->username, function ($query) use ($downlineIds) {
+                $query->whereIn('member_networks.member_id', $downlineIds);
             })
             ->select([
                 'member_networks.*',
@@ -93,18 +121,10 @@ final class GenTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('member.name', 'like', '%'.$searchTerm.'%');
-                }),
-            Filter::inputText('username')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('member.username', 'like', '%'.$searchTerm.'%');
+                    return $query->where(function ($q) use ($searchTerm) {
+                        $q->where('member.name', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('member.username', 'like', '%'.$searchTerm.'%');
+                    });
                 }),
             Filter::inputText('sponsor')
                 ->operators(['contains'])
@@ -115,7 +135,10 @@ final class GenTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('sponsor.name', 'like', '%'.$searchTerm.'%');
+                    return $query->where(function ($q) use ($searchTerm) {
+                        $q->where('sponsor.name', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('sponsor.username', 'like', '%'.$searchTerm.'%');
+                    });
                 }),
             Filter::inputText('generation')
                 ->operators(['contains'])

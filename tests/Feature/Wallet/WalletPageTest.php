@@ -98,3 +98,71 @@ it('can open detail modal and show member wallet logs', function () {
         ->assertCount('memberWalletLogs', 1)
         ->assertSee('Test deposit');
 });
+
+it('filters ewallet logs by amount and wd_status', function () {
+    $admin = createAdminUser();
+
+    // Alice: wd_status = 1 (manual), wd_min = 0, balance = 100000
+    $member1 = Member::factory()->active()->create([
+        'name' => 'Alice',
+        'username' => 'alice123',
+        'wd_status' => 1,
+        'wd_min' => 0,
+    ]);
+    EwalletLog::create([
+        'member_id' => $member1->id,
+        'nominal' => 100000,
+        'amount' => 100000,
+        'type' => 'IN',
+        'status' => 1,
+    ]);
+
+    // Bob: wd_status = 2 (automatic), wd_min = 50000, balance = 200000
+    $member2 = Member::factory()->active()->create([
+        'name' => 'Bob',
+        'username' => 'bob456',
+        'wd_status' => 2,
+        'wd_min' => 50000,
+    ]);
+    EwalletLog::create([
+        'member_id' => $member2->id,
+        'nominal' => 200000,
+        'amount' => 200000,
+        'type' => 'IN',
+        'status' => 1,
+    ]);
+
+    Livewire::actingAs($admin)
+        ->test(WalletTable::class)
+        ->assertSee('Withdraw Manual')
+        ->assertSee('Withdraw Otomatis')
+        ->assertSee('Minimal: Rp 50,000')
+
+        // Filter by wd_status = 1 (Withdraw Manual)
+        ->set('filters', [
+            'select' => [
+                'wd_status_formatted' => '1',
+            ],
+        ])
+        ->assertSee('Alice')
+        ->assertDontSee('Bob')
+
+        // Filter by wd_status = 2 (Withdraw Otomatis)
+        ->set('filters', [
+            'select' => [
+                'wd_status_formatted' => '2',
+            ],
+        ])
+        ->assertSee('Bob')
+        ->assertDontSee('Alice')
+
+        // Filter by amount = 200000 (Bob)
+        ->set('filters', [
+            'select' => [],
+            'input_text' => [
+                'total_balance_formatted' => '200000',
+            ],
+        ])
+        ->assertSee('Bob')
+        ->assertDontSee('Alice');
+});

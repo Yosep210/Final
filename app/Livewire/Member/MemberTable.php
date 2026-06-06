@@ -105,7 +105,9 @@ final class MemberTable extends PowerGridComponent
                 'profile.phone as profile_phone',
 
                 'sponsor_member.name as sponsor_name',
+                'sponsor_member.username as sponsor_username',
                 'parent_member.name as parent_name',
+                'parent_member.username as parent_username',
             ])
 
             ->selectRaw("
@@ -155,14 +157,8 @@ final class MemberTable extends PowerGridComponent
 
                 return '<div>'.e($email).'</div><div class="text-zinc-500 text-xs">'.e($phone).'</div>';
             })
-            ->add(
-                'sponsor',
-                fn (Member $member) => $member->sponsor_name
-            )
-            ->add(
-                'parent',
-                fn (Member $member) => $member->parent_name
-            )
+            ->add('sponsor', fn (Member $member) => '<div><strong>'.e(strtoupper($member->sponsor_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($member->sponsor_name).'</div>')
+            ->add('parent', fn (Member $member) => '<div><strong>'.e(strtoupper($member->parent_username)).'</strong></div><div class="text-zinc-500 text-xs">'.e($member->parent_name).'</div>')
             ->add(
                 'position',
                 fn (Member $member) => ucfirst($member->network_position ?: 'left')
@@ -241,27 +237,16 @@ final class MemberTable extends PowerGridComponent
                 ]))
                 ->optionValue('id')
                 ->optionLabel('name'),
-            Filter::inputText('email')
+            Filter::inputText('contact')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
 
-                    return $query->where('members.email', 'like', '%'.$searchTerm.'%');
-                }),
-            Filter::inputText('phone')
-                ->operators(['contains'])
-                ->builder(function (Builder $query, $value) {
-                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
-                    if (is_array($searchTerm) || empty($searchTerm)) {
-                        return $query;
-                    }
-
-                    return $query->where('profile.phone', 'like', '%'.$searchTerm.'%');
+                    return $query->where('members.email', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('profile.phone', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('sponsor')
                 ->operators(['contains'])
@@ -272,7 +257,8 @@ final class MemberTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('sponsor_member.name', 'like', '%'.$searchTerm.'%');
+                    return $query->where('sponsor_member.name', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('sponsor_member.username', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('parent')
                 ->operators(['contains'])
@@ -283,7 +269,8 @@ final class MemberTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->where('parent_member.name', 'like', '%'.$searchTerm.'%');
+                    return $query->where('parent_member.name', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('parent_member.username', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::select('position', 'network.position')
                 ->dataSource(collect([
@@ -301,6 +288,7 @@ final class MemberTable extends PowerGridComponent
                 ->optionValue('id')
                 ->optionLabel('name'),
             Filter::datepicker('created_at_formatted', 'members.created_at'),
+            Filter::datepicker('last_login_at_formatted', 'members.last_login_at'),
         ];
     }
 

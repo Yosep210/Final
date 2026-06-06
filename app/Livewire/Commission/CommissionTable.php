@@ -20,6 +20,8 @@ final class CommissionTable extends PowerGridComponent
 
     public string $sortDirection = 'desc';
 
+    public string $primaryKey = 'member_id';
+
     public function setUp(): array
     {
         return [
@@ -66,7 +68,7 @@ final class CommissionTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('username', fn (CommissionLog $row) => $row->member_username)
+            ->add('username', fn (CommissionLog $row) => strtoupper($row->member_username))
             ->add('name', fn (CommissionLog $row) => $row->member_name)
             ->add('gross_commission_formatted', fn (CommissionLog $row) => number_format((float) ($row->total_gross_commission ?? 0), 0));
     }
@@ -104,6 +106,26 @@ final class CommissionTable extends PowerGridComponent
                     }
 
                     return $query->where('member.name', 'like', '%'.$searchTerm.'%');
+                }),
+            Filter::inputText('gross_commission_formatted')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    $normalizedSearch = preg_replace('/[^0-9]/', '', $searchTerm);
+                    if ($normalizedSearch === '') {
+                        return $query;
+                    }
+
+                    return $query->whereIn('commission_logs.member_id', function ($subQuery) use ($normalizedSearch) {
+                        $subQuery->select('commission_logs.member_id')
+                            ->from('commission_logs')
+                            ->groupBy('commission_logs.member_id')
+                            ->havingRaw('CAST(SUM(commission_logs.gross_commission) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
+                    });
                 }),
         ];
     }

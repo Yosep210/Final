@@ -9,7 +9,7 @@
     </div>
 
     <div class="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-zinc-900">
-        <livewire:generation.gen-table />
+        <livewire:generation.gen-table :username="$username" :key="'gen-table-'.$username" />
     </div>
 
     <flux:modal name="generation-detail-modal" class="max-w-3xl md:min-w-3xl" wire:model="showDetailModal"

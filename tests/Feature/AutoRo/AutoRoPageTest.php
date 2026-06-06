@@ -100,3 +100,35 @@ it('can open Auto RO detail modal and show member logs', function () {
         ->assertCount('memberAutoRoLogs', 1)
         ->assertSee('Test Auto RO entry');
 });
+
+it('filters auto ro logs by total amount', function () {
+    $admin = createAdminForAutoRo();
+    $member1 = Member::factory()->active()->create(['name' => 'Alice', 'username' => 'alice123']);
+    $member2 = Member::factory()->active()->create(['name' => 'Bob', 'username' => 'bob456']);
+
+    AutoRoLog::create([
+        'member_id' => $member1->id,
+        'nominal' => 1200000,
+        'amount' => 1200000,
+        'status' => 1,
+    ]);
+
+    AutoRoLog::create([
+        'member_id' => $member2->id,
+        'nominal' => 1000000,
+        'amount' => 1000000,
+        'status' => 1,
+    ]);
+
+    Livewire::actingAs($admin)
+        ->test(AutoRoTable::class)
+        ->assertSee('Alice')
+        ->assertSee('Bob')
+        ->set('filters', [
+            'input_text' => [
+                'total_amount_formatted' => '1200000',
+            ],
+        ])
+        ->assertSee('Alice')
+        ->assertDontSee('Bob');
+});

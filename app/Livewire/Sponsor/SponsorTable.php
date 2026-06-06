@@ -163,7 +163,7 @@ final class SponsorTable extends PowerGridComponent
     #[On('sponsor:view-gen')]
     public function viewGen(string $username): void
     {
-        $this->redirect(route('network.index', ['username' => $username]), navigate: true);
+        $this->redirect(route('generation.index', ['username' => $username]), navigate: true);
     }
 
     public function filters(): array
@@ -228,7 +228,7 @@ final class SponsorTable extends PowerGridComponent
                 ]))
                 ->optionValue('id')
                 ->optionLabel('name'),
-            Filter::datepicker('join_date', 'members.created_at'),
+            Filter::datepicker('join_date_formatted', 'members.created_at'),
         ];
     }
 }

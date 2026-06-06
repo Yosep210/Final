@@ -49,7 +49,7 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->group(function () {
 
     Route::livewire('group', GroupIndex::class)->name('group.index');
 
-    Route::livewire('generation', GenerationIndex::class)->name('generation.index');
+    Route::livewire('generation/{username?}', GenerationIndex::class)->name('generation.index');
 
     Route::livewire('network/{username?}', NetworkIndex::class)->name('network.index');
 

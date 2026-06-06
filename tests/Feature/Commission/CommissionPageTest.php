@@ -1,7 +1,10 @@
 <?php
 
+use App\Livewire\Commission\CommissionTable;
+use App\Models\CommissionLog;
 use App\Models\Member;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
@@ -42,4 +45,50 @@ it('renders the commission submenu pages for admins', function () {
     $this->actingAs($admin)->get(route('wallet.index'))->assertOk()->assertSee('eWallet Logs');
     $this->actingAs($admin)->get(route('auto.ro.index'))->assertOk()->assertSee('Auto RO Logs');
     $this->actingAs($admin)->get(route('withdraw.index'))->assertOk()->assertSee('Withdraw List');
+});
+
+it('renders CommissionTable and filters by total gross commission', function () {
+    $admin = createAdmin();
+    $member = Member::factory()->active()->create(['username' => 'earner123', 'name' => 'John Earner']);
+
+    CommissionLog::create([
+        'member_id' => $member->id,
+        'gross_commission' => 250000.00,
+        'type' => 'pairing',
+        'commission_year' => 2026,
+        'commission_month' => 6,
+    ]);
+
+    CommissionLog::create([
+        'member_id' => $member->id,
+        'gross_commission' => 750000.00,
+        'type' => 'sponsor',
+        'commission_year' => 2026,
+        'commission_month' => 6,
+    ]);
+
+    $member2 = Member::factory()->active()->create(['username' => 'bob456', 'name' => 'Bob Earner']);
+    CommissionLog::create([
+        'member_id' => $member2->id,
+        'gross_commission' => 500000.00,
+        'type' => 'sponsor',
+        'commission_year' => 2026,
+        'commission_month' => 6,
+    ]);
+
+    Livewire::actingAs($admin)
+        ->test(CommissionTable::class)
+        ->assertSee('EARNER123')
+        ->assertSee('John Earner')
+        ->assertSee('1,000,000')
+        ->assertSee('BOB456')
+        ->assertSee('Bob Earner')
+        ->assertSee('500,000')
+        ->set('filters', [
+            'input_text' => [
+                'gross_commission_formatted' => '1000000',
+            ],
+        ])
+        ->assertSee('John Earner')
+        ->assertDontSee('Bob Earner');
 });

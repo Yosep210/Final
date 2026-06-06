@@ -20,6 +20,8 @@ final class WalletTable extends PowerGridComponent
 
     public string $sortDirection = 'desc';
 
+    public string $primaryKey = 'member_id';
+
     public function setUp(): array
     {
         return [
@@ -34,7 +36,7 @@ final class WalletTable extends PowerGridComponent
         $allowedSort = [
             'member.username' => 'member.username',
             'member.name' => 'member.name',
-            'member.status' => 'member.status',
+            'member.wd_status' => 'member.wd_status',
             'total_balance' => 'total_balance',
         ];
 
@@ -56,10 +58,11 @@ final class WalletTable extends PowerGridComponent
                 'ewallet_logs.member_id',
                 'member.name as member_name',
                 'member.username as member_username',
-                'member.status as member_status',
+                'member.wd_status as member_wd_status',
+                'member.wd_min as member_wd_min',
                 DB::raw("SUM(CASE WHEN ewallet_logs.type = 'IN' THEN ewallet_logs.amount ELSE 0 END) - SUM(CASE WHEN ewallet_logs.type = 'OUT' THEN ewallet_logs.amount ELSE 0 END) as total_balance"),
             ])
-            ->groupBy('ewallet_logs.member_id', 'member.name', 'member.username', 'member.status')
+            ->groupBy('ewallet_logs.member_id', 'member.name', 'member.username', 'member.wd_status', 'member.wd_min')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
             ->orderBy($sortColumn, $sortDirection);
     }
@@ -70,16 +73,19 @@ final class WalletTable extends PowerGridComponent
             ->add('no')
             ->add('username', fn (EwalletLog $row) => strtoupper($row->member_username))
             ->add('name', fn (EwalletLog $row) => $row->member_name)
-            ->add('status', function (EwalletLog $row) {
-                $status = strtolower($row->member_status ?: 'active');
-                $class = match ($status) {
-                    'active' => 'bg-green-50 text-green-700 ring-green-600/10 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20',
-                    'suspended' => 'bg-yellow-50 text-yellow-700 ring-yellow-600/10 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20',
-                    'inactive' => 'bg-red-50 text-red-700 ring-red-600/10 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20',
-                    default => 'bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20',
-                };
+            ->add('wd_status_formatted', function (EwalletLog $row) {
+                $status = (int) $row->member_wd_status;
+                $min = number_format((float) ($row->member_wd_min ?? 0), 0);
 
-                return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset '.$class.'">'.ucfirst($status).'</span>';
+                if ($status === 1) {
+                    return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-blue-50 text-blue-700 ring-blue-600/10 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">Withdraw Manual</span>';
+                }
+
+                if ($status === 2) {
+                    return '<div class="space-y-0.5"><span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-green-50 text-green-700 ring-green-600/10 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20">Withdraw Otomatis</span><div class="text-[10px] text-zinc-500">Minimal: Rp '.$min.'</div></div>';
+                }
+
+                return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20">Tidak Aktif</span>';
             })
             ->add('total_balance_formatted', fn (EwalletLog $row) => number_format((float) ($row->total_balance ?? 0), 0));
     }
@@ -90,7 +96,7 @@ final class WalletTable extends PowerGridComponent
             Column::make('#', 'no'),
             Column::make('Username', 'username', 'member.username')->sortable(),
             Column::make('Nama', 'name', 'member.name')->sortable(),
-            Column::make('Status', 'status', 'member.status')->sortable(),
+            Column::make('Status', 'wd_status_formatted', 'member.wd_status')->sortable(),
             Column::make('Jumlah (Rp)', 'total_balance_formatted', 'total_balance')->sortable(),
             Column::action('Action'),
         ];
@@ -119,14 +125,41 @@ final class WalletTable extends PowerGridComponent
 
                     return $query->where('member.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::select('status', 'member.status')
+            Filter::select('wd_status_formatted')
                 ->dataSource(collect([
-                    ['id' => 'active', 'name' => 'Active'],
-                    ['id' => 'suspended', 'name' => 'Suspended'],
-                    ['id' => 'inactive', 'name' => 'Inactive'],
+                    ['id' => '1', 'name' => 'Withdraw Manual'],
+                    ['id' => '2', 'name' => 'Withdraw Otomatis'],
+                    ['id' => '0', 'name' => 'Tidak Aktif'],
                 ]))
                 ->optionValue('id')
-                ->optionLabel('name'),
+                ->optionLabel('name')
+                ->builder(function (Builder $query, $value) {
+                    if ($value === '' || $value === null) {
+                        return $query;
+                    }
+
+                    return $query->where('member.wd_status', $value);
+                }),
+            Filter::inputText('total_balance_formatted')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    $normalizedSearch = preg_replace('/[^0-9]/', '', $searchTerm);
+                    if ($normalizedSearch === '') {
+                        return $query;
+                    }
+
+                    return $query->whereIn('ewallet_logs.member_id', function ($subQuery) use ($normalizedSearch) {
+                        $subQuery->select('ewallet_logs.member_id')
+                            ->from('ewallet_logs')
+                            ->groupBy('ewallet_logs.member_id')
+                            ->havingRaw('CAST(SUM(CASE WHEN ewallet_logs.type = \'IN\' THEN ewallet_logs.amount ELSE 0 END) - SUM(CASE WHEN ewallet_logs.type = \'OUT\' THEN ewallet_logs.amount ELSE 0 END) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
+                    });
+                }),
         ];
     }
 
