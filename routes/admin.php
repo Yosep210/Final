@@ -59,4 +59,15 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->group(function () {
     Route::livewire('auto-ro', AutoRoIndex::class)->name('auto.ro.index');
     Route::livewire('withdraw', WithdrawIndex::class)->name('withdraw.index');
     Route::livewire('product-order', ProductOrderIndex::class)->name('product.order.index');
+
+    // Laporan (Report) Routes
+    Route::livewire('report/registration', \App\Livewire\Report\Registration::class)->name('report.registration');
+    Route::livewire('report/ro', \App\Livewire\Report\Ro::class)->name('report.ro');
+    Route::livewire('report/pairing', \App\Livewire\Report\Pairing::class)->name('report.pairing');
+    Route::livewire('report/omzet-daily', \App\Livewire\Report\OmzetDaily::class)->name('report.omzet-daily');
+    Route::livewire('report/omzet-monthly', \App\Livewire\Report\OmzetMonthly::class)->name('report.omzet-monthly');
+    Route::livewire('report/omzet-order', \App\Livewire\Report\OmzetOrder::class)->name('report.omzet-order');
+    Route::livewire('report/budgeting', \App\Livewire\Report\Budgeting::class)->name('report.budgeting');
+    Route::livewire('report/tax', \App\Livewire\Report\Tax::class)->name('report.tax');
+    Route::livewire('report/reward', \App\Livewire\Report\Reward::class)->name('report.reward');
 });

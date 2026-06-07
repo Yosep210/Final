@@ -5,7 +5,7 @@
     {{ filled(config('app.name', 'Laravel')) ? config('app.name', 'Laravel').' - '.($title ?? null) : $title }}
 </title>
 
-<link rel="icon" href="/logo.png" type="image/png" />
+<link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
 @if(Route::is(['home', 'about', 'contact', 'edukasi', 'product', 'opportunity']))
 <link rel="preconnect" href="https://fonts.bunny.net">

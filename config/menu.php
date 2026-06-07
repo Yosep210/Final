@@ -103,18 +103,65 @@ return [
             ],
         ],
         [
-            'heading' => 'Master Data',
-            'icon' => 'lock-closed',
-            'route' => ['role.*', 'permission.*', 'country.*', 'province.*', 'city.*', 'district.*', 'village.*', 'bank.*'],
+            'heading' => 'Laporan',
+            'icon' => 'document-text',
+            'route' => ['report.*'],
             'sub' => [
                 [
-                    'title' => 'Role',
-                    'href' => 'role.index',
+                    'title' => 'Pendaftaran',
+                    'href' => 'report.registration',
                     'role' => 'Admin',
                 ],
                 [
-                    'title' => 'Permission',
-                    'href' => 'permission.index',
+                    'title' => 'Repeat Order (RO)',
+                    'href' => 'report.ro',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Pairing Qualified',
+                    'href' => 'report.pairing',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Omzet Posting Harian',
+                    'href' => 'report.omzet-daily',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Omzet Posting Bulanan',
+                    'href' => 'report.omzet-monthly',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Omzet Order',
+                    'href' => 'report.omzet-order',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Budgeting',
+                    'href' => 'report.budgeting',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Pajak',
+                    'href' => 'report.tax',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Reward',
+                    'href' => 'report.reward',
+                    'role' => 'Admin',
+                ],
+            ],
+        ],
+        [
+            'heading' => 'Master Data',
+            'icon' => 'lock-closed',
+            'route' => ['bank.*', 'country.*', 'province.*', 'city.*', 'district.*', 'village.*', 'role.*', 'permission.*'],
+            'sub' => [
+                [
+                    'title' => 'Bank',
+                    'href' => 'bank.index',
                     'role' => 'Admin',
                 ],
                 [
@@ -143,8 +190,13 @@ return [
                     'role' => 'Admin',
                 ],
                 [
-                    'title' => 'Bank',
-                    'href' => 'bank.index',
+                    'title' => 'Role',
+                    'href' => 'role.index',
+                    'role' => 'Admin',
+                ],
+                [
+                    'title' => 'Permission',
+                    'href' => 'permission.index',
                     'role' => 'Admin',
                 ],
             ],

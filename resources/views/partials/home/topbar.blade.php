@@ -39,19 +39,19 @@
             {{ __('Home') }}
         </flux:navbar.item>
         <flux:navbar.item :href="route('about')" :current="request()->routeIs('about')" wire:navigate>
-            {{ __('About') }}
+            {{ __('Tentang Kami') }}
         </flux:navbar.item>
         <flux:navbar.item :href="route('product')" :current="request()->routeIs('product')" wire:navigate>
-            {{ __('Product') }}
+            {{ __('Product Unggulan') }}
         </flux:navbar.item>
         <flux:navbar.item :href="route('opportunity')" :current="request()->routeIs('opportunity')" wire:navigate>
-            {{ __('Opportunity') }}
+            {{ __('Model Bisnis') }}
         </flux:navbar.item>
         <flux:navbar.item :href="route('edukasi')" :current="request()->routeIs('edukasi')" wire:navigate>
-            {{ __('Edukasi') }}
+            {{ __('Edukasi & Pelatihan') }}
         </flux:navbar.item>
         <flux:navbar.item :href="route('contact')" :current="request()->routeIs('contact')" wire:navigate>
-            {{ __('Contact') }}
+            {{ __('Kontak & Informasi') }}
         </flux:navbar.item>
     </flux:navbar>
 
@@ -76,19 +76,19 @@
                 {{ __('Home') }}
             </flux:navlist.item>
             <flux:navlist.item :href="route('about')" :current="request()->routeIs('about')" wire:navigate>
-                {{ __('About') }}
+                {{ __('Tentang Kami') }}
             </flux:navlist.item>
             <flux:navlist.item :href="route('product')" :current="request()->routeIs('product')" wire:navigate>
-                {{ __('Product') }}
+                {{ __('Product Unggulan') }}
             </flux:navlist.item>
             <flux:navlist.item :href="route('opportunity')" :current="request()->routeIs('opportunity')" wire:navigate>
-                {{ __('Opportunity') }}
+                {{ __('Model Bisnis') }}
             </flux:navlist.item>
             <flux:navlist.item :href="route('edukasi')" :current="request()->routeIs('edukasi')" wire:navigate>
-                {{ __('Edukasi') }}
+                {{ __('Edukasi & Pelatihan') }}
             </flux:navlist.item>
             <flux:navlist.item :href="route('contact')" :current="request()->routeIs('contact')" wire:navigate>
-                {{ __('Contact') }}
+                {{ __('Kontak & Informasi') }}
             </flux:navlist.item>
             <div class="p-3 border-t border-zinc-100 dark:border-zinc-700">
                 @auth
