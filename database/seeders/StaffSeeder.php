@@ -78,18 +78,92 @@ class StaffSeeder extends Seeder
                 ]
             );
 
-            // Assign Spatie Admin role
-            if ($adminRoleId) {
-                DB::table('model_has_roles')->updateOrInsert(
-                    [
-                        'role_id' => $adminRoleId,
-                        'model_type' => Member::class,
-                        'model_id' => $memberId,
-                    ]
-                );
+            // Assign roles & permissions dynamically based on legacy data
+            $member = Member::find($memberId);
+            if ($member) {
+                $isAllAccess = (strtolower($source->access) === 'all');
+
+                if ($isAllAccess) {
+                    $member->syncRoles(['Admin']);
+                    $member->syncPermissions([]); // Admins get all access via Gate before filter
+                } else {
+                    $member->syncRoles(['Staff']);
+
+                    // Parse serialized role (access IDs)
+                    $permissionsToSync = [];
+                    $legacyRoles = @unserialize($source->role);
+                    if (is_array($legacyRoles)) {
+                        $mapping = [
+                            1 => 'access-member-new',
+                            2 => 'access-member-list',
+                            3 => 'access-member-sponsor',
+                            4 => 'access-member-generation',
+                            5 => 'access-member-tree',
+                            6 => 'access-member-edit',
+                            7 => 'access-member-reset-password',
+                            8 => 'access-member-assume',
+                            9 => 'access-stockist-new',
+                            10 => 'access-stockist-list',
+                            11 => 'access-stockist-stock',
+                            12 => 'access-stockist-transfer',
+                            13 => 'access-finance-bonus',
+                            14 => 'access-finance-statement',
+                            15 => 'access-finance-ewallet',
+                            16 => 'access-finance-autoro',
+                            17 => 'access-finance-withdraw',
+                            18 => 'access-finance-withdraw-transfer',
+                            19 => 'access-eproduct',
+                            20 => 'access-pin-generate',
+                            21 => 'access-pin-stock',
+                            22 => 'access-pin-transfer',
+                            23 => 'access-pin-order',
+                            24 => 'access-pin-order-stockist',
+                            25 => 'access-report-registration',
+                            26 => 'access-report-upgrade',
+                            27 => 'access-report-ro',
+                            28 => 'access-report-pairing',
+                            29 => 'access-report-omzet-posting',
+                            30 => 'access-report-omzet-posting-daily',
+                            31 => 'access-report-omzet-posting-monthly',
+                            32 => 'access-report-omzet-order',
+                            33 => 'access-report-budgeting',
+                            34 => 'access-report-reward',
+                            35 => 'access-master-product',
+                            36 => 'access-master-supplier',
+                            37 => 'access-master-purchase',
+                            38 => 'access-master-stock',
+                            39 => 'access-master-stock-opname',
+                            40 => 'access-setting-staff',
+                            41 => 'access-setting-general',
+                            42 => 'access-setting-notification',
+                            43 => 'access-setting-reward',
+                            44 => 'access-setting-withdraw',
+                            45 => 'access-setting-flip',
+                            46 => 'access-setting-budget',
+                            47 => 'access-setting-subsidi-ongkir',
+                            48 => 'access-news',
+                            49 => 'access-report-tax',
+                            50 => 'access-flip',
+                            51 => 'access-linkita',
+                            52 => 'access-setting-linkita',
+                            53 => 'access-eprofit',
+                            54 => 'access-eshipping',
+                            55 => 'access-report-activation',
+                            56 => 'access-stockist-adjustment',
+                        ];
+
+                        foreach ($legacyRoles as $legacyRoleId) {
+                            if (isset($mapping[(int) $legacyRoleId])) {
+                                $permissionsToSync[] = $mapping[(int) $legacyRoleId];
+                            }
+                        }
+                    }
+
+                    $member->syncPermissions($permissionsToSync);
+                }
             }
 
-            $this->command?->info("Staff {$source->username} (ID: {$memberId}) imported successfully.");
+            $this->command?->info("Staff {$source->username} (ID: {$memberId}) imported and permissions synced successfully.");
         }
     }
 }

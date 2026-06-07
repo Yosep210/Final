@@ -2,13 +2,12 @@
 
 namespace App\Livewire\Report;
 
-use App\Models\RewardConfig;
 use App\Models\MemberNetwork;
+use App\Models\RewardConfig;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Title;
-use Illuminate\Support\Facades\DB;
 
 #[Title('Laporan Reward')]
 class Reward extends Component
@@ -16,7 +15,9 @@ class Reward extends Component
     use AuthorizesRequests, WithPagination;
 
     public $username = '';
+
     public $name = '';
+
     public $activeTab = 'achievements'; // 'achievements' or 'configs'
 
     protected $queryString = [
@@ -27,7 +28,7 @@ class Reward extends Component
 
     public function mount(): void
     {
-        if (!auth()->user() || !auth()->user()->hasRole('Admin')) {
+        if (! auth()->user() || ! auth()->user()->hasRole('Admin')) {
             abort(403);
         }
 
@@ -45,7 +46,7 @@ class Reward extends Component
                     'is_lifetime' => true,
                     'is_active' => true,
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ],
                 [
                     'type' => 'lifetime',
@@ -58,7 +59,7 @@ class Reward extends Component
                     'is_lifetime' => true,
                     'is_active' => true,
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ],
                 [
                     'type' => 'lifetime',
@@ -71,7 +72,7 @@ class Reward extends Component
                     'is_lifetime' => true,
                     'is_active' => true,
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ],
                 [
                     'type' => 'lifetime',
@@ -84,7 +85,7 @@ class Reward extends Component
                     'is_lifetime' => true,
                     'is_active' => true,
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ],
                 [
                     'type' => 'lifetime',
@@ -97,7 +98,7 @@ class Reward extends Component
                     'is_lifetime' => true,
                     'is_active' => true,
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ],
                 [
                     'type' => 'lifetime',
@@ -110,8 +111,8 @@ class Reward extends Component
                     'is_lifetime' => true,
                     'is_active' => true,
                     'created_at' => now(),
-                    'updated_at' => now()
-                ]
+                    'updated_at' => now(),
+                ],
             ]);
         }
     }
@@ -139,10 +140,10 @@ class Reward extends Component
         $rewardConfigs = RewardConfig::where('is_active', true)->orderBy('point', 'asc')->get();
 
         if ($this->activeTab === 'configs') {
-            //configs doesn't need pagination in this view
+            // configs doesn't need pagination in this view
             return view('livewire.report.reward', [
                 'rewardConfigs' => $rewardConfigs,
-                'achievements' => null
+                'achievements' => null,
             ])->layout('layouts.app', ['title' => __('Laporan Reward')]);
         }
 
@@ -154,14 +155,14 @@ class Reward extends Component
                 'member_networks.left_volume',
                 'member_networks.right_volume',
                 'members.username',
-                'members.name'
+                'members.name',
             ]);
 
         if ($this->username) {
-            $query->where('members.username', 'like', '%' . $this->username . '%');
+            $query->where('members.username', 'like', '%'.$this->username.'%');
         }
         if ($this->name) {
-            $query->where('members.name', 'like', '%' . $this->name . '%');
+            $query->where('members.name', 'like', '%'.$this->name.'%');
         }
 
         $results = $query->orderBy('member_networks.total_volume', 'desc')->paginate(10);
@@ -169,25 +170,25 @@ class Reward extends Component
         // Process achievements for paginated list
         $achievements = $results->through(function ($net) use ($rewardConfigs) {
             // Assume 1 Point = 1,000 BV
-            $leftPoints = (int)($net->left_volume / 1000);
-            $rightPoints = (int)($net->right_volume / 1000);
+            $leftPoints = (int) ($net->left_volume / 1000);
+            $rightPoints = (int) ($net->right_volume / 1000);
             $points = min($leftPoints, $rightPoints);
 
             // Find qualifying rewards
             $achieved = [];
             $nextReward = null;
-            
+
             foreach ($rewardConfigs as $cfg) {
                 if ($points >= $cfg->point) {
                     $achieved[] = $cfg->reward;
                 } else {
-                    if (!$nextReward) {
-                        $nextReward = (object)[
+                    if (! $nextReward) {
+                        $nextReward = (object) [
                             'reward' => $cfg->reward,
                             'req_points' => $cfg->point,
                             'cur_points' => $points,
                             'left_points' => $leftPoints,
-                            'right_points' => $rightPoints
+                            'right_points' => $rightPoints,
                         ];
                     }
                 }
@@ -204,7 +205,7 @@ class Reward extends Component
 
         return view('livewire.report.reward', [
             'rewardConfigs' => $rewardConfigs,
-            'achievements' => $achievements
+            'achievements' => $achievements,
         ])->layout('layouts.app', ['title' => __('Laporan Reward')]);
     }
 }

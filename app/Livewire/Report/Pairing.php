@@ -15,20 +15,25 @@ class Pairing extends Component
     use AuthorizesRequests;
 
     public bool $showDetailModal = false;
+
     public ?Member $selectedMember = null;
+
     public array $memberLogs = [];
+
     public float $totalLeft = 0;
+
     public float $totalRight = 0;
+
     public float $totalMatched = 0;
 
     public function mount(): void
     {
-        if (!auth()->user()) {
+        if (! auth()->user()) {
             abort(403);
         }
 
         // If not Admin, show their own history immediately
-        if (!auth()->user()->hasRole('Admin')) {
+        if (! auth()->user()->hasRole('Admin')) {
             $this->openDetail(auth()->user()->id);
         }
     }
@@ -63,7 +68,7 @@ class Pairing extends Component
     public function render()
     {
         return view('livewire.report.pairing', [
-            'isAdmin' => auth()->user()->hasRole('Admin')
+            'isAdmin' => auth()->user()->hasRole('Admin'),
         ])->layout('layouts.app', ['title' => __('Laporan Pairing Qualified')]);
     }
 }

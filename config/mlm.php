@@ -4,10 +4,10 @@
  * MLM (Multi-Level Marketing) System Configuration
  *
  * This file configures all MLM-related settings including:
- * - Binary commission rates by rank
- * - Rank requirements and thresholds
- * - Volume calculation rules
- * - Tax rates and financial settings
+ * - Binary pairing rates and dynamic caps
+ * - Dynamic sponsor rates based on recruits
+ * - Volume calculation and registration BV rules
+ * - Tax rates, withdrawal limits/fees, and Auto-RO caps
  */
 
 return [
@@ -17,20 +17,51 @@ return [
     'default_member_role' => 'Member',
 
     /**
-     * Commission Rates Configuration
-     * Percentage rates applied based on member rank
+     * Commission Settings
      */
     'commission' => [
-        'rates' => [
-            'member' => 3,        // 3% commission
-            'star' => 10,         // 10% commission
-        ],
+        /**
+         * Kurs BV to IDR (1 BV = Rp 1.000)
+         */
+        'kurs_bv' => 1000,
+
+        /**
+         * Standard Registration Package Volume (BV)
+         */
+        'registration_bv' => 2500,
+
+        /**
+         * Pairing Rate (6% of matched volume)
+         */
+        'pairing_rate' => 6,
+
+        /**
+         * Dynamic Daily Pairing Caps (IDR) based on number of active sponsors
+         */
         'pairing_caps' => [
-            'member' => 1000000,  // Max Rp 1.000.000 monthly pairing commission
-            'star' => 5000000,    // Max Rp 5.000.000 monthly pairing commission
+            1 => 5000000,  // >= 1 sponsor: Rp 5.000.000 / day
+            2 => 10000000, // >= 2 sponsors: Rp 10.000.000 / day
+            3 => 20000000, // >= 3 sponsors: Rp 20.000.000 / day
         ],
-        'tax_rate' => 2.5,        // 2.5% tax on gross commission
-        'minimum_volume' => 100, // Minimum matched volume to qualify for commission
+
+        /**
+         * Dynamic Sponsor Percentages based on number of active sponsors
+         */
+        'sponsor_rates' => [
+            1 => 14, // >= 1 sponsor: 14% of package BV
+            2 => 18, // >= 2 sponsors: 18% of package BV
+            3 => 24, // >= 3 sponsors: 24% of package BV
+        ],
+
+        /**
+         * Tax Rate on gross commission (2.5%)
+         */
+        'tax_rate' => 2.5,
+
+        /**
+         * Minimum matched volume to qualify for pairing commission
+         */
+        'minimum_volume' => 100,
     ],
 
     /**
@@ -44,45 +75,37 @@ return [
             'right_volume' => 0,
         ],
         'star' => [
-            'personal_recruits' => 1,
+            'personal_recruits' => 3, // star achieved by recruiting 3 members
             'left_volume' => 0,
             'right_volume' => 0,
         ],
     ],
 
     /**
-     * Generation Bonus Configuration
-     * Additional bonuses for deep network levels
+     * Generation Bonus Configuration (Sponsor referral chain)
      */
     'generation_bonus' => [
-        'enabled' => false, // Set to true to enable generation bonuses
-        'max_levels' => 10,
-        'rates' => [
-            1 => 0,  // 0% bonus on level 1 (already counted in binary)
-            2 => 1,  // 1% bonus on level 2
-            3 => 0.5,
-            4 => 0.3,
-            5 => 0.1,
-        ],
+        'enabled' => true,
+        'rate' => 0.6,        // 0.6% per level
+        'max_levels' => 12,   // Up to 12 levels
     ],
 
     /**
-     * Unilevel Configuration
-     * Flat bonus based on direct recruits' volume
+     * Unilevel Configuration (Placement parent chain)
      */
     'unilevel' => [
-        'enabled' => false, // Set to true to enable unilevel bonuses
-        'rate' => 2,        // 2% on direct downline volume
+        'enabled' => true,
+        'rate' => 0.4,        // 0.4% per level
+        'max_levels' => 20,   // Up to 20 levels
     ],
 
     /**
-     * Fast Start Bonus
-     * Bonus given when recruiting new members within specific timeframe
+     * Fast Start Bonus (Disabled by default)
      */
     'faststart_bonus' => [
         'enabled' => false,
-        'amount' => 0,           // Flat amount per new recruit
-        'days_active' => 30,     // Days to qualify as "fast start"
+        'amount' => 0,
+        'days_active' => 30,
     ],
 
     /**
@@ -90,8 +113,8 @@ return [
      */
     'network' => [
         'binary_enabled' => true,
-        'auto_placement' => true,    // Auto-place new recruits in binary tree
-        'placement_algorithm' => 'breadth_first', // 'breadth_first' or 'depth_first'
+        'auto_placement' => true,
+        'placement_algorithm' => 'breadth_first',
     ],
 
     /**
@@ -100,37 +123,33 @@ return [
     'registration_requires_pin' => true,
 
     /**
-     * Payout Settings
+     * Payout & Withdrawal Settings
      */
     'payout' => [
-        'minimum_commission' => 100,  // Minimum commission to request payout
+        'minimum_commission' => 50000,  // Minimum withdraw Rp 50.000
+        'fee' => 5000,                  // Flat withdrawal fee Rp 5.000
         'payment_methods' => [
             'bank_transfer' => 'Bank Transfer',
-            'check' => 'Check',
-            'direct_deposit' => 'Direct Deposit',
-            'cryptocurrency' => 'Cryptocurrency',
         ],
-        'processing_days' => 5,       // Days to process payout
+        'processing_days' => 5,
     ],
 
     /**
      * Demotion Settings
-     * What happens when member doesn't meet rank requirements
      */
     'demotion' => [
         'enabled' => true,
-        'check_frequency' => 'monthly', // 'monthly', 'quarterly', 'annually'
-        'grace_period_months' => 0,     // Allow member to fail for N months before demotion
+        'check_frequency' => 'monthly',
+        'grace_period_months' => 0,
     ],
 
     /**
      * Volume Reset Settings
-     * When and how volumes are calculated/reset
      */
     'volume' => [
-        'reset_frequency' => 'monthly',      // 'daily', 'weekly', 'monthly', 'annually'
-        'include_member_own_volume' => false, // Include member's personal purchases in volume
-        'count_downline_depth' => null,      // null = unlimited depth, or specify max levels
+        'reset_frequency' => 'monthly',
+        'include_member_own_volume' => false,
+        'count_downline_depth' => null,
     ],
 
     /**
@@ -139,14 +158,16 @@ return [
     'audit' => [
         'log_all_transactions' => true,
         'log_commissions' => true,
-        'retention_days' => 2555, // 7 years for compliance
+        'retention_days' => 2555,
     ],
 
     /**
      * Auto Repeat Order (Auto-RO) Settings
      */
     'auto_ro' => [
-        'package_price_threshold' => 1000000.00, // Threshold to trigger auto-purchase (e.g. Rp 1.000.000)
-        'default_package_sku' => 'RO-PACKAGE',   // Default SKU of the package to auto-purchase
+        'percent' => 20,                         // 20% split from pairing bonus
+        'monthly_max' => 3300000.00,             // Max Rp 3.300.000 Auto-RO split per calendar month
+        'package_price_threshold' => 1000000.00, // Threshold to trigger auto-purchase (Rp 1.000.000)
+        'default_package_sku' => 'RO-PACKAGE',
     ],
 ];

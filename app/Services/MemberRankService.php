@@ -2,13 +2,11 @@
 
 namespace App\Services;
 
-use App\Events\MemberDemoted;
-use App\Events\MemberPromoted;
+use App\Actions\Member\UpdateMemberRankAction;
+use App\Enums\MemberRank;
 use App\Events\MemberVolumeUpdated;
 use App\Models\Member;
 use App\Models\MemberNetwork;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class MemberRankService
 {
@@ -25,35 +23,8 @@ class MemberRankService
         }
 
         $rank = $this->determineRank($member, $network);
-        $previousRank = $network->current_rank;
 
-        // Only update if rank changed
-        if ($rank === $previousRank) {
-            return $rank;
-        }
-
-        // Persist atomically
-        DB::transaction(function () use ($network, $rank, $previousRank) {
-            $network->current_rank = $rank;
-            $network->save();
-
-            // Trigger promotion or demotion event
-            if ($this->isPromotion($previousRank, $rank)) {
-                event(new MemberPromoted($network->member, ['rank' => $rank, 'previous_rank' => $previousRank]));
-                Log::info('Member promoted', [
-                    'member_id' => $network->member_id,
-                    'from_rank' => $previousRank,
-                    'to_rank' => $rank,
-                ]);
-            } else {
-                event(new MemberDemoted($network->member, ['rank' => $rank, 'previous_rank' => $previousRank]));
-                Log::info('Member demoted', [
-                    'member_id' => $network->member_id,
-                    'from_rank' => $previousRank,
-                    'to_rank' => $rank,
-                ]);
-            }
-        });
+        UpdateMemberRankAction::run($member, MemberRank::from($rank));
 
         return $rank;
     }

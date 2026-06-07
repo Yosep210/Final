@@ -12,6 +12,7 @@ it('calculates binary commission from network volumes using configured rates', f
     config()->set('mlm.commission.minimum_volume', 100);
     config()->set('mlm.commission.rates.silver', 7);
     config()->set('mlm.commission.tax_rate', 10);
+    config()->set('mlm.commission.kurs_bv', 1);
 
     $member = Member::factory()->active()->create();
 
@@ -124,6 +125,7 @@ it('applies monthly pairing capping limits based on member rank', function () {
     config()->set('mlm.commission.rates.silver', 10);
     config()->set('mlm.commission.pairing_caps.silver', 500); // Low cap for testing
     config()->set('mlm.commission.tax_rate', 10);
+    config()->set('mlm.commission.kurs_bv', 1);
 
     $member = Member::factory()->active()->create();
 
@@ -152,6 +154,7 @@ it('triggers automatic repeat order and generates pin when auto-ro balance reach
     config()->set('mlm.commission.rates.silver', 10);
     config()->set('mlm.commission.tax_rate', 0); // No tax for simpler math
     config()->set('mlm.auto_ro.package_price_threshold', 1000.00); // Low threshold for test
+    config()->set('mlm.commission.kurs_bv', 1);
 
     $member = Member::factory()->active()->create();
 

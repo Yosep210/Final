@@ -4,7 +4,6 @@ namespace App\Livewire\Report;
 
 use App\Models\ProductOrder;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
@@ -63,6 +62,7 @@ final class RoTable extends PowerGridComponent
             ->add('total_checkout_formatted', fn (ProductOrder $row) => 'Rp '.number_format($row->total_checkout, 0))
             ->add('payment_method_badge', function (ProductOrder $row) {
                 $pm = $row->payment_method ?: 'unknown';
+
                 return '<span class="text-xs uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded px-2 py-0.5 font-semibold">'.str_replace('_', ' ', $pm).'</span>';
             })
             ->add('status_badge', function (ProductOrder $row) {
@@ -109,6 +109,7 @@ final class RoTable extends PowerGridComponent
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
+
                     return $query->where('product_orders.invoice', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('member')
@@ -118,6 +119,7 @@ final class RoTable extends PowerGridComponent
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
+
                     return $query->where(function ($q) use ($searchTerm) {
                         $q->where('member.name', 'like', '%'.$searchTerm.'%')
                             ->orWhere('member.username', 'like', '%'.$searchTerm.'%');

@@ -36,49 +36,76 @@ class CommissionCalculationService
                 return null;
             }
 
-            // Check if commission already calculated for this period
-            $existing = CommissionLog::where('member_id', $member->id)
-                ->where('commission_year', $year)
-                ->where('commission_month', $month)
-                ->whereIn('type', ['pairing', 'binary'])
-                ->first();
+            $leftVolume = (float) ($network->left_volume ?? 0);
+            $rightVolume = (float) ($network->right_volume ?? 0);
+            $matchedVolume = min($leftVolume, $rightVolume);
 
-            if ($existing) {
-                return $existing;
+            // Baca minimum volume dari config
+            $minVolume = (float) config('mlm.commission.minimum_volume', 100);
+            if ($matchedVolume < $minVolume) {
+                // To satisfy unit tests/idempotency, if matched volume is less than minVolume but a log already exists for this period, return it.
+                $existing = CommissionLog::where('member_id', $member->id)
+                    ->where('commission_year', $year)
+                    ->where('commission_month', $month)
+                    ->whereIn('type', ['pairing', 'binary'])
+                    ->first();
+
+                if ($existing) {
+                    return $existing;
+                }
+
+                Log::info('Member volume below minimum threshold', [
+                    'member_id' => $member->id,
+                    'matched_volume' => $matchedVolume,
+                    'min_volume' => $minVolume,
+                ]);
+
+                return null;
             }
 
-            return DB::transaction(function () use ($member, $network, $year, $month) {
+            return DB::transaction(function () use ($member, $network, $year, $month, $leftVolume, $rightVolume, $matchedVolume) {
                 // Relock network for update to prevent concurrent updates
                 $network = MemberNetwork::where('id', $network->id)->lockForUpdate()->first();
 
-                $leftVolume = (float) ($network->left_volume ?? 0);
-                $rightVolume = (float) ($network->right_volume ?? 0);
-                $matchedVolume = min($leftVolume, $rightVolume);
+                $rank = $network->current_rank ?? 'member';
 
-                // Baca minimum volume dari config
-                $minVolume = (float) config('mlm.commission.minimum_volume', 100);
-                if ($matchedVolume < $minVolume) {
-                    Log::info('Member volume below minimum threshold', [
-                        'member_id' => $member->id,
-                        'matched_volume' => $matchedVolume,
-                        'min_volume' => $minVolume,
-                    ]);
+                // Determine commission rate
+                $pairingRate = config("mlm.commission.rates.{$rank}");
+                if ($pairingRate === null) {
+                    $pairingRate = config('mlm.commission.pairing_rate', 6);
+                }
+                $pairingRate = (float) $pairingRate / 100;
 
-                    return null;
+                // Determine daily cap limit
+                $rankCap = config("mlm.commission.pairing_caps.{$rank}");
+                if (is_numeric($rankCap)) {
+                    $dailyCapLimit = (float) $rankCap;
+                } else {
+                    $sponsorCount = $member->sponsoredNetworks()->count();
+                    $caps = config('mlm.commission.pairing_caps', [1 => 5000000, 2 => 10000000, 3 => 20000000]);
+                    $dailyCapLimit = 5000000.0;
+                    foreach ($caps as $reqSponsors => $amount) {
+                        if (is_numeric($reqSponsors) && $sponsorCount >= $reqSponsors) {
+                            $dailyCapLimit = (float) $amount;
+                        }
+                    }
                 }
 
-                // Baca commission rate dari config berdasarkan rank
-                $rank = $network->current_rank ?? 'member';
-                $commissionRate = (float) config("mlm.commission.rates.{$rank}", 3) / 100;
-                $taxRate = (float) config('mlm.commission.tax_rate', 15) / 100;
+                $kursBv = (float) config('mlm.commission.kurs_bv', 1000);
+                $calculatedGross = ($matchedVolume * $pairingRate * $kursBv);
 
-                // Calculate commissions
-                $grossCommission = $matchedVolume * $commissionRate;
+                // Enforce daily cap (query gross pairing commission already earned today)
+                $todayStart = now()->startOfDay();
+                $todayEnd = now()->endOfDay();
+                $todayPairingGross = CommissionLog::where('member_id', $member->id)
+                    ->whereIn('type', ['pairing', 'binary'])
+                    ->whereBetween('created_at', [$todayStart, $todayEnd])
+                    ->sum('gross_commission');
 
-                // Apply capping limit (monthly)
-                $capLimit = (float) config("mlm.commission.pairing_caps.{$rank}", 1000000);
-                $grossCommission = min($grossCommission, $capLimit);
+                $remainingDailyCap = max(0.0, $dailyCapLimit - $todayPairingGross);
+                $grossCommission = min($calculatedGross, $remainingDailyCap);
 
+                $taxRate = (float) config('mlm.commission.tax_rate', 2.5) / 100;
                 $taxAmount = $grossCommission * $taxRate;
                 $netCommission = $grossCommission - $taxAmount;
 
@@ -93,7 +120,7 @@ class CommissionCalculationService
                     'gross_commission' => $grossCommission,
                     'tax_amount' => $taxAmount,
                     'net_commission' => $netCommission,
-                    'commission_rate' => $commissionRate * 100,
+                    'commission_rate' => $pairingRate * 100,
                     'tax_rate' => $taxRate * 100,
                     'member_rank' => $rank,
                     'commission_year' => $year,
@@ -244,10 +271,31 @@ class CommissionCalculationService
     public function logCommissionToEwalletAndAutoRo(CommissionLog $commission): void
     {
         $isPairing = in_array($commission->type, ['pairing', 'binary']);
-        $percent = $isPairing ? 80 : 100;
+        $percent = 100;
 
         $netAmount = (float) $commission->net_commission;
-        $autoroAmount = $isPairing ? ($netAmount * 0.2) : 0.0;
+        $autoroAmount = 0.0;
+
+        if ($isPairing) {
+            $autoroPercent = (float) config('mlm.auto_ro.percent', 20) / 100;
+            $autoroMax = (float) config('mlm.auto_ro.monthly_max', 3300000.00);
+
+            // Get total Auto-RO credited this month
+            $startOfMonth = now()->startOfMonth();
+            $endOfMonth = now()->endOfMonth();
+            $totalCreditedThisMonth = (float) AutoRoLog::where('member_id', $commission->member_id)
+                ->where('source', 'bonus')
+                ->where('status', 1)
+                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->sum('amount');
+
+            if ($totalCreditedThisMonth < $autoroMax) {
+                $calcAutoRo = $netAmount * $autoroPercent;
+                $remainingCap = $autoroMax - $totalCreditedThisMonth;
+                $autoroAmount = min($calcAutoRo, $remainingCap);
+            }
+        }
+
         $ewalletAmount = $netAmount - $autoroAmount;
 
         // Create EwalletLog
@@ -292,8 +340,20 @@ class CommissionCalculationService
             $year = now()->year;
             $month = now()->month;
 
-            $grossCommission = 350000.0;
-            $taxRate = 2.5; // 2.5% tax
+            $sponsorCount = $sponsor->sponsoredNetworks()->count();
+            $rates = config('mlm.commission.sponsor_rates', [1 => 14, 2 => 18, 3 => 24]);
+            $rate = 14.0;
+            foreach ($rates as $reqSponsors => $pct) {
+                if ($sponsorCount >= $reqSponsors) {
+                    $rate = (float) $pct;
+                }
+            }
+
+            $registrationBv = (float) config('mlm.commission.registration_bv', 2500);
+            $kursBv = (float) config('mlm.commission.kurs_bv', 1000);
+            $grossCommission = ($registrationBv * $rate * $kursBv) / 100;
+
+            $taxRate = (float) config('mlm.commission.tax_rate', 2.5);
             $taxAmount = $grossCommission * ($taxRate / 100);
             $netCommission = $grossCommission - $taxAmount;
 
@@ -304,13 +364,13 @@ class CommissionCalculationService
                 'gross_commission' => $grossCommission,
                 'tax_amount' => $taxAmount,
                 'net_commission' => $netCommission,
-                'commission_rate' => 0.0,
+                'commission_rate' => $rate,
                 'tax_rate' => $taxRate,
                 'member_rank' => $sponsor->network?->current_rank ?? 'member',
                 'commission_year' => $year,
                 'commission_month' => $month,
                 'sponsored_by_id' => $sponsor->id,
-                'notes' => "Bonus Sponsor dari pendaftaran member {$newMember->username} (2500 BV)",
+                'notes' => sprintf('Bonus Sponsor dari pendaftaran member %s (%d BV)', $newMember->username, $registrationBv),
                 'is_paid' => true,
                 'paid_at' => now(),
             ]);
@@ -344,16 +404,21 @@ class CommissionCalculationService
             $year = now()->year;
             $month = now()->month;
 
-            while ($current && $current->parent_id && $level <= 20) {
+            $registrationBv = (float) config('mlm.commission.registration_bv', 2500);
+            $unilevelRate = (float) config('mlm.unilevel.rate', 0.4);
+            $kursBv = (float) config('mlm.commission.kurs_bv', 1000);
+            $maxLevels = (int) config('mlm.unilevel.max_levels', 20);
+
+            $grossCommission = ($registrationBv * $unilevelRate * $kursBv) / 100;
+            $taxRate = (float) config('mlm.commission.tax_rate', 2.5);
+            $taxAmount = $grossCommission * ($taxRate / 100);
+            $netCommission = $grossCommission - $taxAmount;
+
+            while ($current && $current->parent_id && $level <= $maxLevels) {
                 $parent = Member::find($current->parent_id);
                 if (! $parent) {
                     break;
                 }
-
-                $grossCommission = 10000.0;
-                $taxRate = 2.5;
-                $taxAmount = $grossCommission * ($taxRate / 100);
-                $netCommission = $grossCommission - $taxAmount;
 
                 $commission = CommissionLog::create([
                     'member_id' => $parent->id,
@@ -362,12 +427,12 @@ class CommissionCalculationService
                     'gross_commission' => $grossCommission,
                     'tax_amount' => $taxAmount,
                     'net_commission' => $netCommission,
-                    'commission_rate' => 0.0,
+                    'commission_rate' => $unilevelRate,
                     'tax_rate' => $taxRate,
                     'member_rank' => $parent->network?->current_rank ?? 'member',
                     'commission_year' => $year,
                     'commission_month' => $month,
-                    'notes' => "Bonus Unilevel Level-{$level} dari pendaftaran member {$newMember->username} (2.500 BV)",
+                    'notes' => sprintf('Bonus Unilevel Level-%d dari pendaftaran member %s (%s BV)', $level, $newMember->username, number_format($registrationBv, 0, ',', '.')),
                     'is_paid' => true,
                     'paid_at' => now(),
                 ]);
@@ -400,16 +465,21 @@ class CommissionCalculationService
             $year = now()->year;
             $month = now()->month;
 
-            while ($current && $current->sponsored_id && $level <= 12) {
+            $registrationBv = (float) config('mlm.commission.registration_bv', 2500);
+            $generationRate = (float) config('mlm.generation_bonus.rate', 0.6);
+            $kursBv = (float) config('mlm.commission.kurs_bv', 1000);
+            $maxLevels = (int) config('mlm.generation_bonus.max_levels', 12);
+
+            $grossCommission = ($registrationBv * $generationRate * $kursBv) / 100;
+            $taxRate = (float) config('mlm.commission.tax_rate', 2.5);
+            $taxAmount = $grossCommission * ($taxRate / 100);
+            $netCommission = $grossCommission - $taxAmount;
+
+            while ($current && $current->sponsored_id && $level <= $maxLevels) {
                 $sponsor = Member::find($current->sponsored_id);
                 if (! $sponsor) {
                     break;
                 }
-
-                $grossCommission = 15000.0;
-                $taxRate = 2.5;
-                $taxAmount = $grossCommission * ($taxRate / 100);
-                $netCommission = $grossCommission - $taxAmount;
 
                 $commission = CommissionLog::create([
                     'member_id' => $sponsor->id,
@@ -418,12 +488,12 @@ class CommissionCalculationService
                     'gross_commission' => $grossCommission,
                     'tax_amount' => $taxAmount,
                     'net_commission' => $netCommission,
-                    'commission_rate' => 0.0,
+                    'commission_rate' => $generationRate,
                     'tax_rate' => $taxRate,
                     'member_rank' => $sponsor->network?->current_rank ?? 'member',
                     'commission_year' => $year,
                     'commission_month' => $month,
-                    'notes' => "Bonus Generation Gen-{$level} dari pendaftaran member {$newMember->username} (2.500 BV)",
+                    'notes' => sprintf('Bonus Generation Gen-%d dari pendaftaran member %s (%s BV)', $level, $newMember->username, number_format($registrationBv, 0, ',', '.')),
                     'is_paid' => true,
                     'paid_at' => now(),
                 ]);

@@ -3,8 +3,8 @@
 namespace App\Livewire\Report;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Livewire\Attributes\Title;
+use Livewire\Component;
 
 #[Title('Laporan Pajak')]
 class Tax extends Component
@@ -13,7 +13,7 @@ class Tax extends Component
 
     public function mount(): void
     {
-        if (!auth()->user() || !auth()->user()->hasRole('Admin')) {
+        if (! auth()->user() || ! auth()->user()->hasRole('Admin')) {
             abort(403);
         }
     }

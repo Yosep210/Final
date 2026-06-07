@@ -4,10 +4,11 @@ namespace App\Livewire\Report;
 
 use App\Models\ProductOrder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Title;
-use Illuminate\Support\Facades\DB;
 
 #[Title('Laporan Omzet Order')]
 class OmzetOrder extends Component
@@ -15,9 +16,13 @@ class OmzetOrder extends Component
     use AuthorizesRequests, WithPagination;
 
     public $tab = 'daily'; // 'daily' or 'monthly'
+
     public $startDate = '';
+
     public $endDate = '';
+
     public $startMonth = '';
+
     public $endMonth = '';
 
     protected $queryString = [
@@ -30,7 +35,7 @@ class OmzetOrder extends Component
 
     public function mount(): void
     {
-        if (!auth()->user() || !auth()->user()->hasRole('Admin')) {
+        if (! auth()->user() || ! auth()->user()->hasRole('Admin')) {
             abort(403);
         }
 
@@ -71,12 +76,12 @@ class OmzetOrder extends Component
             $query = ProductOrder::query()
                 ->whereIn('status', [1, 2])
                 ->select([
-                    DB::raw("DATE(created_at) as date_omzet"),
+                    DB::raw('DATE(created_at) as date_omzet'),
                     DB::raw("SUM(CASE WHEN type_order = 'generate' THEN total_omzet ELSE 0 END) as omzet_generate"),
                     DB::raw("SUM(CASE WHEN type_order != 'generate' THEN total_omzet ELSE 0 END) as omzet_order"),
-                    DB::raw("SUM(total_omzet) as total_omzet")
+                    DB::raw('SUM(total_omzet) as total_omzet'),
                 ])
-                ->groupBy(DB::raw("DATE(created_at)"));
+                ->groupBy(DB::raw('DATE(created_at)'));
 
             if ($this->startDate) {
                 $query->whereDate('created_at', '>=', $this->startDate);
@@ -88,11 +93,11 @@ class OmzetOrder extends Component
             $results = $query->orderBy('date_omzet', 'desc')->get();
 
             foreach ($results as $row) {
-                $items[] = (object)[
+                $items[] = (object) [
                     'label' => $row->date_omzet,
                     'omzet_generate' => $row->omzet_generate,
                     'omzet_order' => $row->omzet_order,
-                    'total_omzet' => $row->total_omzet
+                    'total_omzet' => $row->total_omzet,
                 ];
             }
         } else {
@@ -102,25 +107,25 @@ class OmzetOrder extends Component
                     DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month_omzet"),
                     DB::raw("SUM(CASE WHEN type_order = 'generate' THEN total_omzet ELSE 0 END) as omzet_generate"),
                     DB::raw("SUM(CASE WHEN type_order != 'generate' THEN total_omzet ELSE 0 END) as omzet_order"),
-                    DB::raw("SUM(total_omzet) as total_omzet")
+                    DB::raw('SUM(total_omzet) as total_omzet'),
                 ])
                 ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"));
 
             if ($this->startMonth) {
-                $query->where('created_at', '>=', $this->startMonth . '-01 00:00:00');
+                $query->where('created_at', '>=', $this->startMonth.'-01 00:00:00');
             }
             if ($this->endMonth) {
-                $query->where('created_at', '<=', $this->endMonth . '-31 23:59:59');
+                $query->where('created_at', '<=', $this->endMonth.'-31 23:59:59');
             }
 
             $results = $query->orderBy('month_omzet', 'desc')->get();
 
             foreach ($results as $row) {
-                $items[] = (object)[
+                $items[] = (object) [
                     'label' => $row->month_omzet,
                     'omzet_generate' => $row->omzet_generate,
                     'omzet_order' => $row->omzet_order,
-                    'total_omzet' => $row->total_omzet
+                    'total_omzet' => $row->total_omzet,
                 ];
             }
         }
@@ -130,13 +135,13 @@ class OmzetOrder extends Component
         $perPage = 10;
         $totalItems = count($items);
         $paginatedItems = array_slice($items, ($page - 1) * $perPage, $perPage);
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator($paginatedItems, $totalItems, $perPage, $page, [
+        $paginator = new LengthAwarePaginator($paginatedItems, $totalItems, $perPage, $page, [
             'path' => request()->url(),
-            'query' => request()->query()
+            'query' => request()->query(),
         ]);
 
         return view('livewire.report.omzet-order', [
-            'orders' => $paginator
+            'orders' => $paginator,
         ])->layout('layouts.app', ['title' => __('Laporan Omzet Order')]);
     }
 }

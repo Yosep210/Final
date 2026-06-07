@@ -52,7 +52,7 @@ final class PairingTable extends PowerGridComponent
                 'commission_logs.member_id',
                 'member.username as member_username',
                 'member.name as member_name',
-                DB::raw('SUM(commission_logs.matched_volume) as total_qualified')
+                DB::raw('SUM(commission_logs.matched_volume) as total_qualified'),
             ])
             ->groupBy('commission_logs.member_id', 'member.username', 'member.name')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
@@ -65,7 +65,7 @@ final class PairingTable extends PowerGridComponent
             ->add('no')
             ->add('username', fn (CommissionLog $row) => strtoupper($row->member_username ?? ''))
             ->add('name', fn (CommissionLog $row) => $row->member_name)
-            ->add('total_qualified_formatted', fn (CommissionLog $row) => number_format((float)$row->total_qualified, 0) . ' BV');
+            ->add('total_qualified_formatted', fn (CommissionLog $row) => number_format((float) $row->total_qualified, 0).' BV');
     }
 
     public function columns(): array
@@ -89,6 +89,7 @@ final class PairingTable extends PowerGridComponent
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
+
                     return $query->where('member.username', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('name')
@@ -98,6 +99,7 @@ final class PairingTable extends PowerGridComponent
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
+
                     return $query->where('member.name', 'like', '%'.$searchTerm.'%');
                 }),
         ];

@@ -3,6 +3,7 @@
 namespace App\Livewire\Report;
 
 use App\Models\CommissionLog;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -45,8 +46,8 @@ final class TaxTable extends PowerGridComponent
 
         $windowOrderMap = [
             'tax_month' => "DATE_FORMAT(commission_logs.created_at, '%Y-%m')",
-            'total_bonus' => "SUM(commission_logs.gross_commission)",
-            'total_tax' => "SUM(commission_logs.tax_amount)",
+            'total_bonus' => 'SUM(commission_logs.gross_commission)',
+            'total_tax' => 'SUM(commission_logs.tax_amount)',
         ];
         $windowOrder = $windowOrderMap[$sortColumn] ?? $sortColumn;
 
@@ -56,17 +57,17 @@ final class TaxTable extends PowerGridComponent
             ->select([
                 'commission_logs.member_id',
                 DB::raw("DATE_FORMAT(commission_logs.created_at, '%Y-%m') as tax_month"),
-                DB::raw("SUM(commission_logs.gross_commission) as total_bonus"),
-                DB::raw("SUM(commission_logs.tax_amount) as total_tax"),
+                DB::raw('SUM(commission_logs.gross_commission) as total_bonus'),
+                DB::raw('SUM(commission_logs.tax_amount) as total_tax'),
                 'member.username as member_username',
                 'member.name as member_name',
-                'profile.id_card_number as member_id_card'
+                'profile.id_card_number as member_id_card',
             ])
             ->groupBy(
-                'commission_logs.member_id', 
-                DB::raw("DATE_FORMAT(commission_logs.created_at, '%Y-%m')"), 
-                'member.username', 
-                'member.name', 
+                'commission_logs.member_id',
+                DB::raw("DATE_FORMAT(commission_logs.created_at, '%Y-%m')"),
+                'member.username',
+                'member.name',
                 'profile.id_card_number'
             )
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
@@ -78,13 +79,13 @@ final class TaxTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('no')
             ->add('tax_month_formatted', function ($row) {
-                return \Carbon\Carbon::parse($row->tax_month . '-01')->locale('id')->isoFormat('MMMM YYYY');
+                return Carbon::parse($row->tax_month.'-01')->locale('id')->isoFormat('MMMM YYYY');
             })
             ->add('username', fn ($row) => strtoupper($row->member_username ?? ''))
             ->add('name', fn ($row) => strtoupper($row->member_name ?? ''))
             ->add('id_card_number', fn ($row) => $row->member_id_card ?: '-')
-            ->add('total_bonus_formatted', fn ($row) => 'Rp ' . number_format($row->total_bonus, 0))
-            ->add('total_tax_formatted', fn ($row) => 'Rp ' . number_format($row->total_tax, 0));
+            ->add('total_bonus_formatted', fn ($row) => 'Rp '.number_format($row->total_bonus, 0))
+            ->add('total_tax_formatted', fn ($row) => 'Rp '.number_format($row->total_tax, 0));
     }
 
     public function columns(): array
@@ -110,6 +111,7 @@ final class TaxTable extends PowerGridComponent
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
+
                     return $query->where('member.username', 'like', '%'.$searchTerm.'%');
                 }),
             Filter::inputText('name')
@@ -119,6 +121,7 @@ final class TaxTable extends PowerGridComponent
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
+
                     return $query->where('member.name', 'like', '%'.$searchTerm.'%');
                 }),
         ];

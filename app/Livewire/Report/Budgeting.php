@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Report;
 
-use App\Models\ProductOrder;
 use App\Models\CommissionLog;
+use App\Models\ProductOrder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Title;
-use Illuminate\Support\Facades\DB;
 
 #[Title('Laporan Budgeting')]
 class Budgeting extends Component
@@ -16,6 +17,7 @@ class Budgeting extends Component
     use AuthorizesRequests, WithPagination;
 
     public $startMonth = '';
+
     public $endMonth = '';
 
     protected $queryString = [
@@ -25,7 +27,7 @@ class Budgeting extends Component
 
     public function mount(): void
     {
-        if (!auth()->user() || !auth()->user()->hasRole('Admin')) {
+        if (! auth()->user() || ! auth()->user()->hasRole('Admin')) {
             abort(403);
         }
 
@@ -49,9 +51,9 @@ class Budgeting extends Component
     public function render()
     {
         // 1. Get months in the range
-        $start = strtotime($this->startMonth . '-01');
-        $end = strtotime($this->endMonth . '-01');
-        
+        $start = strtotime($this->startMonth.'-01');
+        $end = strtotime($this->endMonth.'-01');
+
         if ($start > $end) {
             $end = $start;
         }
@@ -73,16 +75,16 @@ class Budgeting extends Component
                 DB::raw("SUM(CASE WHEN type_order = 'register' THEN total_bv ELSE 0 END) as bv_reg"),
                 DB::raw("SUM(CASE WHEN type_order = 'manual_ro' THEN total_omzet ELSE 0 END) as omzet_ro"),
                 DB::raw("SUM(CASE WHEN type_order = 'manual_ro' THEN total_bv ELSE 0 END) as bv_ro"),
-                DB::raw("SUM(total_omzet) as total_omzet"),
-                DB::raw("SUM(total_bv) as total_bv")
+                DB::raw('SUM(total_omzet) as total_omzet'),
+                DB::raw('SUM(total_bv) as total_bv'),
             ])
             ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"));
 
         if ($this->startMonth) {
-            $omzetQuery->where('created_at', '>=', $this->startMonth . '-01 00:00:00');
+            $omzetQuery->where('created_at', '>=', $this->startMonth.'-01 00:00:00');
         }
         if ($this->endMonth) {
-            $omzetQuery->where('created_at', '<=', $this->endMonth . '-31 23:59:59');
+            $omzetQuery->where('created_at', '<=', $this->endMonth.'-31 23:59:59');
         }
 
         $omzetData = $omzetQuery->get()->keyBy('month')->all();
@@ -92,15 +94,15 @@ class Budgeting extends Component
             ->select([
                 DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
                 'type',
-                DB::raw("SUM(gross_commission) as total_commission")
+                DB::raw('SUM(gross_commission) as total_commission'),
             ])
             ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"), 'type');
 
         if ($this->startMonth) {
-            $commissionQuery->where('created_at', '>=', $this->startMonth . '-01 00:00:00');
+            $commissionQuery->where('created_at', '>=', $this->startMonth.'-01 00:00:00');
         }
         if ($this->endMonth) {
-            $commissionQuery->where('created_at', '<=', $this->endMonth . '-31 23:59:59');
+            $commissionQuery->where('created_at', '<=', $this->endMonth.'-31 23:59:59');
         }
 
         $commissionData = [];
@@ -114,7 +116,7 @@ class Budgeting extends Component
             'pairing' => ['percent' => 24, 'label' => 'Pairing', 'color' => 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900'],
             'unilevel' => ['percent' => 8, 'label' => 'Level', 'color' => 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900'],
             'generation' => ['percent' => 7.2, 'label' => 'Generasi', 'color' => 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900'],
-            'reward' => ['percent' => 0, 'label' => 'Reward', 'color' => 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900']
+            'reward' => ['percent' => 0, 'label' => 'Reward', 'color' => 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900'],
         ];
         $kurs_bv = 1000;
 
@@ -122,7 +124,7 @@ class Budgeting extends Component
         $items = [];
         foreach ($months as $month) {
             $omzet = $omzetData[$month] ?? null;
-            
+
             $omzet_reg = $omzet ? $omzet->omzet_reg : 0;
             $bv_reg = $omzet ? $omzet->bv_reg : 0;
             $omzet_ro = $omzet ? $omzet->omzet_ro : 0;
@@ -146,14 +148,14 @@ class Budgeting extends Component
                 $budget_data[$type] = [
                     'budget' => $budget,
                     'bonus' => $bonus,
-                    'saldo' => $saldo
+                    'saldo' => $saldo,
                 ];
             }
 
             $total_saldo = $total_budget - $total_bonus;
             $percentage = $total_budget > 0 ? ($total_saldo / $total_budget) * 100 : 0;
 
-            $items[] = (object)[
+            $items[] = (object) [
                 'period' => $month,
                 'omzet_reg' => $omzet_reg,
                 'bv_reg' => $bv_reg,
@@ -165,7 +167,7 @@ class Budgeting extends Component
                 'total_bonus' => $total_bonus,
                 'total_saldo' => $total_saldo,
                 'percentage' => $percentage,
-                'budget_data' => $budget_data
+                'budget_data' => $budget_data,
             ];
         }
 
@@ -174,14 +176,14 @@ class Budgeting extends Component
         $perPage = 10;
         $totalItems = count($items);
         $paginatedItems = array_slice($items, ($page - 1) * $perPage, $perPage);
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator($paginatedItems, $totalItems, $perPage, $page, [
+        $paginator = new LengthAwarePaginator($paginatedItems, $totalItems, $perPage, $page, [
             'path' => request()->url(),
-            'query' => request()->query()
+            'query' => request()->query(),
         ]);
 
         return view('livewire.report.budgeting', [
             'orders' => $paginator,
-            'cfg_budget' => $cfg_budget
+            'cfg_budget' => $cfg_budget,
         ])->layout('layouts.app', ['title' => __('Laporan Budgeting')]);
     }
 }
