@@ -17,6 +17,7 @@ class PengenalanSqlSeeder extends Seeder
     {
         $this->configureSourceConnection();
         $memberRoleId = DB::table('roles')->where('name', 'Member')->value('id');
+        $stockistRoleId = DB::table('roles')->where('name', 'Stockist')->value('id');
         $seenEmails = [];
         $seenIdCards = [];
         $seenNpwp = [];
@@ -60,6 +61,7 @@ class PengenalanSqlSeeder extends Seeder
                     'email' => $memberEmail,
                     'password' => Hash::make('password'),
                     'status' => $memberStatus,
+                    'type' => (int) ($source->as_stockist ?? 0),
                     'referral_code' => $source->referral_code ?: null,
                     'email_verified_at' => $memberStatus === 'active' ? $createdAt : null,
                     'last_login_at' => $lastLoginAt,
@@ -144,6 +146,16 @@ class PengenalanSqlSeeder extends Seeder
                 DB::table('model_has_roles')->updateOrInsert(
                     [
                         'role_id' => $memberRoleId,
+                        'model_type' => Member::class,
+                        'model_id' => $memberId,
+                    ]
+                );
+            }
+
+            if (($source->as_stockist ?? 0) > 0 && $stockistRoleId) {
+                DB::table('model_has_roles')->updateOrInsert(
+                    [
+                        'role_id' => $stockistRoleId,
                         'model_type' => Member::class,
                         'model_id' => $memberId,
                     ]

@@ -6,6 +6,7 @@ use App\Data\MemberData;
 use App\Events\MemberRegistered;
 use App\Models\Member;
 use App\Models\Pin;
+use App\Models\RewardPoint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -56,6 +57,16 @@ class CreateMemberAction
             $defaultRole = config('mlm.default_member_role', 'Member');
             Role::findOrCreate($defaultRole, 'web');
             $member->assignRole($defaultRole);
+
+            // Generate Reward Point for the new member activation/registration
+            RewardPoint::create([
+                'member_id' => $member->id,
+                'package' => 'silver', // Default package code
+                'type' => 'activation',
+                'bv' => (int) config('mlm.commission.registration_bv', 2500),
+                'point' => 1.0, // Default point value for activation
+                'status' => 1,
+            ]);
 
             event(new MemberRegistered($member, [
                 'sponsor_username' => $data->sponsorUsername ?? null,

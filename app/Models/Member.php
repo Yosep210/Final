@@ -24,6 +24,7 @@ class Member extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'status',
+        'type',
         'wd_status',
         'wd_min',
         'referral_code',
@@ -89,6 +90,15 @@ class Member extends Authenticatable implements MustVerifyEmail
     public function sponsoredNetworks()
     {
         return $this->hasMany(MemberNetwork::class, 'sponsored_id');
+    }
+
+    /**
+     * Calculate member's current eWallet balance.
+     */
+    public function ewalletBalance(): float
+    {
+        return (float) (EwalletLog::where('member_id', $this->id)->where('type', 'IN')->sum('amount')
+            - EwalletLog::where('member_id', $this->id)->where('type', 'OUT')->sum('amount'));
     }
 
     /**

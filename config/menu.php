@@ -13,6 +13,11 @@ return [
             'href' => 'my.pin.index',
         ],
         [
+            'title' => 'My Wallet',
+            'icon' => 'currency-dollar',
+            'href' => 'my.wallet.index',
+        ],
+        [
             'heading' => 'Data Member',
             'icon' => 'users',
             'route' => ['member.*', 'sponsor.*', 'group.*', 'network.*', 'generation.*'],

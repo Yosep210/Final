@@ -170,4 +170,30 @@ return [
         'package_price_threshold' => 1000000.00, // Threshold to trigger auto-purchase (Rp 1.000.000)
         'default_package_sku' => 'RO-PACKAGE',
     ],
+
+    /**
+     * Stockist Settings
+     */
+    'stockist' => [
+        'minimum_order' => [
+            1 => 7500000.00,  // Mobile Stockist
+            2 => 7500000.00,  // Stockist
+            3 => 90000000.00, // Master Stockist
+        ],
+        'minimum_order_by_member_id' => [
+            3340 => 7500000.00,
+            2667 => 54500000.00,
+            2052 => 54000000.00,
+        ],
+        'discount' => [
+            1 => 0.0,
+            2 => 0.0,
+            3 => 0.0,
+        ],
+        'minimum_order_discount' => [
+            5000000 => 0.0,
+            25000000 => 0.0,
+            150000000 => 0.0,
+        ],
+    ],
 ];
