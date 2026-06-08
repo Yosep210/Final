@@ -19,13 +19,9 @@ class CreateMemberAction
     public function handle(MemberData $data): Member
     {
         return DB::transaction(function () use ($data) {
-            // Validate Activation PIN if configured
+            // Validate Activation PIN only when it is supplied by the caller
             $pin = null;
-            if (config('mlm.registration_requires_pin')) {
-                if (empty($data->pinSerial) || empty($data->pinCode)) {
-                    throw new \InvalidArgumentException('Serial number and PIN code are required.');
-                }
-
+            if (! empty($data->pinSerial) && ! empty($data->pinCode)) {
                 $pin = Pin::where('serial_number', $data->pinSerial)
                     ->where('pin_code', $data->pinCode)
                     ->where('status', 'unused')

@@ -36,7 +36,7 @@ class MenuService
 
         // Fallback if the resolved group configuration does not exist
         if (empty($menus)) {
-            $menus = config("menu.Menu", []);
+            $menus = config('menu.Menu', []);
         }
 
         return self::filterMenu(is_array($menus) ? $menus : [], $user);

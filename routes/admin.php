@@ -7,9 +7,7 @@ use App\Livewire\Commission\Index as CommissionIndex;
 use App\Livewire\Commission\Statement as CommissionStatement;
 use App\Livewire\Country\Index as CountryIndex;
 use App\Livewire\District\Index as DistrictIndex;
-use App\Livewire\Generation\Index as GenerationIndex;
 use App\Livewire\Group\Index as GroupIndex;
-use App\Livewire\Network\Index as NetworkIndex;
 use App\Livewire\Permission\Index as PermissionIndex;
 use App\Livewire\Pin\AdminIndex as PinAdminIndex;
 use App\Livewire\Pin\HistoryList as PinHistoryList;
@@ -85,8 +83,6 @@ Route::middleware(['auth', 'verified', 'role:Admin|Staff'])->group(function () {
     Route::livewire('group', GroupIndex::class)
         ->middleware('can:access-member-list')
         ->name('group.index');
-
-
 
     Route::livewire('commission', CommissionIndex::class)
         ->middleware('can:access-finance-bonus')

@@ -27,31 +27,46 @@ class Checkout extends Component
 
     // Form fields
     public string $name = '';
+
     public string $phone = '';
+
     public string $email = '';
-    
+
     public ?int $provinceId = null;
+
     public ?int $cityId = null;
+
     public ?int $districtId = null;
+
     public ?int $villageId = null;
+
     public string $address = '';
 
     public string $shippingMethod = 'pickup'; // pickup, ekspedisi
+
     public string $productOrderTo = 'pusat'; // pusat, stockist
+
     public ?int $selectStockistId = null;
 
     public string $selectedCourier = 'jne'; // jne, jnt, pos
+
     public string $selectedService = '';
+
     public float $courierCost = 0.0;
+
     public string $selectedServiceDescription = '';
 
     public string $paymentMethod = 'transfer'; // transfer, wallet
+
     public string $passwordConfirm = '';
 
     // Cached lists for cascading dropdowns
     public array $cities = [];
+
     public array $districts = [];
+
     public array $villages = [];
+
     public array $courierServices = [];
 
     protected $rules = [
@@ -71,14 +86,15 @@ class Checkout extends Component
     public function mount(ProductOrderService $orderService): void
     {
         $this->cart = session()->get('shop_cart', []);
-        
+
         if (empty($this->cart)) {
             redirect()->route('shop.index');
+
             return;
         }
 
         $user = auth()->user();
-        
+
         // Pre-fill user profile fields
         $this->name = $user->name;
         $this->email = $user->email;
@@ -150,13 +166,14 @@ class Checkout extends Component
         if (empty($value)) {
             $this->courierCost = 0.0;
             $this->selectedServiceDescription = '';
+
             return;
         }
 
         foreach ($this->courierServices as $service) {
             if ($service['service'] === $value) {
                 $this->courierCost = (float) $service['cost'][0]['value'];
-                $this->selectedServiceDescription = $service['service'] . ' (' . $service['description'] . ' - ETD: ' . $service['cost'][0]['etd'] . ')';
+                $this->selectedServiceDescription = $service['service'].' ('.$service['description'].' - ETD: '.$service['cost'][0]['etd'].')';
                 break;
             }
         }
@@ -177,6 +194,7 @@ class Checkout extends Component
     {
         if ($this->shippingMethod !== 'ekspedisi' || ! $this->cityId) {
             $this->resetCourierCost();
+
             return;
         }
 
@@ -240,6 +258,7 @@ class Checkout extends Component
         $minCheck = $orderService->validateCheckoutMinimumOrder($user, $subtotal);
         if (! $minCheck['valid']) {
             $this->dispatch('toast', variant: 'danger', heading: 'Minimum Belanja', content: $minCheck['message']);
+
             return;
         }
 
@@ -247,11 +266,13 @@ class Checkout extends Component
         if ($this->paymentMethod === 'wallet') {
             if ($user->ewalletBalance() < $totalCheckout) {
                 $this->dispatch('toast', variant: 'danger', heading: 'Saldo Kurang', content: 'Saldo eWallet Anda tidak mencukupi untuk melakukan transaksi ini.');
+
                 return;
             }
 
             if (! Hash::check($this->passwordConfirm, $user->password)) {
                 $this->dispatch('toast', variant: 'danger', heading: 'Password Salah', content: 'Password konfirmasi salah.');
+
                 return;
             }
         }
@@ -260,7 +281,7 @@ class Checkout extends Component
         try {
             $order = DB::transaction(function () use ($user, $subtotal, $discount, $totalBv, $totalPoints, $totalQty, $totalCheckout) {
                 // Generate Invoice
-                $invoice = 'INV/RO/' . now()->format('Ymd') . '/' . strtoupper(Str::random(6));
+                $invoice = 'INV/RO/'.now()->format('Ymd').'/'.strtoupper(Str::random(6));
 
                 // Determine order status
                 // eWallet paid orders are auto-confirmed (status = 1), transfer requires manual confirmation (status = 0)
@@ -324,7 +345,7 @@ class Checkout extends Component
                         'amount' => $totalCheckout,
                         'type' => 'OUT',
                         'status' => 1,
-                        'description' => 'Pembayaran pesanan produk dengan invoice ' . $invoice,
+                        'description' => 'Pembayaran pesanan produk dengan invoice '.$invoice,
                     ]);
                 }
 
@@ -336,15 +357,16 @@ class Checkout extends Component
             $this->cart = [];
 
             $this->dispatch('toast', variant: 'success', heading: 'Sukses', content: 'Pesanan Anda berhasil dikirim.');
+
             return redirect()->route('shop.orders');
 
         } catch (\Exception $e) {
             Log::error('Placing order transaction failed', [
                 'member_id' => $user->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            $this->dispatch('toast', variant: 'danger', heading: 'Error', content: 'Gagal membuat pesanan: ' . $e->getMessage());
+            $this->dispatch('toast', variant: 'danger', heading: 'Error', content: 'Gagal membuat pesanan: '.$e->getMessage());
         }
     }
 

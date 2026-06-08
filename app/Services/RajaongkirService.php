@@ -12,7 +12,7 @@ class RajaongkirService
      */
     public function getCost(int $origin, string $originType, int $destination, string $destinationType, int $weight, string $courier): array
     {
-        $url = config('mlm.shipping.rajaongkir_url', 'https://rajaongkir.komerce.id/api/v1/') . 'cost';
+        $url = config('mlm.shipping.rajaongkir_url', 'https://rajaongkir.komerce.id/api/v1/').'cost';
         $token = config('mlm.shipping.rajaongkir_token', '14086d4d07f3a24feff8a2fad320d909');
         $active = config('mlm.shipping.rajaongkir_active', true);
 
@@ -21,15 +21,15 @@ class RajaongkirService
                 $response = Http::withHeaders([
                     'key' => $token,
                 ])
-                ->asForm()
-                ->post($url, [
-                    'origin' => $origin,
-                    'originType' => $originType,
-                    'destination' => $destination,
-                    'destinationType' => $destinationType,
-                    'weight' => $weight,
-                    'courier' => $courier,
-                ]);
+                    ->asForm()
+                    ->post($url, [
+                        'origin' => $origin,
+                        'originType' => $originType,
+                        'destination' => $destination,
+                        'destinationType' => $destinationType,
+                        'weight' => $weight,
+                        'courier' => $courier,
+                    ]);
 
                 if ($response->successful()) {
                     $json = $response->json();
@@ -52,10 +52,10 @@ class RajaongkirService
     protected function getMockCosts(int $destination, int $weight, string $courier): array
     {
         $weightInKg = max(1.0, ceil($weight / 1000.0));
-        
+
         // Base flat rates by city ID
         $baseRate = 12000.0; // Java/Local region default
-        
+
         if ($destination > 350) {
             $baseRate = 45000.0; // Far regions (e.g. Papua/Maluku)
         } elseif ($destination > 150) {
@@ -77,8 +77,8 @@ class RajaongkirService
                                 'value' => $costVal,
                                 'etd' => '2-4 Hari',
                                 'note' => '',
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                     [
                         'service' => 'OKE',
@@ -88,11 +88,11 @@ class RajaongkirService
                                 'value' => max(9000.0, $costVal - 4000.0),
                                 'etd' => '4-6 Hari',
                                 'note' => '',
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 }

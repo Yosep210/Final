@@ -23,15 +23,15 @@
             <flux:sidebar.group :heading="__($menu['heading'])" icon="{{ $menu['icon'] }}" class="grid" expandable
                 :expanded="request()->routeIs(...($menu['route'] ?? []))">
                 @foreach ($menu['sub'] as $sub)
-                <flux:sidebar.item :href="route($sub['href'])" :current="request()->routeIs($sub['href'])"
+                <flux:sidebar.item :href="Route::has($sub['href'] ?? '') ? route($sub['href']) : '#'" :current="Route::has($sub['href'] ?? '') && request()->routeIs($sub['href'])"
                     wire:navigate>
                     {{ __($sub['title']) }}
                 </flux:sidebar.item>
                 @endforeach
             </flux:sidebar.group>
             @else
-            <flux:sidebar.item icon="{{ $menu['icon'] }}" :href="route($menu['href'])"
-                :current="request()->routeIs($menu['href'])" wire:navigate>
+            <flux:sidebar.item icon="{{ $menu['icon'] }}" :href="Route::has($menu['href'] ?? '') ? route($menu['href']) : '#'"
+                :current="Route::has($menu['href'] ?? '') && request()->routeIs($menu['href'])" wire:navigate>
                 {{ __($menu['title']) }}
             </flux:sidebar.item>
             @endif

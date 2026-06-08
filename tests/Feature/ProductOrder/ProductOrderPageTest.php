@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\ProductOrder\Index as ProductOrderIndex;
+use App\Models\EwalletLog;
 use App\Models\Member;
 use App\Models\ProductOrder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -115,9 +116,9 @@ it('allows admin to cancel an order and refunds e-wallet balance if paid by wall
     $admin->assignRole('Admin');
 
     $member = Member::factory()->active()->create();
-    
+
     // Give member initial wallet balance of 200,000 via IN log, then deduct 150,000 via order payment OUT log
-    App\Models\EwalletLog::create([
+    EwalletLog::create([
         'member_id' => $member->id,
         'type' => 'IN',
         'nominal' => 200000.00,
@@ -133,7 +134,7 @@ it('allows admin to cancel an order and refunds e-wallet balance if paid by wall
         'payment_method' => 'wallet',
     ]);
 
-    App\Models\EwalletLog::create([
+    EwalletLog::create([
         'member_id' => $member->id,
         'source_id' => $order->id,
         'source' => 'order_payment',
@@ -165,4 +166,3 @@ it('allows admin to cancel an order and refunds e-wallet balance if paid by wall
         'amount' => 150000.00,
     ]);
 });
-

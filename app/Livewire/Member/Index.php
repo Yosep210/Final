@@ -6,14 +6,9 @@ use App\Actions\Member\CreateMemberAction;
 use App\Actions\Member\Profile\CreateProfileAction;
 use App\Actions\Member\Profile\UpdateProfileAction;
 use App\Actions\Member\UpdateMemberAction;
-use App\Actions\MemberBank\CreateMemberBankAction;
-use App\Actions\MemberBank\UpdateMemberBankAction;
-use App\Data\MemberBankData;
 use App\Data\MemberData;
 use App\Data\MemberProfileData;
-use App\Http\Requests\Member\Profile\StoreProfileRequest;
 use App\Http\Requests\Member\StoreMemberRequest;
-use App\Http\Requests\MemberBank\StoreMemberBankRequest;
 use App\Models\Country;
 use App\Models\Member;
 use App\Models\MemberNetwork;
@@ -47,23 +42,16 @@ class Index extends Component
     /**
      * @var array<string, mixed>
      */
-    public array $profile = [];
-
-    /**
-     * @var array<string, mixed>
-     */
     public array $network = [];
 
     /**
      * @var array<string, mixed>
      */
-    public array $bank = [];
+    public array $profile = [];
 
     public ?string $phoneCode = null;
 
     public string $phoneNumber = '';
-
-    public ?int $countryId = null;
 
     public string $sponsorUsername = '';
 
@@ -78,6 +66,36 @@ class Index extends Component
         $this->authorize('viewAny', Member::class);
         $this->canManageMembers = auth()->user()?->can('create', Member::class) ?? false;
         $this->resetForm();
+
+        // Check query parameters to trigger "add member" modal with prefilled data
+        $queryParent = request()->query('parent');
+        $queryPosition = request()->query('position');
+
+        if ($queryParent && $this->canManageMembers) {
+            $this->parentUsername = $queryParent;
+            $this->resolveParentUsername();
+
+            if ($queryPosition) {
+                $pos = strtolower($queryPosition);
+                if ($pos === 'l' || $pos === 'left') {
+                    $this->network['position'] = 'left';
+                } elseif ($pos === 'r' || $pos === 'right') {
+                    $this->network['position'] = 'right';
+                }
+            }
+
+            // Default sponsor to current user if they are a member, or parent as fallback
+            $user = auth()->user();
+            if ($user && ! ($user->hasRole('Admin') || $user->hasRole('Staff'))) {
+                $this->sponsorUsername = $user->username;
+                $this->resolveSponsorUsername();
+            } else {
+                $this->sponsorUsername = $queryParent;
+                $this->resolveSponsorUsername();
+            }
+
+            $this->showModal = true;
+        }
     }
 
     public function create(): void
@@ -93,7 +111,7 @@ class Index extends Component
     #[On('member:edit')]
     public function edit(int $memberId): void
     {
-        $member = Member::query()->with(['profile', 'network.sponsor', 'network.parent', 'bank'])->findOrFail($memberId);
+        $member = Member::query()->with(['network.sponsor', 'network.parent'])->findOrFail($memberId);
         $this->authorize('update', $member);
 
         $this->editingMemberId = $member->id;
@@ -107,13 +125,10 @@ class Index extends Component
             'referral_code' => $member->referral_code,
             'email_verified_at' => optional($member->email_verified_at)->format('Y-m-d\TH:i'),
             'last_login_at' => optional($member->last_login_at)->format('Y-m-d\TH:i'),
-            'pin_serial' => '',
-            'pin_code' => '',
         ];
 
         $this->fillProfileForm($member);
         $this->fillNetworkForm($member);
-        $this->fillBankForm($member);
 
         $this->resetValidation();
         $this->showModal = true;
@@ -121,13 +136,6 @@ class Index extends Component
 
     public function save(): void
     {
-        // Combine phone code + phone number
-        if ($this->phoneCode && $this->phoneNumber) {
-            $this->profile['phone'] = $this->phoneCode.preg_replace('/^0+/', '', $this->phoneNumber);
-        } elseif ($this->phoneNumber) {
-            $this->profile['phone'] = $this->phoneNumber;
-        }
-
         $member = $this->editingMemberId
             ? Member::query()->findOrFail($this->editingMemberId)
             : null;
@@ -141,9 +149,8 @@ class Index extends Component
         $validated = $this->validate($this->rules($member), [], $this->attributes());
 
         if (! $member) {
-            $temporaryPassword = $this->generateTemporaryPassword();
-            $validated['form']['password'] = $temporaryPassword;
-            $validated['form']['password_confirmation'] = $temporaryPassword;
+            $validated['form']['password'] = $validated['form']['password'] ?? $this->generateTemporaryPassword();
+            $validated['form']['password_confirmation'] = $validated['form']['password'];
         }
 
         $memberData = MemberData::fromArray($validated['form']);
@@ -164,7 +171,6 @@ class Index extends Component
             }
 
             $this->syncNetwork($member, $validated);
-            $this->syncBank($member, $validated);
             Flux::toast(variant: 'success', text: 'Member updated successfully.');
         } else {
             $created = CreateMemberAction::run($memberData);
@@ -177,7 +183,6 @@ class Index extends Component
             }
 
             $this->syncNetwork($created, $validated);
-            $this->syncBank($created, $validated);
             $this->sendPasswordSetupLink($created);
 
             Flux::toast(variant: 'success', text: 'Member created successfully.');
@@ -197,41 +202,10 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.member.index', $this->getLocationOptions())
-            ->layout('layouts.app', ['title' => __('Member')]);
-    }
-
-    /**
-     * Mengambil opsi pilihan wilayah secara cascading.
-     *
-     * @return array<string, array<int, string>>
-     */
-    private function getLocationOptions(): array
-    {
-        return [
+        return view('livewire.member.index', [
             'countries' => Country::where('status', true)->orderBy('nice_name')->pluck('nice_name', 'id')->all(),
-        ];
-    }
-
-    public function updatedProfile($value, $key): void
-    {
-        if ($key === 'country_id') {
-            $this->phoneCode = $this->resolvePhoneCodeFromCountry($value);
-            $this->phoneNumber = ''; // Reset nomor saat negara berubah
-        }
-
-        $resets = [
-            'country_id' => ['province_id', 'city_id', 'district_id', 'village_id'],
-            'province_id' => ['city_id', 'district_id', 'village_id'],
-            'city_id' => ['district_id', 'village_id'],
-            'district_id' => ['village_id'],
-        ];
-
-        if (isset($resets[$key])) {
-            foreach ($resets[$key] as $field) {
-                $this->profile[$field] = null;
-            }
-        }
+        ])
+            ->layout('layouts.app', ['title' => __('Member')]);
     }
 
     /**
@@ -246,40 +220,26 @@ class Index extends Component
             'profile.*' => ['nullable'],
             'network' => ['array'],
             'network.*' => ['nullable'],
-            'bank' => ['array'],
-            'bank.*' => ['nullable'],
         ];
 
         foreach (StoreMemberRequest::memberRules($member) as $key => $ruleSet) {
             $rules["form.$key"] = $ruleSet;
         }
 
-        $profileRules = StoreProfileRequest::rules();
-        unset($profileRules['member_id']);
-
-        foreach ($profileRules as $key => $ruleSet) {
-            $rules["profile.$key"] = $ruleSet;
-        }
-
         $rules['network.sponsored_id'] = ['nullable', 'integer', Rule::exists('members', 'id')];
         $rules['network.parent_id'] = ['nullable', 'integer', Rule::exists('members', 'id')];
         $rules['network.position'] = ['nullable', 'in:left,right'];
 
-        // Bank Account conditional validation rules
-        if ($this->hasBankInput($this->bank)) {
-            foreach (StoreMemberBankRequest::bankRules() as $key => $ruleSet) {
-                $rules["bank.$key"] = $ruleSet;
-            }
-        } else {
-            $rules['bank.bank_name'] = ['nullable', 'string', 'max:100'];
-            $rules['bank.account_number'] = ['nullable', 'string', 'max:50'];
-            $rules['bank.account_holder'] = ['nullable', 'string', 'max:150'];
-        }
-
         $rules['network.rank'] = ['nullable', 'integer'];
         $rules['network.group'] = ['nullable', 'integer'];
-        $rules['sponsorUsername'] = ['nullable', 'string', Rule::exists('members', 'username')];
-        $rules['parentUsername'] = ['nullable', 'string', Rule::exists('members', 'username')];
+        $rules['sponsorUsername'] = ['required', 'string', Rule::exists('members', 'username')];
+        $rules['parentUsername'] = ['required', 'string', Rule::exists('members', 'username')];
+        $rules['profile.country_id'] = ['required', 'integer', Rule::exists('countries', 'id')];
+        $rules['profile.phone'] = ['required', 'string', 'max:255'];
+        $rules['profile.birth_date'] = ['nullable', 'date'];
+        $rules['profile.gender'] = ['required', 'in:male,female'];
+        $rules['profile.id_card_number'] = ['required', 'string', 'max:255'];
+        $rules['profile.npwp_number'] = ['nullable', 'string', 'max:255'];
 
         $rules['form.password'] = ['nullable', 'string', Password::default(), 'confirmed'];
         $rules['form.password_confirmation'] = ['nullable', 'string'];
@@ -298,35 +258,19 @@ class Index extends Component
             $attributes["form.$key"] = $value;
         }
 
-        foreach (StoreProfileRequest::attributeLabels() as $key => $value) {
-            $attributes["profile.$key"] = $value;
-        }
+        $attributes['profile.country_id'] = 'Country';
+        $attributes['profile.phone'] = 'Phone/WhatsApp';
+        $attributes['profile.birth_date'] = 'Birth Date';
+        $attributes['profile.gender'] = 'Gender';
+        $attributes['profile.id_card_number'] = 'KTP';
+        $attributes['profile.npwp_number'] = 'NPWP';
 
         $attributes['sponsorUsername'] = 'Sponsor Username';
         $attributes['parentUsername'] = 'Parent Username';
         $attributes['form.password'] = 'password';
         $attributes['form.password_confirmation'] = 'password confirmation';
 
-        foreach (StoreMemberBankRequest::attributeLabels() as $key => $value) {
-            $attributes["bank.$key"] = $value;
-        }
-
         return $attributes;
-    }
-
-    private function hasProfileInput(array $profile): bool
-    {
-        foreach ($profile as $key => $value) {
-            if ($key === 'member_id') {
-                continue;
-            }
-
-            if ($value !== null && $value !== '') {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function hasNetworkInput(array $network): bool
@@ -428,9 +372,16 @@ class Index extends Component
         $this->network['parent_id'] = $member?->id;
     }
 
+    public function updatedProfile($value, $key): void
+    {
+        if ($key === 'country_id') {
+            $this->phoneCode = $this->resolvePhoneCodeFromCountry($value);
+            $this->phoneNumber = '';
+        }
+    }
+
     private function resolveDefaultCountryId(): ?int
     {
-        // Indonesia: iso bisa 'ID' atau 'id', nice_name='Indonesia'
         return Country::where('status', true)
             ->where(function ($query) {
                 $query->whereRaw('UPPER(iso) = ?', ['ID'])
@@ -448,6 +399,55 @@ class Index extends Component
         $phonecode = Country::where('id', $countryId)->value('phonecode');
 
         return $phonecode ? '+'.ltrim((string) $phonecode, '+') : null;
+    }
+
+    private function extractPhoneNumber(?string $phone, ?string $phoneCode): string
+    {
+        if (! $phone) {
+            return '';
+        }
+
+        if ($phoneCode && str_starts_with($phone, $phoneCode)) {
+            return ltrim(substr($phone, strlen($phoneCode)), '0');
+        }
+
+        return $phone;
+    }
+
+    private function fillProfileForm(Member $member): void
+    {
+        $profile = $member->profile;
+
+        $defaultCountryId = $this->resolveDefaultCountryId();
+        $countryId = $profile?->country_id ?? $defaultCountryId;
+
+        $this->profile = [
+            'member_id' => $member->id,
+            'gender' => $profile?->gender,
+            'birth_date' => $profile?->birth_date?->format('Y-m-d'),
+            'phone' => $profile?->phone,
+            'country_id' => $countryId !== null ? (string) $countryId : '',
+            'id_card_number' => $profile?->id_card_number,
+            'npwp_number' => $profile?->npwp_number,
+        ];
+
+        $this->phoneCode = $this->resolvePhoneCodeFromCountry($countryId);
+        $this->phoneNumber = $this->extractPhoneNumber($profile?->phone, $this->phoneCode);
+    }
+
+    private function hasProfileInput(array $profile): bool
+    {
+        foreach ($profile as $key => $value) {
+            if ($key === 'member_id') {
+                continue;
+            }
+
+            if ($value !== null && $value !== '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function generateTemporaryPassword(): string
@@ -468,35 +468,6 @@ class Index extends Component
         } catch (\Throwable) {
             Flux::toast(variant: 'warning', text: 'Member created, but the password setup email could not be sent.');
         }
-    }
-
-    private function fillProfileForm(Member $member): void
-    {
-        $profile = $member->profile;
-
-        if (! $profile) {
-            return;
-        }
-
-        $this->profile = [
-            'member_id' => $member->id,
-            'gender' => $profile->gender,
-            'birth_date' => $profile->birth_date?->format('Y-m-d'),
-            'phone' => $profile->phone,
-            'profile_photo' => $profile->profile_photo,
-            'country_id' => $profile->country_id !== null ? (string) $profile->country_id : '',
-            'province_id' => $profile->province_id,
-            'city_id' => $profile->city_id,
-            'district_id' => $profile->district_id,
-            'village_id' => $profile->village_id,
-            'address' => $profile->address,
-            'id_card_number' => $profile->id_card_number,
-            'id_card_photo' => $profile->id_card_photo,
-            'npwp_number' => $profile->npwp_number,
-        ];
-
-        $this->phoneCode = $this->resolvePhoneCodeFromCountry($profile->country_id);
-        $this->phoneNumber = $this->extractPhoneNumber($profile->phone, $this->phoneCode);
     }
 
     private function fillNetworkForm(Member $member): void
@@ -524,67 +495,6 @@ class Index extends Component
         $this->parentName = $network->parent?->name;
     }
 
-    private function extractPhoneNumber(?string $phone, ?string $phoneCode): string
-    {
-        if (! $phone) {
-            return '';
-        }
-
-        if ($phoneCode && str_starts_with($phone, $phoneCode)) {
-            return ltrim(substr($phone, strlen($phoneCode)), '0');
-        }
-
-        return $phone;
-    }
-
-    private function fillBankForm(Member $member): void
-    {
-        $bank = $member->bank;
-
-        if (! $bank) {
-            return;
-        }
-
-        $this->bank = [
-            'member_id' => $member->id,
-            'bank_name' => $bank->bank_name,
-            'account_number' => $bank->account_number,
-            'account_holder' => $bank->account_holder,
-        ];
-    }
-
-    private function hasBankInput(array $bank): bool
-    {
-        foreach ($bank as $key => $value) {
-            if ($key === 'member_id') {
-                continue;
-            }
-
-            if ($value !== null && $value !== '') {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function syncBank(Member $member, array $validated): void
-    {
-        if (! $this->hasBankInput($validated['bank'] ?? [])) {
-            return;
-        }
-
-        $bankArr = $validated['bank'];
-        $bankArr['member_id'] = $member->id;
-        $bankData = MemberBankData::fromArray($bankArr);
-
-        if ($member->bank) {
-            UpdateMemberBankAction::run($member->bank, $bankData);
-        } else {
-            CreateMemberBankAction::run($bankData);
-        }
-    }
-
     private function resetForm(): void
     {
         $this->form = [
@@ -597,8 +507,6 @@ class Index extends Component
             'referral_code' => '',
             'email_verified_at' => '',
             'last_login_at' => '',
-            'pin_serial' => '',
-            'pin_code' => '',
         ];
 
         $defaultCountryId = $this->resolveDefaultCountryId();
@@ -608,13 +516,9 @@ class Index extends Component
             'gender' => null,
             'birth_date' => null,
             'phone' => null,
-            'profile_photo' => null,
             'country_id' => $defaultCountryId !== null ? (string) $defaultCountryId : '',
-            'province_id' => null,
-            'city_id' => null,
-            'district_id' => null,
-            'village_id' => null,
-            'address' => null,
+            'id_card_number' => null,
+            'npwp_number' => null,
         ];
 
         $this->phoneCode = $this->resolvePhoneCodeFromCountry($defaultCountryId);
@@ -635,12 +539,5 @@ class Index extends Component
         $this->sponsorName = null;
         $this->parentUsername = '';
         $this->parentName = null;
-
-        $this->bank = [
-            'member_id' => null,
-            'bank_name' => '',
-            'account_number' => '',
-            'account_holder' => '',
-        ];
     }
 }

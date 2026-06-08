@@ -89,7 +89,7 @@
                         'depth' => $depth + 1,
                     ])
     @else
-    <a href="#" class="add-user" onclick="return false;">
+    <a href="{{ route('member.index', ['parent' => $member->username ?? '', 'position' => 'left']) }}" class="add-user" wire:navigate>
         <div class="photo-wrapper">
             <div class="photo-content">
                 <div class="photo-image">
@@ -117,7 +117,7 @@
                         'depth' => $depth + 1,
                     ])
     @else
-    <a href="#" class="add-user" onclick="return false;">
+    <a href="{{ route('member.index', ['parent' => $member->username ?? '', 'position' => 'right']) }}" class="add-user" wire:navigate>
         <div class="photo-wrapper">
             <div class="photo-content">
                 <div class="photo-image">

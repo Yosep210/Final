@@ -10,14 +10,17 @@ use Livewire\Component;
 class ProductList extends Component
 {
     public string $search = '';
+
     public string $type = 'all';
-    
+
     // Active cart loaded from session
     public array $cart = [];
 
     // Selected product for modal details
     public ?int $selectedProductId = null;
+
     public string $selectedVariant = '';
+
     public int $quantity = 1;
 
     public function mount(): void
@@ -31,9 +34,9 @@ class ProductList extends Component
     public function addToCart(int $productId): void
     {
         $product = Product::query()->where('status', true)->findOrFail($productId);
-        
+
         $price = auth()->user()->type > 0 ? (float) $product->price : (float) $product->price_member;
-        
+
         $cartKey = $productId;
         $variantLabel = '';
 
@@ -43,7 +46,7 @@ class ProductList extends Component
                 $this->selectedVariant = $variants[0];
             }
             $variantLabel = $this->selectedVariant;
-            $cartKey = $productId . '_' . str_replace(' ', '_', $variantLabel);
+            $cartKey = $productId.'_'.str_replace(' ', '_', $variantLabel);
         }
 
         if (isset($this->cart[$cartKey])) {
@@ -75,6 +78,7 @@ class ProductList extends Component
     {
         if ($qty <= 0) {
             $this->removeFromCart($cartKey);
+
             return;
         }
 
@@ -112,7 +116,7 @@ class ProductList extends Component
         $product = Product::query()->findOrFail($productId);
         $this->selectedProductId = $productId;
         $this->quantity = 1;
-        
+
         if (! empty($product->varian)) {
             $variants = array_map('trim', explode(',', $product->varian));
             $this->selectedVariant = $variants[0];
@@ -137,6 +141,7 @@ class ProductList extends Component
     {
         if (empty($this->cart)) {
             $this->dispatch('toast', variant: 'warning', heading: 'Keranjang Kosong', content: 'Silakan pilih produk terlebih dahulu.');
+
             return;
         }
 
@@ -150,7 +155,7 @@ class ProductList extends Component
             ->where('show_order', true);
 
         if (! empty($this->search)) {
-            $query->where('name', 'like', '%' . $this->search . '%');
+            $query->where('name', 'like', '%'.$this->search.'%');
         }
 
         if ($this->type !== 'all') {

@@ -16,6 +16,9 @@ Route::view('opportunity', 'opportunity')->name('opportunity');
 
 use App\Livewire\Generation\Index as GenerationIndex;
 use App\Livewire\Network\Index as NetworkIndex;
+use App\Livewire\Shop\Checkout;
+use App\Livewire\Shop\MemberOrders;
+use App\Livewire\Shop\ProductList;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('dashboard', Dashboard::class)->name('dashboard');
@@ -23,9 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('my-pins', PinMemberIndex::class)->name('my.pin.index');
     Route::livewire('my-wallet', MemberWallet::class)->name('my.wallet.index');
 
-    Route::livewire('shop', \App\Livewire\Shop\ProductList::class)->name('shop.index');
-    Route::livewire('shop/checkout', \App\Livewire\Shop\Checkout::class)->name('shop.checkout');
-    Route::livewire('shop/orders', \App\Livewire\Shop\MemberOrders::class)->name('shop.orders');
+    Route::livewire('shop', ProductList::class)->name('shop.index');
+    Route::livewire('shop/checkout', Checkout::class)->name('shop.checkout');
+    Route::livewire('shop/orders', MemberOrders::class)->name('shop.orders');
 
     Route::livewire('generation/{username?}', GenerationIndex::class)
         ->middleware('can:access-member-generation')
