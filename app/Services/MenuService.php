@@ -17,11 +17,26 @@ class MenuService
 
     public static function get(string $group = 'Menu'): Collection
     {
-        $menus = config("menu.{$group}", []);
         $user = auth()->user();
 
         if (! $user) {
             return collect();
+        }
+
+        // Determine if they are admin/staff or member/stockist
+        if ($group === 'Menu') {
+            if (method_exists($user, 'hasRole') && ($user->hasRole('Admin') || $user->hasRole('Staff'))) {
+                $group = 'admin';
+            } else {
+                $group = 'member';
+            }
+        }
+
+        $menus = config("menu.{$group}", []);
+
+        // Fallback if the resolved group configuration does not exist
+        if (empty($menus)) {
+            $menus = config("menu.Menu", []);
         }
 
         return self::filterMenu(is_array($menus) ? $menus : [], $user);

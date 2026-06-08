@@ -1,21 +1,11 @@
 <?php
 
 return [
-    'Menu' => [
+    'admin' => [
         [
             'title' => 'Dashboard',
             'icon' => 'home',
             'href' => 'dashboard',
-        ],
-        [
-            'title' => 'My PINs',
-            'icon' => 'key',
-            'href' => 'my.pin.index',
-        ],
-        [
-            'title' => 'My Wallet',
-            'icon' => 'currency-dollar',
-            'href' => 'my.wallet.index',
         ],
         [
             'heading' => 'Data Member',
@@ -204,6 +194,69 @@ return [
                     'title' => 'Permission',
                     'href' => 'permission.index',
                     'permission' => 'access-setting-staff',
+                ],
+            ],
+        ],
+    ],
+    'member' => [
+        [
+            'title' => 'Dashboard',
+            'icon' => 'home',
+            'href' => 'dashboard',
+        ],
+        [
+            'heading' => 'Jaringan',
+            'icon' => 'users',
+            'route' => ['network.index', 'generation.index'],
+            'sub' => [
+                [
+                    'title' => 'Gen List',
+                    'href' => 'generation.index',
+                    'permission' => 'access-member-generation',
+                ],
+                [
+                    'title' => 'Jaringan Binary',
+                    'href' => 'network.index',
+                    'permission' => 'access-member-tree',
+                ],
+            ],
+        ],
+        [
+            'heading' => 'Financial',
+            'icon' => 'currency-dollar',
+            'route' => ['my.wallet.index'],
+            'sub' => [
+                [
+                    'title' => 'My Wallet',
+                    'href' => 'my.wallet.index',
+                    'permission' => 'access-finance-ewallet',
+                ],
+            ],
+        ],
+        [
+            'heading' => 'PIN',
+            'icon' => 'key',
+            'route' => ['my.pin.index'],
+            'sub' => [
+                [
+                    'title' => 'My PINs',
+                    'href' => 'my.pin.index',
+                    'permission' => 'access-pin-stock',
+                ],
+            ],
+        ],
+        [
+            'heading' => 'Belanja',
+            'icon' => 'shopping-cart',
+            'route' => ['shop.index', 'shop.orders', 'shop.checkout'],
+            'sub' => [
+                [
+                    'title' => 'Toko Belanja',
+                    'href' => 'shop.index',
+                ],
+                [
+                    'title' => 'Riwayat Belanja Saya',
+                    'href' => 'shop.orders',
                 ],
             ],
         ],

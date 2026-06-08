@@ -265,9 +265,27 @@
             </div>
 
             <!-- Footer Buttons -->
-            <div class="flex gap-2">
-                <flux:spacer />
-                <flux:button type="button" variant="ghost" wire:click="closeModal">
+            <div class="flex gap-2 w-full">
+                @if ($selectedOrder->status === 0)
+                    <flux:button type="button" variant="danger" wire:click="cancelOrder({{ $selectedOrder->id }})" wire:confirm="Apakah Anda yakin ingin membatalkan pesanan ini?">
+                        {{ __('Cancel Order') }}
+                    </flux:button>
+                    <flux:spacer />
+                    <flux:button type="button" variant="primary" wire:click="confirmOrder({{ $selectedOrder->id }})">
+                        {{ __('Confirm Order') }}
+                    </flux:button>
+                @elseif ($selectedOrder->status === 1)
+                    <flux:button type="button" variant="danger" wire:click="cancelOrder({{ $selectedOrder->id }})" wire:confirm="Apakah Anda yakin ingin membatalkan pesanan ini?">
+                        {{ __('Cancel Order') }}
+                    </flux:button>
+                    <flux:spacer />
+                    <flux:button type="button" variant="primary" wire:click="doneOrder({{ $selectedOrder->id }})">
+                        {{ __('Mark as Done') }}
+                    </flux:button>
+                @else
+                    <flux:spacer />
+                @endif
+                <flux:button type="button" variant="ghost" wire:click="closeModal()">
                     {{ __('Close') }}
                 </flux:button>
             </div>

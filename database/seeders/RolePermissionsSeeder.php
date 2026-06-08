@@ -144,6 +144,7 @@ class RolePermissionsSeeder extends Seeder
         $member->syncPermissions([
             'access-member-new',
             'access-member-tree',
+            'access-member-generation',
             'access-pin-stock',
             'access-pin-transfer',
             'access-finance-ewallet',

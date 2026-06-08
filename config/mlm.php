@@ -196,4 +196,15 @@ return [
             150000000 => 0.0,
         ],
     ],
+
+    /**
+     * Shipping & Rajaongkir Settings
+     */
+    'shipping' => [
+        'rajaongkir_active' => true,
+        'rajaongkir_origin' => 151, // Default Origin City ID
+        'rajaongkir_origin_type' => 'city',
+        'rajaongkir_token' => '14086d4d07f3a24feff8a2fad320d909',
+        'rajaongkir_url' => 'https://rajaongkir.komerce.id/api/v1/',
+    ],
 ];

@@ -86,13 +86,7 @@ Route::middleware(['auth', 'verified', 'role:Admin|Staff'])->group(function () {
         ->middleware('can:access-member-list')
         ->name('group.index');
 
-    Route::livewire('generation/{username?}', GenerationIndex::class)
-        ->middleware('can:access-member-generation')
-        ->name('generation.index');
 
-    Route::livewire('network/{username?}', NetworkIndex::class)
-        ->middleware('can:access-member-tree')
-        ->name('network.index');
 
     Route::livewire('commission', CommissionIndex::class)
         ->middleware('can:access-finance-bonus')
