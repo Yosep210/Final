@@ -101,11 +101,11 @@ final class GenTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Member', 'member')->sortable(),
-            Column::make('Sponsor', 'sponsor')->sortable(),
-            Column::make('Generation', 'generation')->sortable(),
-            Column::make('Total Omzet', 'total_volume')->sortable(),
-            Column::action('Action')->fixedOnResponsive(),
+            Column::make('MEMBER', 'member')->sortable(),
+            Column::make('SPONSOR', 'sponsor')->sortable(),
+            Column::make('GENERASI', 'generation')->sortable(),
+            Column::make('TOTAL OMZET', 'total_volume')->sortable(),
+            Column::action('PROSES')->fixedOnResponsive(),
         ];
     }
 

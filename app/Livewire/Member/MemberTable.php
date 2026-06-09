@@ -191,17 +191,17 @@ final class MemberTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Username', 'username', 'members.username')->sortable(),
-            Column::make('Name', 'name', 'members.name')->sortable(),
-            Column::make('Rank', 'rank', 'network.current_rank')->sortable(),
-            Column::make('Contact', 'contact'),
-            Column::make('Sponsor', 'sponsor', 'sponsor_member.name')->sortable(),
-            Column::make('Upline', 'parent', 'parent_member.name')->sortable(),
-            Column::make('Position', 'position', 'network.position')->sortable(),
-            Column::make('Status', 'status', 'members.status')->sortable(),
-            Column::make('Datecreated', 'created_at_formatted', 'members.created_at')->sortable(),
-            Column::make('Last Login', 'last_login_at_formatted', 'members.last_login_at')->sortable(),
-            Column::action('Action')->fixedOnResponsive(),
+            Column::make('USERNAME', 'username', 'members.username')->sortable(),
+            Column::make('NAMA', 'name', 'members.name')->sortable(),
+            Column::make('RANK', 'rank', 'network.current_rank')->sortable(),
+            Column::make('KONTAK', 'contact'),
+            Column::make('SPONSOR', 'sponsor', 'sponsor_member.name')->sortable(),
+            Column::make('UPLINE', 'parent', 'parent_member.name')->sortable(),
+            Column::make('POSISI', 'position', 'network.position')->sortable(),
+            Column::make('STATUS', 'status', 'members.status')->sortable(),
+            Column::make('TANGGAL DAFTAR', 'created_at_formatted', 'members.created_at')->sortable(),
+            Column::make('TERAKHIR LOGIN', 'last_login_at_formatted', 'members.last_login_at')->sortable(),
+            Column::action('PROSES')->fixedOnResponsive(),
         ];
     }
 

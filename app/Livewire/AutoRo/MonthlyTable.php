@@ -1,23 +1,28 @@
 <?php
 
-namespace App\Livewire\Commission;
+namespace App\Livewire\AutoRo;
 
-use App\Models\CommissionLog;
+use App\Models\AutoRoLog;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
+use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class StatementTable extends PowerGridComponent
+final class MonthlyTable extends PowerGridComponent
 {
-    public string $tableName = 'statementTable';
+    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
 
-    public string $sortField = 'total_amount';
+    public string $tableName = 'monthlyAutoRoTable';
+
+    public string $sortField = 'total_ro';
 
     public string $sortDirection = 'desc';
+
+    public string $primaryKey = 'month_ro';
 
     public function setUp(): array
     {
@@ -31,51 +36,64 @@ final class StatementTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
+            'month_ro' => 'month_ro',
             'member.username' => 'member.username',
             'member.name' => 'member.name',
-            'total_amount' => 'total_amount',
+            'total_ro' => 'total_ro',
         ];
 
-        $sortColumn = $allowedSort[$this->sortField] ?? 'total_amount';
+        $sortField = $allowedSort[$this->sortField] ?? 'total_ro';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         $windowOrderMap = [
-            'total_amount' => 'SUM(commission_logs.gross_commission)',
+            'month_ro' => 'month_ro',
+            'member.username' => 'member.username',
+            'member.name' => 'member.name',
+            'total_ro' => 'SUM(amount)',
         ];
 
-        $windowOrder = $windowOrderMap[$sortColumn] ?? $sortColumn;
+        $windowOrder = $windowOrderMap[$sortField] ?? $sortField;
 
-        return CommissionLog::query()
-            ->join('members as member', 'commission_logs.member_id', '=', 'member.id')
+        return AutoRoLog::query()
+            ->join('members as member', 'auto_ro_logs.member_id', '=', 'member.id')
             ->whereDoesntHave('member.roles', function ($query) {
                 $query->whereIn('name', ['Admin', 'Staff']);
             })
             ->select([
+                'auto_ro_logs.member_id',
                 'member.name as member_name',
                 'member.username as member_username',
-                DB::raw('SUM(commission_logs.gross_commission) as total_amount'),
             ])
-            ->groupBy('commission_logs.member_id', 'member.name', 'member.username')
+            ->selectRaw('DATE_FORMAT(auto_ro_logs.created_at, "%Y-%m-01") as month_ro')
+            ->selectRaw('SUM(amount) as total_ro')
+            ->groupBy('auto_ro_logs.member_id', 'member.name', 'member.username', 'month_ro')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
-            ->orderBy($sortColumn, $sortDirection);
+            ->orderBy($sortField, $sortDirection);
+    }
+
+    public function relationSearch(): array
+    {
+        return [];
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('username', fn (CommissionLog $row) => strtoupper($row->member_username ?? ''))
-            ->add('name', fn (CommissionLog $row) => $row->member_name)
-            ->add('total_amount_formatted', fn (CommissionLog $row) => number_format((float) ($row->total_amount ?? 0), 0));
+            ->add('month_label', fn (AutoRoLog $row) => Carbon::parse($row->month_ro)->translatedFormat('M, Y'))
+            ->add('username', fn (AutoRoLog $row) => strtoupper($row->member_username ?? ''))
+            ->add('name', fn (AutoRoLog $row) => $row->member_name ?? '-')
+            ->add('total_ro_formatted', fn (AutoRoLog $row) => number_format((float) ($row->total_ro ?? 0), 0));
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
+            Column::make('MONTH', 'month_label', 'month_ro')->sortable(),
             Column::make('USERNAME', 'username', 'member.username')->sortable(),
             Column::make('NAMA', 'name', 'member.name')->sortable(),
-            Column::make('JUMLAH', 'total_amount_formatted', 'total_amount')->sortable(),
+            Column::make('JUMLAH', 'total_ro_formatted', 'total_ro')->sortable(),
             Column::action('PROSES')->fixedOnResponsive(),
         ];
     }
@@ -83,11 +101,11 @@ final class StatementTable extends PowerGridComponent
     public function filters(): array
     {
         return [
+            Filter::datepicker('month_label', 'month_ro'),
             Filter::inputText('username')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
@@ -98,18 +116,16 @@ final class StatementTable extends PowerGridComponent
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
 
                     return $query->where('member.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('total_amount_formatted')
+            Filter::inputText('total_ro_formatted')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
-
                     if (is_array($searchTerm) || empty($searchTerm)) {
                         return $query;
                     }
@@ -119,23 +135,18 @@ final class StatementTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->whereIn('commission_logs.member_id', function ($subQuery) use ($normalizedSearch) {
-                        $subQuery->select('commission_logs.member_id')
-                            ->from('commission_logs')
-                            ->groupBy('commission_logs.member_id')
-                            ->havingRaw('CAST(SUM(commission_logs.gross_commission) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
-                    });
+                    return $query->havingRaw('CAST(SUM(amount) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
                 }),
         ];
     }
 
-    public function actions(CommissionLog $row): array
+    public function actions(AutoRoLog $row): array
     {
         return [
-            // Button::add('view-detail')
-            //     ->slot('Detail')
-            //     ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-            //     ->dispatch('commission:view-detail', ['memberId' => $row->member_id]),
+            Button::add('view-detail')
+                ->slot('Detail')
+                ->class(self::BUTTON_CLASS)
+                ->dispatch('auto-ro:view-month-detail', ['monthRo' => $row->month_ro]),
         ];
     }
 }

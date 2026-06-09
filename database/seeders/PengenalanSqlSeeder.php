@@ -62,6 +62,8 @@ class PengenalanSqlSeeder extends Seeder
                     'password' => Hash::make('password'),
                     'status' => $memberStatus,
                     'type' => (int) ($source->as_stockist ?? 0),
+                    'wd_status' => max(0, min(2, (int) ($source->wd_status ?? 0))),
+                    'wd_min' => max(0, (int) ($source->wd_min ?? 0)),
                     'referral_code' => $source->referral_code ?: null,
                     'email_verified_at' => $memberStatus === 'active' ? $createdAt : null,
                     'last_login_at' => $lastLoginAt,

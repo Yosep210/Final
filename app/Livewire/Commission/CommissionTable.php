@@ -77,10 +77,10 @@ final class CommissionTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Username', 'username', 'member.username')->sortable(),
-            Column::make('Nama', 'name', 'member.name')->sortable(),
-            Column::make('Jumlah (Rp)', 'gross_commission_formatted', 'total_gross_commission')->sortable(),
-            Column::action('Action'),
+            Column::make('USERNAME', 'username', 'member.username')->sortable(),
+            Column::make('NAMA', 'name', 'member.name')->sortable(),
+            Column::make('JUMLAH', 'gross_commission_formatted', 'total_gross_commission')->sortable(),
+            Column::action('PROSES')->fixedOnResponsive(),
         ];
     }
 

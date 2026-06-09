@@ -139,14 +139,14 @@ final class SponsorTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Username', 'username', 'members.username')->sortable(),
-            Column::make('Nama', 'name', 'members.name')->sortable(),
-            Column::make('Rank', 'sponsor_rank', 'sponsor_net.current_rank')->sortable(),
-            Column::make('Total Active', 'member_active', 'member_active')->sortable(),
-            Column::make('Total Non-Active', 'member_non_active', 'member_non_active')->sortable(),
-            Column::make('Status', 'status', 'members.status')->sortable(),
-            Column::make('Date Actived', 'join_date_formatted', 'members.created_at')->sortable(),
-            Column::action('Action'),
+            Column::make('USERNAME', 'username', 'members.username')->sortable(),
+            Column::make('NAMA', 'name', 'members.name')->sortable(),
+            Column::make('RANK', 'sponsor_rank', 'sponsor_net.current_rank')->sortable(),
+            Column::make('MEMBER AKTIF', 'member_active', 'member_active')->sortable(),
+            Column::make('MEMBER TIDAK AKTIF', 'member_non_active', 'member_non_active')->sortable(),
+            Column::make('STATUS', 'status', 'members.status')->sortable(),
+            Column::make('TANGGAL DAFTAR', 'join_date_formatted', 'members.created_at')->sortable(),
+            Column::action('PROSES')->fixedOnResponsive(),
         ];
     }
 

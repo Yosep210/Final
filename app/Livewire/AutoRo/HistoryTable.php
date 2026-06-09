@@ -4,25 +4,19 @@ namespace App\Livewire\AutoRo;
 
 use App\Models\AutoRoLog;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
-use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class AutoRoTable extends PowerGridComponent
+final class HistoryTable extends PowerGridComponent
 {
-    private const BUTTON_CLASS = 'pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700';
+    public string $tableName = 'historyAutoRoTable';
 
-    public string $tableName = 'autoRoTable';
-
-    public string $sortField = 'total_amount';
+    public string $sortField = 'created_at';
 
     public string $sortDirection = 'desc';
-
-    public string $primaryKey = 'member_id';
 
     public function setUp(): array
     {
@@ -36,16 +30,24 @@ final class AutoRoTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSort = [
+            'auto_ro_logs.created_at' => 'auto_ro_logs.created_at',
             'member.username' => 'member.username',
             'member.name' => 'member.name',
-            'total_amount' => 'total_amount',
+            'type' => 'type',
+            'amount' => 'amount',
+            'description' => 'description',
         ];
 
-        $sortField = $allowedSort[$this->sortField] ?? 'total_amount';
+        $sortField = $allowedSort[$this->sortField] ?? 'auto_ro_logs.created_at';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         $windowOrderMap = [
-            'total_amount' => 'SUM(auto_ro_logs.amount)',
+            'auto_ro_logs.created_at' => 'auto_ro_logs.created_at',
+            'member.username' => 'member.username',
+            'member.name' => 'member.name',
+            'type' => 'auto_ro_logs.source',
+            'amount' => 'auto_ro_logs.amount',
+            'description' => 'auto_ro_logs.description',
         ];
 
         $windowOrder = $windowOrderMap[$sortField] ?? $sortField;
@@ -56,12 +58,10 @@ final class AutoRoTable extends PowerGridComponent
                 $query->whereIn('name', ['Admin', 'Staff']);
             })
             ->select([
-                'auto_ro_logs.member_id',
-                'member.name as member_name',
+                'auto_ro_logs.*',
                 'member.username as member_username',
-                DB::raw('SUM(auto_ro_logs.amount) as total_amount'),
+                'member.name as member_name',
             ])
-            ->groupBy('auto_ro_logs.member_id', 'member.name', 'member.username')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
             ->orderBy($sortField, $sortDirection);
     }
@@ -75,26 +75,32 @@ final class AutoRoTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('username', fn (AutoRoLog $row) => strtoupper($row->member_username ?? ''))
-            ->add('name', fn (AutoRoLog $row) => $row->member_name)
-            ->add('total_amount_formatted', fn (AutoRoLog $row) => number_format((float) ($row->total_amount ?? 0), 0));
+            ->add('date_formatted', fn (AutoRoLog $row) => $row->created_at?->format('Y-m-d @H:i') ?? '-')
+            ->add('member_username_formatted', fn (AutoRoLog $row) => strtolower($row->member_username ?? ''))
+            ->add('member_name_formatted', fn (AutoRoLog $row) => $row->member_name ?? '-')
+            ->add('type', fn (AutoRoLog $row) => ((float) ($row->amount ?? 0)) >= 0 ? 'IN' : 'OUT')
+            ->add('autoro_formatted', fn (AutoRoLog $row) => number_format(abs((float) ($row->amount ?? 0)), 0))
+            ->add('status_label', fn (AutoRoLog $row) => $row->description ?? '-');
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('USERNAME', 'username', 'member.username')->sortable(),
-            Column::make('NAMA', 'name', 'member.name')->sortable(),
-            Column::make('JUMLAH', 'total_amount_formatted', 'total_amount')->sortable(),
-            Column::action('PROSES')->fixedOnResponsive(),
+            Column::make('Tanggal', 'date_formatted', 'created_at')->sortable(),
+            Column::make('Username', 'member_username_formatted', 'member.username')->sortable(),
+            Column::make('Nama', 'member_name_formatted', 'member.name')->sortable(),
+            Column::make('Tipe', 'type', 'type')->sortable(),
+            Column::make('Auto RO', 'autoro_formatted', 'nominal')->sortable(),
+            Column::make('Keterangan', 'status_label', 'description')->sortable(),
         ];
     }
 
     public function filters(): array
     {
         return [
-            Filter::inputText('username')
+            Filter::datepicker('date_formatted', 'created_at'),
+            Filter::inputText('member_username_formatted')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
@@ -104,7 +110,7 @@ final class AutoRoTable extends PowerGridComponent
 
                     return $query->where('member.username', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('name')
+            Filter::inputText('member_name_formatted')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
@@ -114,7 +120,17 @@ final class AutoRoTable extends PowerGridComponent
 
                     return $query->where('member.name', 'like', '%'.$searchTerm.'%');
                 }),
-            Filter::inputText('total_amount_formatted')
+            Filter::inputText('type')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
+
+                    return $query->whereRaw('CASE WHEN auto_ro_logs.nominal >= 0 THEN "IN" ELSE "OUT" END like ?', ['%'.$searchTerm.'%']);
+                }),
+            Filter::inputText('autoro_formatted')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
@@ -127,23 +143,18 @@ final class AutoRoTable extends PowerGridComponent
                         return $query;
                     }
 
-                    return $query->whereIn('auto_ro_logs.member_id', function ($subQuery) use ($normalizedSearch) {
-                        $subQuery->select('auto_ro_logs.member_id')
-                            ->from('auto_ro_logs')
-                            ->groupBy('auto_ro_logs.member_id')
-                            ->havingRaw('CAST(SUM(auto_ro_logs.amount) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
-                    });
+                    return $query->whereRaw('CAST(ABS(auto_ro_logs.amount) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
                 }),
-        ];
-    }
+            Filter::inputText('status_label')
+                ->operators(['contains'])
+                ->builder(function (Builder $query, $value) {
+                    $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
+                    if (is_array($searchTerm) || empty($searchTerm)) {
+                        return $query;
+                    }
 
-    public function actions(AutoRoLog $row): array
-    {
-        return [
-            Button::add('view-detail')
-                ->slot('Detail')
-                ->class(self::BUTTON_CLASS)
-                ->dispatch('auto-ro:view-detail', ['memberId' => $row->member_id]),
+                    return $query->where('auto_ro_logs.description', 'like', '%'.$searchTerm.'%');
+                }),
         ];
     }
 }

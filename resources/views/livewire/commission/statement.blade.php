@@ -1,9 +1,9 @@
 <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
     <div class="flex items-center justify-between">
         <div>
-            <flux:heading size="xl">{{ __('Statement Commission') }}</flux:heading>
+            <flux:heading size="xl">{{ __('Statement Bonus') }}</flux:heading>
             <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
-                {{ __('View commission payout statements summarized by period.') }}
+                {{ __('View bonus statement summaries by member.') }}
             </flux:text>
         </div>
     </div>

@@ -40,17 +40,17 @@ return [
             ],
         ],
         [
-            'heading' => 'Commision',
+            'heading' => 'Commission',
             'icon' => 'currency-dollar',
             'route' => ['commission.*', 'wallet.*', 'auto.ro.*', 'withdraw.*'],
             'sub' => [
                 [
-                    'title' => 'Bonues Detail',
+                    'title' => 'Bonus Detail',
                     'href' => 'commission.index',
                     'permission' => 'access-finance-bonus',
                 ],
                 [
-                    'title' => 'Statement Commission',
+                    'title' => 'Statement Bonus',
                     'href' => 'commission.statement',
                     'permission' => 'access-finance-statement',
                 ],

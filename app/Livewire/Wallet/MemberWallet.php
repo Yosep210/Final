@@ -26,7 +26,7 @@ class MemberWallet extends Component
 
     public function mount(): void
     {
-        $this->minWd = (float) config('mlm.payout.minimum_commission', 50000);
+        $this->minWd = max((float) config('mlm.payout.minimum_commission', 50000), 100000.0);
         $this->fee = (float) config('mlm.payout.fee', 5000);
     }
 

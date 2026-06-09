@@ -16,7 +16,7 @@ final class WalletTable extends PowerGridComponent
 {
     public string $tableName = 'walletTable';
 
-    public string $sortField = 'total_balance';
+    public string $sortField = 'total_deposite';
 
     public string $sortDirection = 'desc';
 
@@ -37,14 +37,14 @@ final class WalletTable extends PowerGridComponent
             'member.username' => 'member.username',
             'member.name' => 'member.name',
             'member.wd_status' => 'member.wd_status',
-            'total_balance' => 'total_balance',
+            'total_deposite' => 'total_deposite',
         ];
 
-        $sortColumn = $allowedSort[$this->sortField] ?? 'total_balance';
+        $sortColumn = $allowedSort[$this->sortField] ?? 'total_deposite';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         $windowOrderMap = [
-            'total_balance' => "SUM(CASE WHEN ewallet_logs.type = 'IN' THEN ewallet_logs.amount ELSE 0 END) - SUM(CASE WHEN ewallet_logs.type = 'OUT' THEN ewallet_logs.amount ELSE 0 END)",
+            'total_deposite' => "SUM(CASE WHEN ewallet_logs.type = 'IN' THEN ewallet_logs.amount ELSE 0 END)",
         ];
 
         $windowOrder = $windowOrderMap[$sortColumn] ?? $sortColumn;
@@ -60,7 +60,7 @@ final class WalletTable extends PowerGridComponent
                 'member.username as member_username',
                 'member.wd_status as member_wd_status',
                 'member.wd_min as member_wd_min',
-                DB::raw("SUM(CASE WHEN ewallet_logs.type = 'IN' THEN ewallet_logs.amount ELSE 0 END) - SUM(CASE WHEN ewallet_logs.type = 'OUT' THEN ewallet_logs.amount ELSE 0 END) as total_balance"),
+                DB::raw("SUM(CASE WHEN ewallet_logs.type = 'IN' THEN ewallet_logs.amount ELSE 0 END) as total_deposite"),
             ])
             ->groupBy('ewallet_logs.member_id', 'member.name', 'member.username', 'member.wd_status', 'member.wd_min')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$windowOrder.' '.$sortDirection.') AS no')
@@ -85,20 +85,20 @@ final class WalletTable extends PowerGridComponent
                     return '<div class="space-y-0.5"><span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-green-50 text-green-700 ring-green-600/10 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20">Withdraw Otomatis</span><div class="text-[10px] text-zinc-500">Minimal: Rp '.$min.'</div></div>';
                 }
 
-                return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20">Tidak Aktif</span>';
+                return '<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-zinc-50 text-zinc-700 ring-zinc-600/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20">Withdraw Tidak Aktif</span>';
             })
-            ->add('total_balance_formatted', fn (EwalletLog $row) => number_format((float) ($row->total_balance ?? 0), 0));
+            ->add('total_deposite_formatted', fn (EwalletLog $row) => number_format((float) ($row->total_deposite ?? 0), 0));
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Username', 'username', 'member.username')->sortable(),
-            Column::make('Nama', 'name', 'member.name')->sortable(),
-            Column::make('Status', 'wd_status_formatted', 'member.wd_status')->sortable(),
-            Column::make('Jumlah (Rp)', 'total_balance_formatted', 'total_balance')->sortable(),
-            Column::action('Action'),
+            Column::make('USERNAME', 'username', 'member.username')->sortable(),
+            Column::make('NAMA', 'name', 'member.name')->sortable(),
+            Column::make('STATUS', 'wd_status_formatted', 'member.wd_status')->sortable(),
+            Column::make('TOTAL DEPOSIT', 'total_deposite_formatted', 'total_deposite')->sortable(),
+            Column::action('PROSES')->fixedOnResponsive(),
         ];
     }
 
@@ -129,7 +129,7 @@ final class WalletTable extends PowerGridComponent
                 ->dataSource(collect([
                     ['id' => '1', 'name' => 'Withdraw Manual'],
                     ['id' => '2', 'name' => 'Withdraw Otomatis'],
-                    ['id' => '0', 'name' => 'Tidak Aktif'],
+                    ['id' => '0', 'name' => 'Withdraw Tidak Aktif'],
                 ]))
                 ->optionValue('id')
                 ->optionLabel('name')
@@ -140,7 +140,7 @@ final class WalletTable extends PowerGridComponent
 
                     return $query->where('member.wd_status', $value);
                 }),
-            Filter::inputText('total_balance_formatted')
+            Filter::inputText('total_deposite_formatted')
                 ->operators(['contains'])
                 ->builder(function (Builder $query, $value) {
                     $searchTerm = is_array($value) ? ($value['value'] ?? '') : $value;
@@ -157,7 +157,7 @@ final class WalletTable extends PowerGridComponent
                         $subQuery->select('ewallet_logs.member_id')
                             ->from('ewallet_logs')
                             ->groupBy('ewallet_logs.member_id')
-                            ->havingRaw('CAST(SUM(CASE WHEN ewallet_logs.type = \'IN\' THEN ewallet_logs.amount ELSE 0 END) - SUM(CASE WHEN ewallet_logs.type = \'OUT\' THEN ewallet_logs.amount ELSE 0 END) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
+                            ->havingRaw('CAST(SUM(CASE WHEN ewallet_logs.type = \'IN\' THEN ewallet_logs.amount ELSE 0 END) AS CHAR) like ?', ['%'.$normalizedSearch.'%']);
                     });
                 }),
         ];

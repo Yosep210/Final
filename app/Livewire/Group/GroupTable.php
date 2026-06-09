@@ -74,7 +74,7 @@ final class GroupTable extends PowerGridComponent
             ->add('position', fn (MemberNetwork $row) => ucfirst($row->position ?? '-'))
             ->add('left_volume', fn (MemberNetwork $row) => number_format((float) ($row->left_volume ?? 0), 2))
             ->add('right_volume', fn (MemberNetwork $row) => number_format((float) ($row->right_volume ?? 0), 2))
-            ->add('generation', fn (MemberNetwork $row) => (string) ($row->generation ?? 0))
+            ->add('generation', fn (MemberNetwork $row) => 'Gen-'.($row->generation ?? 0))
             ->add('created_at_formatted', fn (MemberNetwork $row) => $row->created_at?->locale('id')?->isoFormat('DD MMM YY HH:mm'));
     }
 
@@ -82,15 +82,15 @@ final class GroupTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Username', 'username', 'member.username')->sortable(),
-            Column::make('Member', 'member', 'member.name')->sortable(),
-            Column::make('Parent', 'parent', 'parent.name')->sortable(),
-            Column::make('Position', 'position', 'member_networks.position')->sortable(),
-            Column::make('Left Volume', 'left_volume', 'member_networks.left_volume')->sortable(),
-            Column::make('Right Volume', 'right_volume', 'member_networks.right_volume')->sortable(),
-            Column::make('Generation', 'generation', 'member_networks.generation')->sortable(),
-            Column::make('Created At', 'created_at_formatted', 'member_networks.created_at')->sortable(),
-            Column::action('Action')->fixedOnResponsive(),
+            Column::make('USERNAME', 'username', 'member.username')->sortable(),
+            Column::make('MEMBER', 'member', 'member.name')->sortable(),
+            Column::make('PARENT', 'parent', 'parent.name')->sortable(),
+            Column::make('POSISI', 'position', 'member_networks.position')->sortable(),
+            Column::make('POSIS KIRI', 'left_volume', 'member_networks.left_volume')->sortable(),
+            Column::make('POSIS KANAN', 'right_volume', 'member_networks.right_volume')->sortable(),
+            Column::make('GENERASI', 'generation', 'member_networks.generation')->sortable(),
+            Column::make('TANGGAL DAFTAR', 'created_at_formatted', 'member_networks.created_at')->sortable(),
+            Column::action('PROSES')->fixedOnResponsive(),
         ];
     }
 
