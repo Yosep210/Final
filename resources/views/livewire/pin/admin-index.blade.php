@@ -1,136 +1,181 @@
 <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-    <div class="flex items-center justify-between">
-        <div>
-            <flux:heading size="xl">{{ __('Activation PINs') }}</flux:heading>
-            <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
-                {{ __('Manage, generate, and track MLM Activation PINs.') }}
-            </flux:text>
-        </div>
-
-        <flux:button wire:click="openGenerateModal" variant="primary">
-            {{ __('Generate PINs') }}
-        </flux:button>
+    <!-- Header Section -->
+    <div class="mb-6">
+        <flux:heading size="xl">{{ __('Form Kirim Produk') }}</flux:heading>
+        <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
+            {{ __('Kirim produk kepada member') }}
+        </flux:text>
     </div>
 
-    <!-- Filters and Search -->
-    <div class="grid gap-4 md:grid-cols-3 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-neutral-700 p-4 rounded-xl">
-        <flux:input wire:model.live.debounce.300ms="searchSerial" placeholder="{{ __('Search Serial Number...') }}" />
-        
-        <flux:input wire:model.live.debounce.300ms="searchOwner" placeholder="{{ __('Search Owner Username/Name...') }}" />
+    <!-- Main Form -->
+    <form wire:submit="sendProduct" class="space-y-6">
+        <div
+            class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6 space-y-6">
 
-        <flux:select wire:model.live="filterStatus" placeholder="{{ __('Filter Status') }}">
-            <flux:select.option value="all">{{ __('All Status') }}</flux:select.option>
-            <flux:select.option value="unused">{{ __('Unused') }}</flux:select.option>
-            <flux:select.option value="used">{{ __('Used') }}</flux:select.option>
-        </flux:select>
-    </div>
-
-    <!-- Table -->
-    <div class="rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-zinc-900 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm">
-                <thead>
-                    <tr class="bg-zinc-50 dark:bg-zinc-800 border-b border-neutral-200 dark:border-neutral-700">
-                        <th class="p-4 font-semibold text-zinc-700 dark:text-zinc-300">ID</th>
-                        <th class="p-4 font-semibold text-zinc-700 dark:text-zinc-300">Serial Number</th>
-                        <th class="p-4 font-semibold text-zinc-700 dark:text-zinc-300">PIN Code</th>
-                        <th class="p-4 font-semibold text-zinc-700 dark:text-zinc-300">Status</th>
-                        <th class="p-4 font-semibold text-zinc-700 dark:text-zinc-300">Owner</th>
-                        <th class="p-4 font-semibold text-zinc-700 dark:text-zinc-300">Activated For</th>
-                        <th class="p-4 font-semibold text-zinc-700 dark:text-zinc-300">Activated At</th>
-                        <th class="p-4 font-semibold text-zinc-700 dark:text-zinc-300">Created At</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
-                    @forelse ($pins as $pin)
-                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
-                            <td class="p-4 align-middle text-zinc-600 dark:text-zinc-400 font-mono">{{ $pin->id }}</td>
-                            <td class="p-4 align-middle font-mono font-medium text-zinc-900 dark:text-white">{{ $pin->serial_number }}</td>
-                            <td class="p-4 align-middle font-mono text-zinc-600 dark:text-zinc-400">{{ $pin->pin_code }}</td>
-                            <td class="p-4 align-middle">
-                                @if ($pin->status === 'unused')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300 border border-green-200 dark:border-green-800">
-                                        {{ __('Unused') }}
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
-                                        {{ __('Used') }}
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="p-4 align-middle text-zinc-900 dark:text-white">
-                                @if ($pin->owner)
-                                    <div class="font-medium">{{ $pin->owner->name }}</div>
-                                    <div class="text-xs text-zinc-500 font-mono">{{ $pin->owner->username }}</div>
-                                @else
-                                    <span class="text-zinc-400 dark:text-zinc-500">-</span>
-                                @endif
-                            </td>
-                            <td class="p-4 align-middle text-zinc-900 dark:text-white">
-                                @if ($pin->activatedMember)
-                                    <div class="font-medium">{{ $pin->activatedMember->name }}</div>
-                                    <div class="text-xs text-zinc-500 font-mono">{{ $pin->activatedMember->username }}</div>
-                                @else
-                                    <span class="text-zinc-400 dark:text-zinc-500">-</span>
-                                @endif
-                            </td>
-                            <td class="p-4 align-middle text-zinc-500 dark:text-zinc-400">
-                                {{ $pin->activated_at ? $pin->activated_at->format('Y-m-d H:i') : '-' }}
-                            </td>
-                            <td class="p-4 align-middle text-zinc-500 dark:text-zinc-400">
-                                {{ $pin->created_at ? $pin->created_at->format('Y-m-d H:i') : '-' }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="p-8 text-center text-zinc-500 dark:text-zinc-400">
-                                {{ __('No activation PINs found.') }}
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        
-        @if ($pins->hasPages())
-            <div class="p-4 border-t border-neutral-200 dark:border-neutral-700">
-                {{ $pins->links() }}
-            </div>
-        @endif
-    </div>
-
-    <!-- Generate Modal -->
-    <flux:modal name="generate-pin-modal" class="max-w-md" wire:model="showGenerateModal">
-        <div class="space-y-6">
+            <!-- Username Section -->
             <div>
-                <flux:heading size="lg">{{ __('Generate PINs') }}</flux:heading>
-                <flux:text class="mt-1 text-zinc-600 dark:text-zinc-400">
-                    {{ __('Create new activation PINs in bulk.') }}
-                </flux:text>
+                <label class="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">
+                    {{ __('Username') }} <span class="text-red-600">*</span>
+                </label>
+                <div class="flex gap-2">
+                    <flux:input wire:model.live.debounce.300ms="targetUsername" placeholder="{{ __('Username') }}"
+                        type="text" class="flex-1" />
+                </div>
             </div>
 
-            <form wire:submit="generate" class="space-y-6">
-                <flux:input wire:model="quantity" type="number" min="1" max="1000" :label="__('Quantity')" placeholder="e.g. 10" />
-
-                <div>
-                    <flux:input wire:model.live.debounce.300ms="targetUsername" :label="__('Owner Username (Optional)')" placeholder="e.g. member01" />
-                    @if ($targetName)
-                        <div class="mt-1 text-xs text-zinc-600 dark:text-zinc-400 font-medium">
-                            {{ $targetName }}
-                        </div>
-                    @endif
+            <!-- Member Info Display -->
+            <div id="member_info">
+                @if ($targetId)
+                <div
+                    class="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <div class="text-sm font-medium text-zinc-600 dark:text-zinc-400">{{ __('Nama Member') }}</div>
+                    <div class="text-lg font-semibold text-zinc-900 dark:text-white">{{ $targetName }}</div>
                 </div>
+                @endif
+            </div>
 
+            <hr class="border-neutral-200 dark:border-neutral-700" />
+
+            <!-- Product Selection Section -->
+            <div>
+                <label class="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">
+                    {{ __('Pilih Produk') }}
+                </label>
                 <div class="flex gap-2">
-                    <flux:spacer />
-                    <flux:button type="button" variant="ghost" wire:click="$set('showGenerateModal', false)">
-                        {{ __('Cancel') }}
-                    </flux:button>
-                    <flux:button type="submit" variant="primary">
-                        {{ __('Generate') }}
-                    </flux:button>
+                    <flux:input wire:model.live.debounce.300ms="searchProduct" placeholder="{{ __('Cari Produk') }}"
+                        class="flex-1" />
                 </div>
-            </form>
+            </div>
+
+            <!-- Products Table -->
+            <div>
+                <div class="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-zinc-50 dark:bg-zinc-800 border-b border-neutral-200 dark:border-neutral-700">
+                                <th class="p-4 text-left font-semibold text-zinc-900 dark:text-white">{{ __('Produk') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                            @forelse ($selectedProducts as $index => $product)
+                            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                                <td class="p-4 text-zinc-900 dark:text-white">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <div class="font-medium">{{ $product['name'] ?? '-' }}</div>
+                                            <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $product['variant']
+                                                ?? '-' }}</div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <input type="number" wire:model="selectedProducts.{{ $index }}.qty" min="1"
+                                                class="w-12 px-2 py-1 text-center border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-xs" />
+                                            <span class="text-xs text-zinc-600 dark:text-zinc-400 w-24 text-right">
+                                                Rp {{ number_format(($product['price'] ?? 0) * ($product['qty'] ?? 1),
+                                                0, ',', '.') }}
+                                            </span>
+                                            <button type="button" wire:click="removeProduct({{ $index }})"
+                                                class="text-red-600 hover:text-red-700 text-xs">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td class="p-4 text-center text-zinc-500 dark:text-zinc-400">
+                                    {{ __('No data available in table') }}
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                        <tfoot>
+                            <tr
+                                class="bg-zinc-50 dark:bg-zinc-800 border-t-2 border-neutral-200 dark:border-neutral-700">
+                                <td class="p-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-semibold text-zinc-600 dark:text-zinc-400">{{
+                                            __('Subtotal') }}</span>
+                                        <span class="text-lg font-bold text-amber-600 dark:text-amber-400">Rp {{
+                                            number_format($subtotal ?? 0, 0, ',', '.') }}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Discount Section (Hidden like reference) -->
+            <div class="hidden">
+                <label class="block text-sm font-semibold text-zinc-900 dark:text-white mb-2">
+                    {{ __('Diskon') }}
+                </label>
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <flux:input wire:model.live="discountPercent" type="number" min="0" max="100" placeholder="0" />
+                    </div>
+                    <div>
+                        <span class="text-sm text-zinc-500 dark:text-zinc-400">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Payment Section -->
+            <div>
+                <label class="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">
+                    {{ __('Total Pembayaran') }}
+                </label>
+                <div class="flex gap-2">
+                    <span
+                        class="px-4 py-2 bg-gray-100 dark:bg-zinc-800 rounded text-zinc-700 dark:text-zinc-400 text-sm">
+                        {{ __('Rp') }}
+                    </span>
+                    <flux:input type="text" value="{{ number_format($totalPayment ?? 0, 0, ',', '.') }}" placeholder="0"
+                        disabled class="flex-1" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center border-t border-neutral-200 dark:border-neutral-700 pt-6">
+            <flux:button type="submit" variant="primary">
+                <i class="fas fa-cart-plus mr-2"></i> {{ __('Kirim Produk') }}
+            </flux:button>
+        </div>
+    </form>
+
+    <!-- Product Selection Modal -->
+    <flux:modal name="product-modal" class="max-w-2xl" wire:model="showProductModal">
+        <div class="space-y-4">
+            <flux:heading size="lg">{{ __('Pilih Produk') }}</flux:heading>
+            <flux:input wire:model.live.debounce.300ms="searchProduct" placeholder="{{ __('Cari produk...') }}" />
+
+            <div class="max-h-96 overflow-y-auto">
+                <div class="space-y-2">
+                    @forelse ($availableProducts as $product)
+                    <button type="button" wire:click="selectProduct({{ $product['id'] ?? 0 }})"
+                        class="w-full p-3 text-left border border-neutral-200 dark:border-neutral-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                        <div class="font-semibold text-zinc-900 dark:text-white">{{ $product['name'] ?? '-' }}</div>
+                        <div class="text-sm text-zinc-600 dark:text-zinc-400">
+                            {{ $product['variant'] ?? '-' }} - Rp {{ number_format($product['price'] ?? 0, 0, ',', '.')
+                            }}
+                        </div>
+                    </button>
+                    @empty
+                    <div class="text-center py-8 text-zinc-500 dark:text-zinc-400">
+                        {{ __('Tidak ada produk ditemukan') }}
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+                <flux:button type="button" variant="ghost" wire:click="$set('showProductModal', false)">
+                    {{ __('Tutup') }}
+                </flux:button>
+            </div>
         </div>
     </flux:modal>
 </div>
