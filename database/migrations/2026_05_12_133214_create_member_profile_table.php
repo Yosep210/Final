@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('id_card_number')->unique()->nullable();
             $table->string('id_card_photo')->nullable();
             $table->string('npwp_number')->unique()->nullable();
-            $table->string('phone')->nullable();
+            $table->string('phone')->nullable()->index();
             $table->string('profile_photo')->nullable();
             $table->foreignId('country_id')->nullable()->constrained('countries')->onDelete('set null');
             $table->foreignId('province_id')->nullable()->constrained('provinces')->onDelete('set null');
@@ -29,6 +29,8 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['country_id', 'province_id', 'city_id']);
         });
     }
 

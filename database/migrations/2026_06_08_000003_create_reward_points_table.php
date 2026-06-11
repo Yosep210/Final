@@ -16,6 +16,10 @@ return new class extends Migration
             $table->foreignId('member_id')
                 ->constrained('members')
                 ->onDelete('cascade');
+            $table->foreignId('product_order_id')
+                ->nullable()
+                ->constrained('product_orders')
+                ->onDelete('set null');
             $table->string('package', 50);
             $table->string('type', 20)->default('ro');
             $table->integer('bv')->default(0);
